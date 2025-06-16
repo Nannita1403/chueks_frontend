@@ -1,4 +1,4 @@
-import "./App.css"
+/*import "./App.css"
 import { Button, HStack } from "@chakra-ui/react"
 
 
@@ -17,3 +17,4 @@ const Demo = () => {
 }
 
 export default  App
+*/
