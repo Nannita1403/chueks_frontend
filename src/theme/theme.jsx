@@ -1,5 +1,4 @@
-// src/theme/theme.js
-import { extendTheme, Theme } from "@chakra-ui/react";
+import { extendTheme } from "@chakra-ui/react";
 import { tabsTheme } from "./components/tabs";
 import { buttonTheme } from "./components/button";
 import { inputTheme } from "./components/inputs";

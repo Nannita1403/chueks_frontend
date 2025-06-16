@@ -1,4 +1,3 @@
-/*import "./App.css"
 import { Button, HStack } from "@chakra-ui/react"
 
 
@@ -17,4 +16,8 @@ const Demo = () => {
 }
 
 export default  App
-*/
+
+
+colorScheme="brand"
+bg="brand.500"
+textColor="text"

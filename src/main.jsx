@@ -1,11 +1,18 @@
-import {Provider} from "../src/components/ui/provider.jsx"
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import theme from "./theme/theme.jsx";
+// src/main.jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { ChakraProvider } from '@chakra-ui/react';
+import { Provider } from './components/ui/provider'; // Tu provider personalizado
+import AuthPage from './components/AuthPage';
+import theme from './theme/theme';
+import App from './App';
 
-
-createRoot(document.getElementById('root')).render(
-    <Provider theme={theme}>
-    <App />
-    </Provider>
-    );
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <ChakraProvider theme={theme}>
+      <Provider>
+        <App/>
+      </Provider>
+    </ChakraProvider>
+  </React.StrictMode>
+);
