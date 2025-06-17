@@ -1,4 +1,5 @@
 import { Button, HStack } from "@chakra-ui/react"
+import AuthPage from "./components/AuthPage"
 
 
 const App = () => {
@@ -9,15 +10,11 @@ const App = () => {
 const Demo = () => {
   return (
     <HStack>
-      <Button>Click me</Button>
-      <Button>Click me</Button>
+      <Toaster />
+      <AuthPage/>
     </HStack>
   )
 }
 
 export default  App
 
-
-colorScheme="brand"
-bg="brand.500"
-textColor="text"

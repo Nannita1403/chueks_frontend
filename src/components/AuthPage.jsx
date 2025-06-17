@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import {
   Box,
   Flex,
-  useColorModeValue,
   useToast
 } from '@chakra-ui/react';
+import { useColorModeValue } from './ui/color-mode';
+
 
 import InfoPanel from './InfoPanel';
 import AuthForm from './AuthForm';
@@ -18,7 +19,7 @@ const AuthPage = () => {
   const [telephone, setTelephone] = useState('');
   const toast = useToast();
 
-  const bgColor = useColorModeValue('white', 'gray.800');
+  const bgColor =useColorModeValue('white', 'gray.800');
 
   const handleLogin = async () => {
     try {

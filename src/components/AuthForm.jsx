@@ -5,10 +5,6 @@ import {
   Button,
   VStack,
   Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   Heading,
 } from '@chakra-ui/react';
 
@@ -23,13 +19,12 @@ const AuthForm = ({
     <Box w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
       <Heading mb={6} size="lg" textAlign="center">Bienvenido</Heading>
       <Tabs variant="enclosed" colorScheme="brand" isFitted>
-        <TabList>
-          <Tab>Iniciar Sesión</Tab>
-          <Tab>Registrarse</Tab>
-        </TabList>
+        <Tabs.List>
+          <Tabs.Trigger value="iniciarSesion">Iniciar Sesión</Tabs.Trigger>
+          <Tabs.Trigger value="registrarse">Registrarse</Tabs.Trigger>
+        </Tabs.List>
 
-        <TabPanels>
-          <Fieldset.Content>
+        <Tabs.Content value="iniciarSesion">
             <VStack spacing={4}>
               <Field.Root isRequired>
                 <Field.Label>Email</Field.Label>
@@ -45,9 +40,9 @@ const AuthForm = ({
                 Iniciar Sesión
               </Button>
             </VStack>
-          </Fieldset.Content>
+          </Tabs.Content>
 
-          <Fieldset.Content>
+        <Tabs.Content value="registrarse">
             <VStack spacing={4}>
               <Field.Root isRequired>
                 <Field.Label>Nombre</Field.Label>
@@ -73,8 +68,7 @@ const AuthForm = ({
                 Registrarse
               </Button>
             </VStack>
-          </Fieldset.Content>
-        </TabPanels>
+          </Tabs.Content>
       </Tabs>
     </Box>
   );
