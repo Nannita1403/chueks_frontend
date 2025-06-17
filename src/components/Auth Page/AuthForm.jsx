@@ -6,6 +6,7 @@ import {
   VStack,
   Tabs,
   Heading,
+  Field,
 } from '@chakra-ui/react';
 
 const AuthForm = ({
@@ -18,7 +19,7 @@ const AuthForm = ({
   return (
     <Box w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
       <Heading mb={6} size="lg" textAlign="center">Bienvenido</Heading>
-      <Tabs variant="enclosed" colorScheme="brand" isFitted>
+      <Tabs.Root variant="enclosed" colorScheme="brand" isFitted>
         <Tabs.List>
           <Tabs.Trigger value="iniciarSesion">Iniciar Sesión</Tabs.Trigger>
           <Tabs.Trigger value="registrarse">Registrarse</Tabs.Trigger>
@@ -69,7 +70,7 @@ const AuthForm = ({
               </Button>
             </VStack>
           </Tabs.Content>
-      </Tabs>
+      </Tabs.Root>
     </Box>
   );
 };

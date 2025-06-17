@@ -1,16 +1,12 @@
 import { Button, HStack } from "@chakra-ui/react"
-import AuthPage from "./components/AuthPage"
+import AuthPage from "./components/Auth Page/AuthPage"
+import { Toaster } from "./components/ui/toaster"
 
 
 const App = () => {
   return (
-    <div>App</div>
-  )
-}
-const Demo = () => {
-  return (
     <HStack>
-      <Toaster />
+      <Toaster/>
       <AuthPage/>
     </HStack>
   )
