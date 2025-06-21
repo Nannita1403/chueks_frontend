@@ -3,11 +3,11 @@ import {
   Box,
   Flex,
 } from '@chakra-ui/react';
-import { useColorModeValue } from '../ui/color-mode';
+import { useColorModeValue } from '../../components/ui/color-mode';
 
 import AuthForm from './AuthForm';
 import InfoPanel from './InfoPanel';
-import { Toaster, toaster } from '../ui/toaster';
+import { Toaster, toaster } from '../../components/ui/toaster';
 
 const BASE_URL = "http://localhost:3000/api/v1/";
 
