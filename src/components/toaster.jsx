@@ -1,11 +1,12 @@
 
 import { Button, For, HStack } from "@chakra-ui/react"
-import { toaster } from "@/components/ui/toaster"
+import { toaster } from "./ui/toaster"
 
-const toasterFunction = () => {
+
+export const toasterFunction = () => {
   return (
     <HStack>
-      <For each={["exitosa", "error", "alerta", "info"]}>
+      <For each={["success", "error", "warning", "info"]}>
         {(type) => (
           <Button
             size="sm"
