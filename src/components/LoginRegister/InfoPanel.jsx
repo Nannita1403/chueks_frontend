@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, VStack, Text, Heading,  } from '@chakra-ui/react';
-import { useColorModeValue } from '../../components/ui/color-mode';
+import { useColorModeValue } from '../ui/color-mode';
 
 const InfoPanel = () => {
   const bg = useColorModeValue('brand.50', 'gray.700');

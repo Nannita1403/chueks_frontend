@@ -5,8 +5,8 @@ import {
 } from '@chakra-ui/react';
 import { useColorModeValue } from '../../components/ui/color-mode';
 
-import AuthForm from './AuthForm';
-import InfoPanel from './InfoPanel';
+import AuthForm from '../../components/LoginRegister/AuthForm';
+import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import { toasterFunction } from '../../components/toaster';
 
 const BASE_URL = "http://localhost:3000/api/v1/";
