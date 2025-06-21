@@ -3,7 +3,7 @@ import { tabsTheme } from "./components/tabs";
 import { buttonTheme } from "./components/button";
 import { inputTheme } from "./components/inputs";
 
-const theme = defineConfig({
+const themeSystem = defineConfig({
   colors: {
     brand: {
       50: "#e3f2ff",
@@ -43,4 +43,4 @@ const theme = defineConfig({
     Input: inputTheme,
   },
 });
-export const Theme = createSystem(defaultBaseConfig, theme)
+export const Theme = createSystem(defaultBaseConfig, themeSystem)

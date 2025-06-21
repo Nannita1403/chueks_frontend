@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Input,
@@ -10,8 +10,11 @@ import {
   Fieldset,
   TabsList,
   TabsContent,
+  Text,
 } from '@chakra-ui/react';
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
+import { PasswordInput } from '..//ui/password-input.jsx';
+
 
 const AuthForm = ({
   email, setEmail,
@@ -20,9 +23,12 @@ const AuthForm = ({
   telephone, setTelephone,
   onLogin, onRegister
 }) => {
+
+  const [visible, setVisible] = useState(false)
+
   return (
     <Box w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
-      <Heading mb={6} size="lg" textAlign="center">Bienvenido</Heading>
+
 
       <Tabs.Root variant="enclosed" maxW="md" fitted defaultValue="Iniciar-Sesion" colorScheme="blue">
         <TabsList>
@@ -32,6 +38,10 @@ const AuthForm = ({
 
         {/* Iniciar Sesión */}
         <TabsContent value="Iniciar-Sesion">
+         <Heading  size="lg" textAlign="left">Inicia Sesión</Heading>
+          <Text fontSize="sm" color="gray.500" mb={6}>
+             Accede a tu cuenta exclusiva a Mayoristas
+          </Text>
           <form onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
             <VStack spacing={4}>
               <Fieldset.Root>
@@ -46,23 +56,32 @@ const AuthForm = ({
 
                 <Field.Root isRequired>
                   <Field.Label>Contraseña</Field.Label>
-                    <Input
+                    <PasswordInput
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      visible={visible}
+                      onVisibleChange={setVisible}
                     />
                 </Field.Root>
               </Fieldset.Root>
+              <Text fontSize="sm" color="gray.500">
+                La contraseña está {visible ? "visible" : "oculta"}
+              </Text>
 
-              <Button type="submit" colorScheme="blue" width="full">
+              <button type="submit" colorScheme="blue" width="full">
                 Iniciar Sesión
-              </Button>
+              </button>
             </VStack>
           </form>
         </TabsContent>
 
         {/* Registrarse */}
         <TabsContent value="Registrarse">
+          <Heading  size="lg" textAlign="left">Crear Cuenta</Heading>
+          <Text fontSize="sm" color="gray.500" mb={6}>
+            Regístrate para acceder a nuestro catálogo exclusivo Mayorista
+          </Text>
           <form onSubmit={(e) => { e.preventDefault(); onRegister(); }}>
             <VStack spacing={4}>
               <Fieldset.Root>

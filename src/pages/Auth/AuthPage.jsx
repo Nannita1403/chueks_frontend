@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import {
   Box,
   Flex,
+  Image,
 } from '@chakra-ui/react';
 import { useColorModeValue } from '../../components/ui/color-mode';
-
 import AuthForm from '../../components/LoginRegister/AuthForm';
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import { toasterFunction } from '../../components/toaster';
+import logoRedondo from "/logoRedondo.png"
 
 const BASE_URL = "http://localhost:3000/api/v1/";
 
@@ -59,7 +60,9 @@ const AuthPage = () => {
   return (
     <Flex height="100vh">
       {/* Izquierda - Formulario */}
-      <Box flex="1" bg={bgColor} display="flex" alignItems="center" justifyContent="center">
+
+      <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
+        <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
         <AuthForm
           email={email} setEmail={setEmail}
           password={password} setPassword={setPassword}

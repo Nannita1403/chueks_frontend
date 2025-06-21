@@ -9,13 +9,17 @@ const InfoPanel = () => {
   return (
     <Box flex="1" bg={bg} color={color} p={10} display="flex" alignItems="center" justifyContent="center">
       <VStack spacing={4} textAlign="center">
-        <Heading size="lg">¡Bienvenido a Chueks!</Heading>
+        <Heading size="2xl" textAlign="center">Catálogo Exclusivo de Accesorios y Carteras</Heading>
+        <Box>
         <Text fontSize="md">
           Inicia sesión o crea una cuenta para comenzar a explorar nuestros productos exclusivos y acceder a tus favoritos.
         </Text>
+        </Box>
+        <Box>
         <Text fontSize="sm" color="gray.500">
           ¡Te esperamos con muchas sorpresas!
         </Text>
+        </Box>
       </VStack>
     </Box>
   );
