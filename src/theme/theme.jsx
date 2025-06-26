@@ -1,9 +1,9 @@
-import { extendTheme } from "@chakra-ui/react";
+import { createSystem, defaultBaseConfig, defineConfig } from "@chakra-ui/react";
 import { tabsTheme } from "./components/tabs";
 import { buttonTheme } from "./components/button";
 import { inputTheme } from "./components/inputs";
 
-const theme = extendTheme({
+const themeSystem = defineConfig({
   colors: {
     brand: {
       50: "#e3f2ff",
@@ -43,4 +43,4 @@ const theme = extendTheme({
     Input: inputTheme,
   },
 });
-export default theme;
+export const Theme = createSystem(defaultBaseConfig, themeSystem)

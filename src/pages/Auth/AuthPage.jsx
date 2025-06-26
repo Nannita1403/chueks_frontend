@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Box,
+<<<<<<< HEAD:src/components/AuthPage.jsx
   Flex
 } from '@chakra-ui/react';
 import { useColorModeValue } from './ui/color-mode';
@@ -10,6 +11,17 @@ import { Toaster, toaster } from "@/components/ui/toaster"
 import InfoPanel from './InfoPanel';
 import AuthForm from './AuthForm';
 <Toaster />
+=======
+  Flex,
+  Image,
+} from '@chakra-ui/react';
+import { useColorModeValue } from '../../components/ui/color-mode';
+import AuthForm from '../../components/LoginRegister/AuthForm';
+import InfoPanel from '../../components/LoginRegister/InfoPanel';
+import { toasterFunction } from '../../components/toaster';
+import logoRedondo from "/logoRedondo.png"
+
+>>>>>>> 7ea3a7e1e24f453cc5cd958148c3c25d94db8eb0:src/pages/Auth/AuthPage.jsx
 const BASE_URL = "http://localhost:3000/api/v1/";
 
 const AuthPage = () => {
@@ -17,7 +29,6 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [telephone, setTelephone] = useState('');
-  const toast = useToast();
 
   const bgColor =useColorModeValue('white', 'gray.800');
 
@@ -35,9 +46,9 @@ const AuthPage = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      toast({ title: 'Login exitoso', status: 'success', duration: 3000, isClosable: true });
+      toasterFunction({ title: 'Login exitoso', status: 'success', duration: 3000, isClosable: true });
     } catch (error) {
-      toast({ title: 'Error al iniciar sesión', description: error.message, status: 'error', duration: 3000, isClosable: true });
+      toasterFunction({ title: 'Error al iniciar sesión', description: error.message, status: 'error', duration: 3000, isClosable: true });
     }
   };
 
@@ -52,16 +63,18 @@ const AuthPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data);
 
-      toast({ title: 'Registro exitoso', description: 'Verifica tu email para continuar.', status: 'success', duration: 4000, isClosable: true });
+      toasterFunction({ title: 'Registro exitoso', description: 'Verifica tu email para continuar.', status: 'success', duration: 4000, isClosable: true });
     } catch (error) {
-      toast({ title: 'Error al registrarse', description: error.message, status: 'error', duration: 3000, isClosable: true });
+      toasterFunction({ title: 'Error al registrarse', description: error.message, status: 'error', duration: 3000, isClosable: true });
     }
   };
 
   return (
     <Flex height="100vh">
       {/* Izquierda - Formulario */}
-      <Box flex="1" bg={bgColor} display="flex" alignItems="center" justifyContent="center">
+
+      <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
+        <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
         <AuthForm
           email={email} setEmail={setEmail}
           password={password} setPassword={setPassword}

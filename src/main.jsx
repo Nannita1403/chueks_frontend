@@ -3,14 +3,15 @@ import ReactDOM from 'react-dom/client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { Provider } from './components/ui/provider'; 
 import theme from './theme/theme';
+import { Provider } from './components/ui/provider'; // Tu provider personalizado
+"import AuthPage from './components/Auth Page/AuthPage';"
 import App from './App';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ChakraProvider theme={theme}>
+  <Router>
       <Provider>
         <App/>
       </Provider>
-    </ChakraProvider>
-  </React.StrictMode>
+  </Router>
 );
