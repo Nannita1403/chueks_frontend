@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Flex,
-  useToast
+  Flex
 } from '@chakra-ui/react';
 import { useColorModeValue } from './ui/color-mode';
+import { Toaster, toaster } from "@/components/ui/toaster"
 
 
 import InfoPanel from './InfoPanel';
 import AuthForm from './AuthForm';
-
+<Toaster />
 const BASE_URL = "http://localhost:3000/api/v1/";
 
 const AuthPage = () => {

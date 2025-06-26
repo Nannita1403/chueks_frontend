@@ -1,9 +1,7 @@
-// src/main.jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ChakraProvider } from '@chakra-ui/react';
-import { Provider } from './components/ui/provider'; // Tu provider personalizado
-import AuthPage from './components/AuthPage';
+import { Provider } from './components/ui/provider'; 
 import theme from './theme/theme';
 import App from './App';
 

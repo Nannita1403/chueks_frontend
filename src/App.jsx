@@ -4,11 +4,6 @@ import AuthPage from "./components/AuthPage"
 
 const App = () => {
   return (
-    <div>App</div>
-  )
-}
-const Demo = () => {
-  return (
     <HStack>
       <Toaster />
       <AuthPage/>
