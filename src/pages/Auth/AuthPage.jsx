@@ -1,29 +1,18 @@
 import React, { useState } from 'react';
 import {
   Box,
-<<<<<<< HEAD:src/components/AuthPage.jsx
-  Flex
-} from '@chakra-ui/react';
-import { useColorModeValue } from './ui/color-mode';
-import { Toaster, toaster } from "@/components/ui/toaster"
-
-
-import InfoPanel from './InfoPanel';
-import AuthForm from './AuthForm';
-<Toaster />
-=======
   Flex,
   Image,
 } from '@chakra-ui/react';
+import { Toaster, toaster } from "../../components/ui/toaster"
 import { useColorModeValue } from '../../components/ui/color-mode';
 import AuthForm from '../../components/LoginRegister/AuthForm';
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import { toasterFunction } from '../../components/toaster';
 import logoRedondo from "/logoRedondo.png"
 
->>>>>>> 7ea3a7e1e24f453cc5cd958148c3c25d94db8eb0:src/pages/Auth/AuthPage.jsx
 const BASE_URL = "http://localhost:3000/api/v1/";
-
+<Toaster />
 const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
