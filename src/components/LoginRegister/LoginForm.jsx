@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Box,
   Input,
@@ -18,7 +18,8 @@ const LoginForm = ({
   password, setPassword, onLogin
 }) => {
 
-  const { register, login, handleSubmit} =useForm();
+  const { register, login, handleSubmit, setError, formState:{errors}} =useForm();
+  const {state, dispatch} = useContext(UserContext);
   const [visible, setVisible] = useState(false)
   const [data, setData] = useState("");
 
