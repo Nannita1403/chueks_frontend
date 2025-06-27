@@ -1,8 +1,5 @@
 import { createContext, useReducer } from "react";
-import {
-  INITIAL_USERS_STATE,
-  usersReducer,
-} from "../reducers/users/users.reducer";
+import { INITIAL_USERS_STATE, usersReducer } from '../../src/reducers/users/users.reducer';
 
 export const UsersContext = createContext();
 
