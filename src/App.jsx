@@ -3,21 +3,38 @@ import { Toaster } from "./components/ui/toaster"
 import AuthPage from "./pages/Auth/AuthPage"
 import { Route, Routes, useNavigate } from "react-router-dom"
 import Home from "./pages/Home/Home"
-import { useEffect } from "react"
+import { useContext, useEffect } from "react"
+import { UsersContext } from "./providers/UsersProviders"
+import { ElementsContext } from "./providers/ElementsProviders"
+import { ProductsContext } from "./providers/ProductsProviders"
+import { checkSession } from "./reducers/users/users.actions"
+import Loading from "./components/Loading/Loading"
+
 
 
 const App = () => {
+  const {
+    state: { loading },
+    dispatch,
+  } = useContext(UsersContext);
+  const {
+    state: { loading: loadingElements },
+  } = useContext(ElementsContext);
+  const {
+    state: { loading: loadingProducts },
+  } = useContext(ProductsContext);
+  const navigate = useNavigate();
 
-/*
-  const navigate=useNavigate();
-
-  useEffect(()=> {
-    if (!localStorage.getItem("token")) {
-      navigate("/login");
+  useEffect(() => {
+    if (!window.location.pathname.includes("/verifyaccount/")) {
+      checkSession(dispatch, navigate);
     }
-  }, []);*/
+  }, []);
+
 
   return (
+    <>
+    {(loading || loadingProducts || loadingElements) && <Loading/>}
     <HStack>
       <Toaster/>
       <Routes>
@@ -26,8 +43,9 @@ const App = () => {
         <Route path="/login" element={<AuthPage/>}/>
       </Routes>
     </HStack>
-  )
-}
+    </>
+  );
+};
 
 export default  App
 

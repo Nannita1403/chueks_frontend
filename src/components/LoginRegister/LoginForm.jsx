@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react';
 import { PasswordInput } from '../ui/password-input.jsx';
 import { useForm } from 'react-hook-form';
+import { UsersContext } from '../../providers/UsersProviders.jsx';
 
 const LoginForm = ({
   email, setEmail,
@@ -19,7 +20,7 @@ const LoginForm = ({
 }) => {
 
   const { register, login, handleSubmit, setError, formState:{errors}} =useForm();
-  const {state, dispatch} = useContext(UserContext);
+  const {state, dispatch} = useContext(UsersContext);
   const [visible, setVisible] = useState(false)
   const [data, setData] = useState("");
 

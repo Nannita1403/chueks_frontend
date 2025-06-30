@@ -4,6 +4,7 @@ import {
   Flex,
   Image,
   Tabs,
+  TabsList,
 } from '@chakra-ui/react';
 import { useColorModeValue } from '../../components/ui/color-mode';
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
@@ -11,6 +12,7 @@ import logoRedondo from "/logoRedondo.png"
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
 import LoginForm from '../../components/LoginRegister/LoginForm';
 import RegisterForm from '../../components/LoginRegister/RegisterForm';
+import { login, registerUser } from '../../reducers/users/users.actions';
 
 
 const BASE_URL = "http://localhost:3000/api/v1/";
@@ -37,14 +39,14 @@ const AuthPage = () => {
         
         <LoginForm
           email={email} setEmail={setEmail}
-          onLogin={handleLogin}
+          onLogin={login}
         />
         <RegisterForm
           email={email} setEmail={setEmail}
           password={password} setPassword={setPassword}
           name={name} setName={setName}
           telephone={telephone} setTelephone={setTelephone}
-          onRegister={handleRegister}
+          onRegister={registerUser}
         />
           </Tabs.Root>
         </Box>

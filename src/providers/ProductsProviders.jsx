@@ -4,7 +4,7 @@ import { createContext, useReducer } from "react";
 
 export const ProductsContext = createContext();
 
-const RecipesProvider = ({ children }) => {
+const ProductsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productsReducer, INITIAL_PRODUCTS_STATE);
 
   return (
@@ -14,4 +14,4 @@ const RecipesProvider = ({ children }) => {
   );
 };
 
-export default RecipesProvider;
+export default ProductsProvider;

@@ -18,7 +18,7 @@ const InfoPanel = () => {
         <Box  w="1rem" h="1rem" bg="pink.500" borderRadius="full" mr={2} semibold/>
         <Heading as="h3" size="2xl"> Diseños Exclusivos </Heading>
       </Flex>
-      <Text color="gray.300" pl={6} size="xl">
+    npx motion-primitives@latest add spinning-text  <Text color="gray.300" pl={6} size="xl">
         Accede a nuestra colección de productos únicos y de alta calidad.
       </Text>
     </Box>
