@@ -19,7 +19,6 @@ const LoginForm = ({
   password, setPassword, onLogin
 }) => {
 
-  const { register, login, handleSubmit, setError, formState:{errors}} =useForm();
   const {state, dispatch} = useContext(UsersContext);
   const [visible, setVisible] = useState(false)
   const [data, setData] = useState("");

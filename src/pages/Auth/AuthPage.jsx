@@ -12,7 +12,7 @@ import logoRedondo from "/logoRedondo.png"
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
 import LoginForm from '../../components/LoginRegister/LoginForm';
 import RegisterForm from '../../components/LoginRegister/RegisterForm';
-import { login, registerUser } from '../../reducers/users/users.actions';
+import { login, register } from '../../reducers/users/users.actions';
 
 
 const BASE_URL = "http://localhost:3000/api/v1/";
@@ -28,26 +28,31 @@ const AuthPage = () => {
     <Flex height="100vh">
       {/* Izquierda - Formulario */}
       <Box w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
-
+      <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
       <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
          <Tabs.Root variant="enclosed" maxW="md" fitted defaultValue="Iniciar-Sesion" colorScheme="blue">
           <TabsList>
           <Tabs.Trigger value="Iniciar-Sesion"><LuLogIn /> Iniciar Sesión</Tabs.Trigger>
           <Tabs.Trigger value="Registrarse"><LuSquareCheck /> Registrarse</Tabs.Trigger>
           </TabsList>
-        <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
         
+      {window.location.pathname === "/login" 
+      ? 
         <LoginForm
           email={email} setEmail={setEmail}
           onLogin={login}
         />
-        <RegisterForm
+      :
+       <RegisterForm
           email={email} setEmail={setEmail}
           password={password} setPassword={setPassword}
           name={name} setName={setName}
           telephone={telephone} setTelephone={setTelephone}
-          onRegister={registerUser}
-        />
+          onRegister={register}
+        />}
+
+        
+        
           </Tabs.Root>
         </Box>
       </Box>

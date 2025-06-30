@@ -72,7 +72,7 @@ export const checkSession = async (dispatch, navigate) => {
   };
 */
 
-export const registerUser = async (body, dispatch, navigate) => {
+export const register = async (body, dispatch, navigate) => {
   dispatch({ type: "LOADING" });
 
   const { error } = await API({
