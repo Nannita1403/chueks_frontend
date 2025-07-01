@@ -44,12 +44,13 @@ const AuthPage = () => {
         />
       :
        <RegisterForm
-       //   email={email} setEmail={setEmail}
-       //   password={password} setPassword={setPassword}
-       //   name={name} setName={setName}
-       //   telephone={telephone} setTelephone={setTelephone}
-       //   onRegister={register}
+  email={email} setEmail={setEmail}
+         password={password} setPassword={setPassword}
+        name={name} setName={setName}
+        telephone={telephone} setTelephone={setTelephone}
+        onRegister={register}
         />}
+        <RegisterForm/>
           </Tabs.Root>
         </Box>
       </Box>

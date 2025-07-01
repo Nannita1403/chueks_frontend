@@ -43,7 +43,7 @@ export const login = async (body, dispatch, navigate) => {
 export const checkSession = async (dispatch, navigate) => {
   dispatch({ type: "LOADING" });
 
-  const { error, response } = await API({ endpoint: "/users/checksession" });
+  const { error, response } = await API({ endpoint: "/users/checkSession" });
 
   if (error) {
     dispatch({ type: "LOGOUT" });
@@ -96,7 +96,7 @@ export const register = async (body, dispatch, navigate) => {
 export const verifyAccount = async (id, dispatch, navigate) => {
   dispatch({ type: "LOADING" });
 
-  const { error, response } = await API({ endpoint: `/users/verify/${id}` });
+  const { error, response } = await API({ endpoint: `/users/verifyaccount/${id}` });
 
   if (!error) {
     dispatch({ type: "LOGIN", payload: response });
