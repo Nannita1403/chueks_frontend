@@ -39,20 +39,17 @@ const AuthPage = () => {
       {window.location.pathname === "/login" 
       ? 
         <LoginForm
-          email={email} setEmail={setEmail}
-          onLogin={login}
+//         email={email} setEmail={setEmail}
+ //         onLogin={login}
         />
       :
        <RegisterForm
-          email={email} setEmail={setEmail}
-          password={password} setPassword={setPassword}
-          name={name} setName={setName}
-          telephone={telephone} setTelephone={setTelephone}
-          onRegister={register}
+       //   email={email} setEmail={setEmail}
+       //   password={password} setPassword={setPassword}
+       //   name={name} setName={setName}
+       //   telephone={telephone} setTelephone={setTelephone}
+       //   onRegister={register}
         />}
-
-        
-        
           </Tabs.Root>
         </Box>
       </Box>

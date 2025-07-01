@@ -13,6 +13,7 @@ import {
 import { PasswordInput } from '../ui/password-input.jsx';
 import { useForm } from 'react-hook-form';
 import { UsersContext } from '../../providers/UsersProviders.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({
   email, setEmail,
@@ -23,6 +24,7 @@ const LoginForm = ({
   const {state, dispatch} = useContext(UsersContext);
   const [visible, setVisible] = useState(false)
   const [data, setData] = useState("");
+  const navigate = useNavigate();
 
   return (
     <Box w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">

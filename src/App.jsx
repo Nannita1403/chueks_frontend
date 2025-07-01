@@ -1,16 +1,15 @@
 import { HStack } from "@chakra-ui/react"
 import { Toaster } from "./components/ui/toaster"
-import AuthPage from "./pages/Auth/AuthPage"
 import { Route, Routes, useNavigate } from "react-router-dom"
-import Home from "./pages/Home/Home"
 import { useContext, useEffect } from "react"
 import { UsersContext } from "./providers/UsersProviders"
 import { ElementsContext } from "./providers/ElementsProviders"
 import { ProductsContext } from "./providers/ProductsProviders"
 import { checkSession } from "./reducers/users/users.actions"
 import Loading from "./components/Loading/Loading"
-
-
+import VerifyAccount from "./pages/VerifyAccount/VerifyAccount"
+import AuthPage from "./pages/Auth/AuthPage"
+import Home from "./pages/Home/Home"
 
 const App = () => {
   const {
@@ -27,7 +26,7 @@ const App = () => {
 
   useEffect(() => {
     if (!window.location.pathname.includes("/verifyaccount/")) {
-      checkSession(dispatch, navigate);
+      checkSession (dispatch, navigate);
     }
   }, []);
 
@@ -41,6 +40,8 @@ const App = () => {
         <Route path="/" element={<Home/>}/>
         <Route path="/register" element={<AuthPage/>}/>
         <Route path="/login" element={<AuthPage/>}/>
+        <Route path="/verifyaccount" element={<VerifyAccount/>} />
+        <Route path="/verifyaccount/:id/:token" element={<VerifyAccount/>} />
       </Routes>
     </HStack>
     </>
