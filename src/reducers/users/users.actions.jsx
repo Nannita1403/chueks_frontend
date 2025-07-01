@@ -89,14 +89,14 @@ export const register = async (body, dispatch, navigate) => {
       type: "REGISTER",
       payload: { email: body.email, password: body.password },
     });
-    navigate("/verifyaccount");
+    navigate("/verifyAccount");
   }
 };
 
 export const verifyAccount = async (id, dispatch, navigate) => {
   dispatch({ type: "LOADING" });
 
-  const { error, response } = await API({ endpoint: `/users/verifyaccount/${id}` });
+  const { error, response } = await API({ endpoint: `/users/verifyAccount/${id}` });
 
   if (!error) {
     dispatch({ type: "LOGIN", payload: response });

@@ -25,7 +25,7 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!window.location.pathname.includes("/verifyaccount/")) {
+    if (!window.location.pathname.includes("/verifyAccount/")) {
       checkSession (dispatch, navigate);
     }
   }, []);
@@ -40,8 +40,8 @@ const App = () => {
         <Route path="/" element={<Home/>}/>
         <Route path="/register" element={<AuthPage/>}/>
         <Route path="/login" element={<AuthPage/>}/>
-        <Route path="/verifyaccount" element={<VerifyAccount/>} />
-        <Route path="/verifyaccount/:id/:token" element={<VerifyAccount/>} />
+        <Route path="/verifyAccount" element={<VerifyAccount/>} />
+        <Route path="/verifyAccount/:id/:token" element={<VerifyAccount/>} />
       </Routes>
     </HStack>
     </>
