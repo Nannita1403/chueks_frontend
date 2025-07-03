@@ -10,7 +10,6 @@ import { useColorModeValue } from '../../components/ui/color-mode';
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
-import LoginForm from '../../components/LoginRegister/LoginForm';
 import RegisterForm from '../../components/LoginRegister/RegisterForm';
 import { login, register } from '../../reducers/users/users.actions';
 import Login from '../../components/LoginRegister/Login';
@@ -26,9 +25,9 @@ const AuthPage = () => {
   const bgColor =useColorModeValue('white', 'gray.800');
 
   return (
-    <Flex height="100vh">
+    <Flex  height="100vh" justifyContent="center" alignItems="center" >
       {/* Izquierda - Formulario */}
-      <Box flex={1} w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
+      <Box flex={1} justifyItems="center" alignItems="center" w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
       <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
          <Tabs.Root variant="enclosed" maxW="md" fitted defaultValue="Iniciar-Sesion" colorScheme="blue">

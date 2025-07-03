@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import Button from "../Button/Button";
-import { Box, FieldsetRoot, Flex } from "@chakra-ui/react";
+import {FieldsetRoot, Flex } from "@chakra-ui/react";
 
 export const FormContext = createContext();
 
