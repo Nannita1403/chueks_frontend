@@ -1,4 +1,4 @@
-import { createSystem, defaultBaseConfig, defineConfig } from "@chakra-ui/react";
+import {defaultBaseConfig, defineConfig, extendTheme } from "@chakra-ui/react";
 import { tabsTheme } from "./components/tabs";
 import { buttonTheme } from "./components/button";
 import { inputTheme } from "./components/inputs";
@@ -43,4 +43,4 @@ const themeSystem = defineConfig({
     Input: inputTheme,
   },
 });
-export const Theme = createSystem(defaultBaseConfig, themeSystem)
+export const Theme = extendTheme(defaultBaseConfig, themeSystem)

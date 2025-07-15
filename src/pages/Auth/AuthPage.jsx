@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Flex,
-  Image,
-  Tabs,
-  TabsList,
-} from '@chakra-ui/react';
-import { useColorModeValue } from '../../components/ui/color-mode';
+import { Box, Flex, Image, Tabs, TabsContent, TabsList } from '@chakra-ui/react';
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
@@ -22,7 +15,6 @@ const AuthPage = () => {
   const [name, setName] = useState('');
   const [telephone, setTelephone] = useState('');
 
-  const bgColor =useColorModeValue('white', 'gray.800');
 
   return (
     <Flex  height="100vh" justifyContent="center" alignItems="center" >
@@ -30,10 +22,10 @@ const AuthPage = () => {
       <Box flex={1} justifyItems="center" alignItems="center" w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
       <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
-         <Tabs.Root variant="enclosed" maxW="md" fitted defaultValue="Iniciar-Sesion" colorScheme="blue">
+         <Tabs variant="enclosed" maxW="md" fitted defaultValue="Iniciar-Sesion" colorScheme="blue">
           <TabsList>
-          <Tabs.Trigger value="Iniciar-Sesion"><LuLogIn /> Iniciar Sesión</Tabs.Trigger>
-          <Tabs.Trigger value="Registrarse"><LuSquareCheck /> Registrarse</Tabs.Trigger>
+          <TabsContent value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</TabsContent>
+          <TabsContent value="Registrarse"><LuSquareCheck /> Registrarse</TabsContent>
           </TabsList>
         
       {window.location.pathname === "/login" 
@@ -52,7 +44,7 @@ const AuthPage = () => {
         onRegister={register}
         />}
         <RegisterForm/>
-          </Tabs.Root>
+          </Tabs>
         </Box>
       </Box>
 

@@ -63,8 +63,8 @@ const LoginForm = ({
                 La contraseña está {visible ? "visible" : "oculta"}
               </Text>
 
-              <Button type="submit" colorPalette="blue" width="full">
-                Iniciar Sesión
+            <Button type="submit" colorPalette="blue" width="full">
+             Iniciar Sesión
               </Button>
             </VStack>
           </form>

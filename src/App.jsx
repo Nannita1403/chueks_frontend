@@ -1,5 +1,4 @@
 import { HStack } from "@chakra-ui/react"
-import { Toaster } from "./components/ui/toaster"
 import { Route, Routes, useNavigate } from "react-router-dom"
 import { useContext, useEffect } from "react"
 import { UsersContext } from "./providers/UsersProviders"
@@ -36,7 +35,6 @@ const App = () => {
     <>
     {(loading || loadingProducts || loadingElements) && <Loading/>}
     <HStack>
-      <Toaster/>
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/register" element={<AuthPage/>}/>

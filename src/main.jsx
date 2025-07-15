@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Provider } from './components/ui/provider'; // Tu provider personalizado
 import App from './App';
 import { BrowserRouter as Router } from 'react-router-dom';
 import UsersProvider from './providers/UsersProviders';
 import ElementsProvider from './providers/ElementsProviders';
 import ProductsProvider from './providers/ProductsProviders';
+import { ChakraProvider } from '@chakra-ui/react';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-<Provider>
+<ChakraProvider>
     <Router>
         <UsersProvider>
             <ElementsProvider>
@@ -18,5 +18,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             </ElementsProvider>
         </UsersProvider>
     </Router>
-</Provider>
+</ChakraProvider>
 );

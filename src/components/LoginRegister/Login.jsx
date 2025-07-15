@@ -48,7 +48,7 @@ const Login = ({  email, setEmail,
       handleSubmit={handleSubmit}
       submit={(data) => login(data, dispatch, navigate)}
       register={register}
-      buttonText="Login"
+     // buttonText="Login"
     >
      <VStack spacing={4}>
        <Fieldset.Root>
