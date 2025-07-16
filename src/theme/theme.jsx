@@ -1,21 +1,19 @@
 import {defaultBaseConfig, defineConfig, extendTheme } from "@chakra-ui/react";
-import { tabsTheme } from "./components/tabs";
-import { buttonTheme } from "./components/button";
-import { inputTheme } from "./components/inputs";
 
 const themeSystem = defineConfig({
   colors: {
     brand: {
-      50: "#e3f2ff",
-      100: "#b3daff",
-      200: "#81c2ff",
-      300: "#4fa9ff",
-      400: "#1d91ff",
-      500: "#0477e6", // Color principal
-      600: "#005fb4",
-      700: "#004682",
-      800: "#002e51",
-      900: "#001620",
+      0:"#ff0080",// Color magenta
+      1:"#00e6e6",// Color cyan
+      2: "#ffff00",// Color amarillo
+      3: "#7cfc00",// Color verde
+      4: "#9370db",// Color violeta
+      50: "#ffffff", //Color Blanco
+      100: "#f6f6f6",// Color gris claro bg      
+      200: "#e2e2e2",// Color gris claro bgButton-border
+      300: "#9d9d9d",// Color gris oscuro letra-borderselected
+      400: "#595959",// Color gris oscuro bgFondo 
+      500:"#000000",// Color negro
     },
     background: "#f7fafc",
     text: "#1a202c",
@@ -38,9 +36,50 @@ const themeSystem = defineConfig({
     xl: "24px",
   },
   components: {
-    Tabs: tabsTheme,
-    Button: buttonTheme,
-    Input: inputTheme,
+    Tabs: {
+  baseStyle: {
+    tab: {
+      _selected: {
+        color: "brand.0",
+        borderBottom: "2px solid",
+        borderColor: "brand.0",
+      }}},
+  variants: {
+    enclosed: {
+      tab: {
+        _selected: {
+          bg: "brand.0",
+          color: "brand.50",
+        }}}},
   },
+    Button: {
+  baseStyle: {
+    borderRadius: "md",
+    fontWeight: "semibold",
+    font: "mono", 
+  },
+  variants: {
+    solid: (props) => ({
+      bg: props.colorMode === "dark" ? "brand.500" : "brand.200",
+      color: "white",
+      _hover: {
+        bg: props.colorMode === "dark" ? "brand.200" : "brand.500",
+      },
+    })}
+  },
+    Input: {
+    baseStyle: {
+    font: "mono", 
+  },
+  variants: {
+    outline: {
+      field: {
+        borderColor: "gray.100",
+        _focus: {
+          borderColor: "brand.0",
+          boxShadow: "0 0 0 1px var(--chakra-colors-brand-0)",
+    }}}}
+  },
+},
 });
 export const Theme = extendTheme(defaultBaseConfig, themeSystem)

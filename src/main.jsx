@@ -6,9 +6,10 @@ import UsersProvider from './providers/UsersProviders';
 import ElementsProvider from './providers/ElementsProviders';
 import ProductsProvider from './providers/ProductsProviders';
 import { ChakraProvider } from '@chakra-ui/react';
+import { Theme } from './theme/theme';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-<ChakraProvider>
+<ChakraProvider theme={Theme}>
     <Router>
         <UsersProvider>
             <ElementsProvider>
