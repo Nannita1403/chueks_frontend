@@ -5,10 +5,7 @@ import {
   Button,
   VStack,
   Heading,
-  Field,
-  Fieldset,
-  TabsContent,
-  Text,
+  Text
 } from '@chakra-ui/react';
 
 import { useForm } from 'react-hook-form';

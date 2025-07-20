@@ -1,11 +1,11 @@
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
-import Login from '../../components/LoginRegister/Login';
-import RegisterForm from '../../components/LoginRegister/RegisterForm';
-import { login, register } from "../../reducers/users/users.actions"
-import { Box, Flex, Image, Tabs, Tab, TabsList  } from '@chakra-ui/react';
+import { login, registerUser} from "../../reducers/users/users.actions"
+import { Box, Flex, Image, Tabs, Tab, TabList, } from '@chakra-ui/react';
 import React, { useState } from 'react'
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
+import Register from '../../components/Register/Register';
+import LoginForm from '../../components/LoginRegister/LoginForm';
 
 const BASE_URL = "http://localhost:3000/api/v1/";
 
@@ -20,29 +20,29 @@ const AuthP = () => {
       {/* Izquierda - Formulario */}
       <Box flex={1} justifyItems="center" alignItems="center" w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
-      <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
+      <Box flex="1" display="flex" flexDir="column"  alignItems="center" justifyContent="center">
          <Tabs isFitted variant='enclosed' defaultValue="Iniciar-Sesion"> //*maxW="md" colorScheme="blue"
-          <TabsList mb="1em">
+          <TabList mb="1em">
           <Tab value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</Tab>
           <Tab value="Registrarse"><LuSquareCheck /> Registrarse</Tab>
-          </TabsList>
+          </TabList>
         
       {window.location.pathname === "/login" 
       ? 
-      <Login
-    //    <LoginForm
+      //<Login
+       <LoginForm
          email={email} setEmail={setEmail}
          onLogin={login}
         />
       :
-       <RegisterForm
-  email={email} setEmail={setEmail}
+       <Register
+        email={email} setEmail={setEmail}
          password={password} setPassword={setPassword}
         name={name} setName={setName}
         telephone={telephone} setTelephone={setTelephone}
-        onRegister={register}
+        onRegister={registerUser}
         />}
-        <RegisterForm/>
+        <Register/>
           </Tabs>
         </Box>
       </Box>

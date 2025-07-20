@@ -48,7 +48,6 @@ const LoginForm = () => {
         <AlertForm errors={errors} />
         <Box
           rounded={'lg'}
-          bg={useColorModeValue('white', 'gray.700')}
           boxShadow={'lg'}
           p={8}>
         <Form
@@ -57,7 +56,8 @@ const LoginForm = () => {
             register={register}
             buttonText="Login">
           <Stack spacing={4}>
-            <FieldForm isRequired id="email">
+            <FieldForm 
+            isRequired id="email">
               <FormLabel>Email</FormLabel>
               <Input type="email" 
               value={email}

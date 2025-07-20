@@ -1,13 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 
 import FieldForm from "../FieldForm/FieldForm";
-import "./Register.css";
 import Form from "../Form/Form";
 import { useForm } from "react-hook-form";
-import { registerUser } from "../../reducers/users/users.actions";
 import { useContext } from "react";
-import AlertForm from "../AlertForm/AlertForm";
-import { UsersContext } from "../../providers/UsersProvider";
+import AlertForm from "../../components/AlertForm/AlerForm";
+import { UsersContext } from "../../providers/UsersProviders";
+import { registerUser } from "../../reducers/users/users.actions";
 
 const Register = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
