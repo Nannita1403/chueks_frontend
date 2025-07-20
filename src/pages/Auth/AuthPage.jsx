@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Box, Flex, Image, Tabs, TabsContent, TabsList } from '@chakra-ui/react';
+import { Box, Flex, Image, Tabs, Tab, TabsList, Stack } from '@chakra-ui/react';
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
 import RegisterForm from '../../components/LoginRegister/RegisterForm';
 import { login, register } from '../../reducers/users/users.actions';
-import Login from '../../components/LoginRegister/Login';
+import LoginForm from '@/components/LoginRegister/LoginForm';
 
 
 const BASE_URL = "http://localhost:3000/api/v1/";
@@ -17,41 +17,42 @@ const AuthPage = () => {
 
 
   return (
-    <Flex  height="100vh" justifyContent="center" alignItems="center" >
+    <Stack minH={'100vh'} direction={{ base: 'column', md: 'row' }}>
+      
       {/* Izquierda - Formulario */}
-      <Box flex={1} justifyItems="center" alignItems="center" w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
-      <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
-      <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
-         <Tabs variant="enclosed" maxW="md" fitted defaultValue="Iniciar-Sesion" colorScheme="blue">
+      <Flex p={8} flex={1} align={'center'} justify={'center'}>
+       <Stack spacing={4} w={'full'} maxW={'md'}>
+        <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
+          <Box flex="1" bg={bgColor} display="flex" flexDir="column"  alignItems="center" justifyContent="center">
+          <Tabs variant="enclosed" maxW="md" fitted default Value="Iniciar-Sesion" colorScheme="blue">
           <TabsList>
-          <TabsContent value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</TabsContent>
-          <TabsContent value="Registrarse"><LuSquareCheck /> Registrarse</TabsContent>
-          </TabsList>
-        
-      {window.location.pathname === "/login" 
-      ? 
-      <Login
-    //    <LoginForm
-         email={email} setEmail={setEmail}
-         onLogin={login}
-        />
-      :
-       <RegisterForm
-  email={email} setEmail={setEmail}
+          <Tab value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</Tab>
+          <Tab value="Registrarse"><LuSquareCheck /> Registrarse</Tab>
+            </TabsList>
+            {window.location.pathname === "/login" 
+            ? 
+            <LoginForm
+             email={email} setEmail={setEmail}
+             onLogin={login}
+             />
+            :
+            <RegisterForm
+             email={email} setEmail={setEmail}
          password={password} setPassword={setPassword}
         name={name} setName={setName}
         telephone={telephone} setTelephone={setTelephone}
-        onRegister={register}
-        />}
-        <RegisterForm/>
-          </Tabs>
-        </Box>
-      </Box>
-
+             onRegister={register}
+             />}
+            <RegisterForm/>
+            </Tabs>
+          </Box>
+        </Stack>
+      </Flex>
       {/* Derecha - Información */}
-      <InfoPanel />
-
-    </Flex>
+      <Flex flex={1}>
+        <InfoPanel />
+      </Flex>
+    </Stack>
   );
 };
 

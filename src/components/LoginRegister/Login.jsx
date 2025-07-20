@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import FieldForm from "../FieldForm/FieldForm";
+//import FieldForm from "../FieldForm/FieldForm";
 import { login } from "../../reducers/users/users.actions";
 import { useContext, useEffect, useState } from "react";
 import AlertForm from "../AlertForm/AlerForm";
@@ -9,11 +9,11 @@ import {  Box,
   Input,
   VStack,
   Heading,
-  Field,
-  Fieldset,
-  TabsContent,
-  Text, } from "@chakra-ui/react";
-import { PasswordInput } from '../ui/password-input.jsx';
+
+  Text,
+  Tabs,
+  FormControl, } from "@chakra-ui/react";
+// import { PasswordInput } from '../ui/password-input.jsx';
 import Form from "../Form/Form";
 import ButtonForm from "../Button/Button";
   
@@ -38,19 +38,19 @@ const Login = ({  email, setEmail,
 
   return (
     <Box w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
-    <TabsContent value="Iniciar-Sesion">
+    <Tabs value="Iniciar-Sesion">
     <Heading  size="lg" textAlign="left">Inicia Sesión</Heading>
     <Text fontSize="sm" color="gray.500" mb={6}>
       Accede a tu cuenta exclusiva a Mayoristas
     </Text>
     <AlertForm errors={errors} />
-    <Form
+    <FormControl
       handleSubmit={handleSubmit}
       submit={(data) => login(data, dispatch, navigate)}
       register={register}
-     // buttonText="Login"
+      buttonText= "Login"
     >
-     <VStack spacing={4}>
+    //*<VStack spacing={4}>
        <Fieldset.Root>
         <Field.Root required>
             <Field.Label>Email</Field.Label>
@@ -70,16 +70,7 @@ const Login = ({  email, setEmail,
 
         <Field.Root required>
             <Field.Label>Contraseña</Field.Label>
-                <PasswordInput
-                 type="password"
-                 value={password}
-                 onChange={(e) => setPassword(e.target.value)}
-                 visible={visible}
-                 onVisibleChange={setVisible}
-                 validations={{
-                    required: { value: true, message: "Introduce la contraseña" },
-                }}
-                />
+               //* <PasswordInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} visible={visible} onVisibleChange={setVisible} validations={{ required: { value: true, message: "Introduce la contraseña" },}} />
         </Field.Root>
        </Fieldset.Root>
        <Text fontSize="sm" color="gray.500">
@@ -91,8 +82,8 @@ const Login = ({  email, setEmail,
         </ButtonForm>
         <Link to="/register">¿No tienes cuenta? Regístrate</Link>
      </VStack>
-    </Form>
-    </TabsContent>
+    </FormControl>
+    </Tabs>
     </Box>
     
   );

@@ -15,7 +15,7 @@ const FieldForm = ({
     <Box>
       <Tag>{label}</Tag>
       <Input
-        variant="subtle" 
+        variant="subtitle" 
         size="sm"
         placeholder={ph}
         type={type}
