@@ -1,6 +1,6 @@
-import {defaultBaseConfig, defineConfig, extendTheme } from "@chakra-ui/react";
+import { extendTheme } from "@chakra-ui/react";
 
-const themeSystem = defineConfig({
+export const themeSystem = extendTheme({
   colors: {
     brand: {
       0:"#ff0080",// Color magenta
@@ -82,4 +82,3 @@ const themeSystem = defineConfig({
   },
 },
 });
-export const Theme = extendTheme(defaultBaseConfig, themeSystem)
