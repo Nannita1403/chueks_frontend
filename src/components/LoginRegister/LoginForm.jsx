@@ -10,9 +10,10 @@ import {  Box,
   Text,
   Flex,
   Stack,
-  FormLabel} from "@chakra-ui/react";
+  Button,
+  InputGroup,
+  InputRightElement} from "@chakra-ui/react";
 import Form from "../Form/Form";
-//import ButtonForm from "../Button/Button";
 import FieldForm from "../FieldForm/FieldForm";
   
 
@@ -25,6 +26,8 @@ const LoginForm = () => {
   } = useForm();
   const { state, dispatch } = useContext(UsersContext);
   const navigate = useNavigate();
+  const [show, setShow] = useState(false)
+  const handleClick = () => setShow(!show)
 
   useEffect(() => {
     if (state.error) {
@@ -33,66 +36,39 @@ const LoginForm = () => {
   }, [state.error]);
 
   return (
-    <Flex
-      minH={'100vh'}
-      align={'center'}
-      justify={'center'}
-      borderRadius="lg" boxShadow="lg">
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-        <Stack align={'center'}>
-          <Heading fontSize={'4xl'}>Inicia Sesión</Heading>
-          <Text fontSize={'sm'} color={'gray.500'}>
-            Accede a tu cuenta exclusiva a Mayoristas <Text color={'blue.400'}>features</Text> ✌️
-          </Text>
-        </Stack>
-        <AlertForm errors={errors} />
-        <Box
-          rounded={'lg'}
-          boxShadow={'lg'}
-          p={8}>
-        <Form
-            handleSubmit={handleSubmit}
-            submit={(data) => login(data, dispatch, navigate)}
-            register={register}
-            buttonText="Login">
+    <Form
+        handleSubmit={handleSubmit}
+        submit={(data) => login(data, dispatch, navigate)}
+        register={register}
+        buttonText="Login">
+        <Text color="brand.0" fontWeight="800" fontSize="25px">Iniciar Sesión</Text>
+        <Text color="brand.500">Accede a tu cuenta exclusiva a Mayoristas</Text>
+          <AlertForm errors={errors} />
           <Stack spacing={4}>
             <FieldForm 
-            isRequired id="email">
-              <FormLabel>Email</FormLabel>
-              <Input type="email" 
-              value={email}
-                 onChange={(e) => setEmail(e.target.value)}
-                 validations={{
-                    required: { value: true, message: "El email es requerido" },
-                    pattern: {
-                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                    message: "Debes introducir un formato de email correcto",
-                    },
-                    }}/>
-            </FieldForm>
-            <FieldForm id="password">
-            <FormLabel>Password</FormLabel>
-              <InputGroup size='md'>
-                <Input
-                  pr='4.5rem'
-                  type={show ? 'text' : 'password'}
-                  placeholder='Password'
-                />
-                <InputRightElement width='4.5rem'>
-                  <Button h='1.75rem' size='sm' onClick={handleClick}>
-                  {show ? 'Hide' : 'Show'}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-            </FieldForm>
-            <Stack spacing={10}>
-              <Link to="/register">¿No tienes cuenta? Regístrate</Link>
-            </Stack>
+             label="Correo electrónico"
+             ph="tu@email.com"
+             registerName="email"
+             validations={{
+              required: { value: true, message: "El email es requerido" },
+              pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: "Debes introducir un formato de email correcto",
+                },
+              }}
+            />
+            <FieldForm
+        label="Contraseña"
+        ph="*********"
+        type="password"
+        registerName="password"
+        validations={{
+          required: { value: true, message: "La contraseña es requerida" },
+        }}
+      />
+            <Stack spacing={10}/>
           </Stack>
         </Form>
-        </Box>
-      </Stack>
-    </Flex>
     
   );
 };

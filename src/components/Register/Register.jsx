@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-
 import FieldForm from "../FieldForm/FieldForm";
 import Form from "../Form/Form";
 import { useForm } from "react-hook-form";
@@ -7,6 +6,7 @@ import { useContext } from "react";
 import AlertForm from "../../components/AlertForm/AlerForm";
 import { UsersContext } from "../../providers/UsersProviders";
 import { registerUser } from "../../reducers/users/users.actions";
+import { Stack, Text } from "@chakra-ui/react";
 
 const Register = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -20,9 +20,10 @@ const Register = () => {
       register={register}
       buttonText="Registrarse"
     >
-      <h2>Registrarse</h2>
-      <p>Crea una cuenta nueva</p>
+      <Text color="brand.0" fontWeight="800" fontSize="25px">Registrarse</Text>
+      <Text color="brand.500">Crea una cuenta nueva</Text>
       <AlertForm errors={errors}/>
+      <Stack spacing={4}>
       <FieldForm
         label="Nombre"
         ph="Tu nombre"
@@ -56,8 +57,10 @@ const Register = () => {
           required: { value: true, message: "La contraseña es requerida" },
         }}
       />
-      <Link to="/login">¿Ya tienes cuenta? Inicia sesión</Link>
+    <Stack spacing={10}/>
+    </Stack>
     </Form>
+    
   );
 };
 

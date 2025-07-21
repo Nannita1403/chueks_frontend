@@ -1,7 +1,7 @@
 import InfoPanel from '../../components/LoginRegister/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
 import { login, registerUser} from "../../reducers/users/users.actions"
-import { Box, Flex, Image, Tabs, Tab, TabList, } from '@chakra-ui/react';
+import { Box, Flex, Image, Tabs, Tab, TabList, Link, TabPanels, TabPanel, } from '@chakra-ui/react';
 import React, { useState } from 'react'
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
 import Register from '../../components/Register/Register';
@@ -21,28 +21,19 @@ const AuthP = () => {
       <Box flex={1} justifyItems="center" alignItems="center" w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
       <Box flex="1" display="flex" flexDir="column"  alignItems="center" justifyContent="center">
-         <Tabs isFitted variant='enclosed' defaultValue="Iniciar-Sesion"> //*maxW="md" colorScheme="blue"
+         <Tabs isFitted variant='enclosed' defaultValue="Iniciar-Sesion">
           <TabList mb="1em">
-          <Tab value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</Tab>
-          <Tab value="Registrarse"><LuSquareCheck /> Registrarse</Tab>
+          <Tab to="/login" value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</Tab>
+          <Tab to="/register" value="Registrarse"><LuSquareCheck /> Registrarse</Tab>
           </TabList>
-        
-      {window.location.pathname === "/login" 
-      ? 
-      //<Login
-       <LoginForm
-         email={email} setEmail={setEmail}
-         onLogin={login}
-        />
-      :
-       <Register
-        email={email} setEmail={setEmail}
-         password={password} setPassword={setPassword}
-        name={name} setName={setName}
-        telephone={telephone} setTelephone={setTelephone}
-        onRegister={registerUser}
-        />}
-        <Register/>
+          <TabPanels>
+            <TabPanel>
+              <LoginForm/>
+            </TabPanel>
+            <TabPanel>
+              <Register/>
+            </TabPanel>
+        </TabPanels>
           </Tabs>
         </Box>
       </Box>
