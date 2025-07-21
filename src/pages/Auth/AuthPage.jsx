@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Box, Flex, Image, Tabs, Tab, TabsList, Stack } from '@chakra-ui/react';
-import InfoPanel from '../../components/LoginRegister/InfoPanel';
+import InfoPanel from '../../components/LogiInfoPanel/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
-import RegisterForm from '../../components/LoginRegister/RegisterForm';
+import RegisterForm from '../../components/LogiInfoPanel/RegisterForm';
 import { login, register } from '../../reducers/users/users.actions';
-import LoginForm from '@/components/LoginRegister/LoginForm';
+import LoginForm from '@/components/LogiInfoPanel/LoginForm';
 
 
 const BASE_URL = "http://localhost:3000/api/v1/";
