@@ -16,10 +16,10 @@ const AuthP = () => {
     const [telephone, setTelephone] = useState('');
 
   return (
-    <Container  maxH='100%' maxW={'3xl'} position="relative">
-    <Flex as={SimpleGrid} alignItems={'center'} columns={{ base: 1, md: 2 }} flexDir={{ base: 'column', md: 'row'}} spacing={{ base: 2, lg: 4 }} py={{ base: 5, sm: 10, lg: 32 }}> 
+    <Container  maxH='xl' maxW={'3xl'} position="relative">
+    <Flex as={SimpleGrid} alignItems={'center'} columns={{ base: 1, md: 2 }} flexDir={{ base: 'column', md: 'row'}} spacing={{ base: 2, lg: 4 }} py={{ base:3, sm: 5, lg: 6 }}> 
       {/* Izquierda - Formulario */}
-      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center" w="full" maxW="md" p={4} borderRadius="lg" boxShadow="lg">
+      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center"  borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
       <Box flex="1" display="flex" flexDir="column"  alignItems="center" justifyContent="center">
          <Tabs isFitted variant='enclosed' defaultValue="Iniciar-Sesion">
@@ -40,7 +40,7 @@ const AuthP = () => {
       </Box>
 
       {/* Derecha - Información */}
-      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center" w="full" maxW="md" p={4} >
+      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center"  >
       <InfoPanel/>
     </Box>
     </Flex>

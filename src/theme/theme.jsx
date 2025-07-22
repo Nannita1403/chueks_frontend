@@ -28,7 +28,7 @@ export const themeSystem = extendTheme({
   fontSizes: {
     sm: "14px",
     md: "16px",
-    lg: "20px",
+    lg: "24px",
   },
   radii: {
     base: "8px",
