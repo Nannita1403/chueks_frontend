@@ -5,9 +5,9 @@ import { Box, VStack, Text, Heading, Flex,  } from '@chakra-ui/react';
 const InfoPanel = () => {
 
   return (
-    <Flex  bg="brand.400" color="brand.300" p={10} display="flex" alignItems="center" justifyContent="center">
-      <VStack spacing={4} textAlign="center">
-        <Heading size="3xl" textAlign="center">Catálogo Exclusivo de Accesorios y Carteras</Heading>
+    <Flex  bg="brand.500" color="white" p={10} alignItems="center" justifyContent="center">
+      <VStack spacing={2} textAlign="center">
+        <Heading size="2xl" textAlign="center">Catálogo Exclusivo de Accesorios y Carteras</Heading>
         <Text fontSize="xl" mr="2">
           Bienvenido a CHUEKS, tu destino para accesorios y carteras de diseño exclusivo para venta mayorista.
         </Text>     

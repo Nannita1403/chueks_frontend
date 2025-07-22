@@ -1,7 +1,7 @@
 import InfoPanel from '../../components/LogiInfoPanel/InfoPanel';
 import logoRedondo from "/logoRedondo.png"
 import { login, registerUser} from "../../reducers/users/users.actions"
-import { Box, Flex, Image, Tabs, Tab, TabList, Link, TabPanels, TabPanel, } from '@chakra-ui/react';
+import { Box, Flex, Image, Tabs, Tab, TabList, Link, TabPanels, TabPanel, SimpleGrid, Container, } from '@chakra-ui/react';
 import React, { useState } from 'react'
 import { LuLogIn, LuSquareCheck } from 'react-icons/lu';
 import Register from '../../components/Register/Register';
@@ -16,9 +16,10 @@ const AuthP = () => {
     const [telephone, setTelephone] = useState('');
 
   return (
-    <Flex  height="100vh" justifyContent="center" alignItems="center" >
+    <Container  maxH='100%' maxW={'3xl'} position="relative">
+    <Flex as={SimpleGrid} alignItems={'center'} columns={{ base: 1, md: 2 }} flexDir={{ base: 'column', md: 'row'}} spacing={{ base: 2, lg: 4 }} py={{ base: 5, sm: 10, lg: 32 }}> 
       {/* Izquierda - Formulario */}
-      <Box flex={1} justifyItems="center" alignItems="center" w="full" maxW="md" p={8} borderRadius="lg" boxShadow="lg">
+      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center" w="full" maxW="md" p={4} borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
       <Box flex="1" display="flex" flexDir="column"  alignItems="center" justifyContent="center">
          <Tabs isFitted variant='enclosed' defaultValue="Iniciar-Sesion">
@@ -39,9 +40,11 @@ const AuthP = () => {
       </Box>
 
       {/* Derecha - Información */}
+      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center" w="full" maxW="md" p={4} >
       <InfoPanel/>
-
+    </Box>
     </Flex>
+    </Container>
   )
 }
 
