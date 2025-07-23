@@ -16,12 +16,12 @@ const AuthP = () => {
     const [telephone, setTelephone] = useState('');
 
   return (
-    <Container  maxH='xl' maxW={'3xl'} position="relative">
-    <Flex as={SimpleGrid} alignItems={'center'} columns={{ base: 1, md: 2 }} flexDir={{ base: 'column', md: 'row'}} spacing={{ base: 2, lg: 4 }} py={{ base:3, sm: 5, lg: 6 }}> 
+    <Container flex={1} minH={'100svh'} maxW={'3xl'} position="relative" alignContent={'center'}>
+    <Flex as={SimpleGrid} flexDir={{base:'column', md:'row'}} justifyItems={'center'} justifyContent={'center'} alignItems={'center'} columns={{ base: 1, md: 2 }} spacing={{ base: 2, lg: 4 }}  py={{ base:5, sm: 7, lg: 9 }}> 
       {/* Izquierda - Formulario */}
-      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center"  borderRadius="lg" boxShadow="lg">
+      <Box display="flex" flexDir={`column`} justifyItems="center" alignContent="center" alignItems="center"  borderRadius="lg" boxShadow="lg">
       <Image mb={6} src={logoRedondo} alt="Logo de la marca" />
-      <Box flex="1" display="flex" flexDir="column"  alignItems="center" justifyContent="center">
+      <Box display="flex" flexDir="column"  alignItems="center" justifyContent="center">
          <Tabs isFitted variant='enclosed' defaultValue="Iniciar-Sesion">
           <TabList mb="1em">
           <Tab to="/login" value="Iniciar-Sesion"><LuLogIn />Iniciar Sesión</Tab>
@@ -40,7 +40,7 @@ const AuthP = () => {
       </Box>
 
       {/* Derecha - Información */}
-      <Box flex={1} justifyItems="center" alignContent="center" alignItems="center"  >
+      <Box display="flex" justifyItems="center" alignContent="center" alignItems="center"  >
       <InfoPanel/>
     </Box>
     </Flex>
