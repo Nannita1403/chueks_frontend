@@ -8,7 +8,7 @@ import Loading from "./components/Loading/Loading"
 import VerifyAccount from "./pages/VerifyAccount/VerifyAccount"
 import { checkSession } from "./reducers/users/users.actions"
 import Home from "./pages/Home/Home"
-import AuthP from "./pages/Auth/AuthP"
+import AuthPage from "./pages/Auth/AuthPage"
 
 
 const App = () => {
@@ -37,8 +37,8 @@ const App = () => {
     <HStack>
       <Routes>
         <Route path="/" element={<Home/>}/>
-        <Route path="/register" element={<AuthP/>}/>
-        <Route path="/login" element={<AuthP/>}/>
+        <Route path="/register" element={<AuthPage/>}/>
+        <Route path="/login" element={<AuthPage/>}/>
         <Route path="/verifyaccount" element={<VerifyAccount/>} />
         <Route path="/verifyaccount/:id/:token" element={<VerifyAccount/>} />
       </Routes>

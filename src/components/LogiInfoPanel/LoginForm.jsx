@@ -4,15 +4,9 @@ import { login } from "../../reducers/users/users.actions";
 import { useContext, useEffect, useState } from "react";
 import AlertForm from "../AlertForm/AlerForm";
 import { UsersContext } from "../../providers/UsersProviders";
-import {  Box,
-  Input,
-  Heading,
+import { 
   Text,
-  Flex,
-  Stack,
-  Button,
-  InputGroup,
-  InputRightElement} from "@chakra-ui/react";
+  Stack} from "@chakra-ui/react";
 import Form from "../Form/Form";
 import FieldForm from "../FieldForm/FieldForm";
   
@@ -66,7 +60,9 @@ const LoginForm = () => {
           required: { value: true, message: "La contraseña es requerida" },
         }}
       />
+      <Link to="/register">¿No tienes cuenta? Regístrate</Link>
             <Stack spacing={10}/>
+    
           </Stack>
         </Form>
     

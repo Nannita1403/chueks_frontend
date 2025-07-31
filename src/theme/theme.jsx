@@ -21,6 +21,9 @@ export const themeSystem = extendTheme({
     yellow: {
       400: "#F6E05E",
     },
+    pink: {
+      500: "#ec4899",
+    },
   },
     background: "#f7fafc",
     text: "#1a202c",
@@ -60,20 +63,23 @@ export const themeSystem = extendTheme({
         }}}},
   },
     Button: {
-  baseStyle: {
-    borderRadius: "md",
-    fontWeight: "semibold",
-    font: "mono", 
-  },
-  variants: {
-    solid: (props) => ({
-      bg: props.colorMode === "dark" ? "brand.500" : "brand.200",
-      color: "white",
-      _hover: {
-        bg: props.colorMode === "dark" ? "brand.200" : "brand.500",
+      variants: {
+        solid: {
+          bg: "black",
+          color: "white",
+          _hover: {
+            bg: "gray.800",
+          },
+        },
+        brand: {
+          bg: "brand.500",
+          color: "white",
+          _hover: {
+            bg: "brand.600",
+          },
+        },
       },
-    })}
-  },
+    },
     Input: {
     baseStyle: {
     font: "mono", 
@@ -87,5 +93,15 @@ export const themeSystem = extendTheme({
           boxShadow: "0 0 0 1px var(--chakra-colors-brand-0)",
     }}}}
   },
+      Card: {
+      baseStyle: {
+        container: {
+          boxShadow: "sm",
+          borderRadius: "lg",
+          border: "1px solid",
+          borderColor: "gray.200",
+        },
+      },
+    },
 },
 });
