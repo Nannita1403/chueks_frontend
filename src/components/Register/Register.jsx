@@ -58,6 +58,7 @@ const Register = () => {
         }}
       />
     <Stack spacing={10}/>
+    <Link to="/login">¿Ya tienes cuenta? Inicia sesión</Link>
     </Stack>
     </Form>
     

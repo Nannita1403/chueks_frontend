@@ -7,7 +7,7 @@ import { ProductsContext } from "./providers/ProductsProviders"
 import Loading from "./components/Loading/Loading"
 import VerifyAccount from "./pages/VerifyAccount/VerifyAccount"
 import { checkSession } from "./reducers/users/users.actions"
-import Home from "./pages/Home/Home"
+import Home from "./pages/User/Home/Home"
 import AuthPage from "./pages/Auth/AuthPage"
 
 

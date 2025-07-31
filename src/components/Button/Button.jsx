@@ -8,7 +8,7 @@ const ButtonForm = ({
   invert,
 }) => {
   return (
-    <Button //size="md" variant="outline" rounded="lg"
+    <Button marginTop={'15px'} size="md" variant="outline" rounded="lg"
       onClick={onClick}
       className={`main_button ${invert ? "invert" : ""}`}
       style={{ width: width }}
