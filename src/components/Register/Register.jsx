@@ -49,6 +49,14 @@ const Register = () => {
         }}
       />
       <FieldForm
+        label="Teléfono"
+        ph="0348915000000"
+        registerName="telephone"
+        validations={{
+          required: { value: true, message: "El telefono es requerido" }
+          }}
+      />
+      <FieldForm
         label="Contraseña"
         ph="*********"
         type="password"

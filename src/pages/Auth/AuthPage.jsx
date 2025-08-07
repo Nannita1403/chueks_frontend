@@ -20,7 +20,7 @@ export default function AuthPage () {
   const bgColor = useColorModeValue("white", "gray.800")
 
   return (
-    <Flex minH="100vh" bg={bgColor} as={SimpleGrid} flexDir={{base:'column', md:'row'}} alignContent={'center'} justifyContent="center">
+    <Flex minH="100vh" bg={bgColor} as={SimpleGrid} flexDir={{base:'column', md:'row'}} alignContent={'center'} justifyContent={'center'}>
       {/* Form Section */}
       <Flex w={{ base: "100%", md: "50%" }} align="center" justify="center" p={8} justifyContent="center">
         <Box w="full" maxW="md">
