@@ -46,21 +46,24 @@ const App = () => {
     {(loading || loadingProducts || loadingElements) && <Loading/>}
     <HStack>
       <Routes>
+        {/* Auth Routes */}
         <Route path="/register" element={<AuthPage/>}/>
         <Route path="/login" element={<AuthPage/>}/>
         <Route path="/verifyaccount" element={<VerifyAccount/>} />
         <Route path="/verifyaccount/:id/:token" element={<VerifyAccount />} />
-        <Route path="/" element={<Home/>}/>
-        <Route path="/cart" element={<Cart/>} />
-        <Route path="/category" element={<Category/>} />
-        <Route path="/product/:id" element={<Product/>} />
-        <Route path="/wishlist" element={<Wishlist/>} />
-        <Route path="/admin-dashboard" element={<DashboardAdmin/>} />
-        <Route path="/admin-categories" element={<Categories/>} />
-        <Route path="/admin-customers" element={<Customers/>} />
-        <Route path="/admin-analytics" element={<Analytics/>} />
-        <Route path="/admin-orders" element={<Orders/>} />
-        <Route path="/admin-products" element={<Products/>} />
+        {/* Dashboard Routes */}
+        <Route path="/dashboard" element={<Home/>}/>
+        <Route path="/dashboard/cart" element={<Cart/>} />
+        <Route path="/dashboard/category/:id" element={<Category/>} />
+        <Route path="/dashboard/product/:id" element={<Product/>} />
+        <Route path="/dashboard/wishlist" element={<Wishlist/>} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<DashboardAdmin/>} />
+        <Route path="/admin/categories" element={<Categories/>} />
+        {/* <Route path="/admin-customers" element={<Customers/>} />*/}
+        {/* <Route path="/admin-analytics" element={<Analytics/>} />*/}
+        {/* <Route path="/admin-orders" element={<Orders/>} />*/}
+        <Route path="/admin/products" element={<Products/>} />
       </Routes>
     </HStack>
     </>

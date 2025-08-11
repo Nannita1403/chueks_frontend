@@ -61,7 +61,7 @@ export const themeSystem = extendTheme({
           bg: "brand.0",
           color: "brand.50",
         }}}},
-  },
+    },
     Button: {
       variants: {
         solid: {
@@ -92,8 +92,8 @@ export const themeSystem = extendTheme({
           borderColor: "brand.0",
           boxShadow: "0 0 0 1px var(--chakra-colors-brand-0)",
     }}}}
-  },
-      Card: {
+    },
+    Card: {
       baseStyle: {
         container: {
           boxShadow: "sm",
