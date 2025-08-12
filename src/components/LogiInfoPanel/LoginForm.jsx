@@ -40,6 +40,7 @@ const LoginForm = () => {
           <AlertForm errors={errors} />
           <Stack spacing={4}>
             <FieldForm 
+            id="correo"
              label="Correo electrónico"
              ph="tu@email.com"
              registerName="email"
@@ -52,12 +53,13 @@ const LoginForm = () => {
               }}
             />
             <FieldForm
-        label="Contraseña"
-        ph="*********"
-        type="password"
-        registerName="password"
-        validations={{
-          required: { value: true, message: "La contraseña es requerida" },
+            id="Contraseña"
+            label="Contraseña"
+            ph="*********"
+            type="password"
+            registerName="password"
+            validations={{
+            required: { value: true, message: "La contraseña es requerida" },
         }}
       />
       <Link to="/register">¿No tienes cuenta? Regístrate</Link>

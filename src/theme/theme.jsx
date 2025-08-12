@@ -102,6 +102,6 @@ export const themeSystem = extendTheme({
           borderColor: "gray.200",
         },
       },
-    },
+    },   
 },
 });

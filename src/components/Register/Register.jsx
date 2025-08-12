@@ -25,6 +25,7 @@ const Register = () => {
       <AlertForm errors={errors}/>
       <Stack spacing={4}>
       <FieldForm
+        id="Nombre"
         label="Nombre"
         ph="Tu nombre"
         registerName="name"
@@ -37,6 +38,7 @@ const Register = () => {
         }}
       />
       <FieldForm
+        id="Correo electrónico"
         label="Correo electrónico"
         ph="tu@email.com"
         registerName="email"
@@ -49,6 +51,7 @@ const Register = () => {
         }}
       />
       <FieldForm
+        id="Teléfono"
         label="Teléfono"
         ph="0348915000000"
         registerName="telephone"
@@ -57,9 +60,9 @@ const Register = () => {
           }}
       />
       <FieldForm
+        id="Contraseña"
         label="Contraseña"
         ph="*********"
-        type="password"
         registerName="password"
         validations={{
           required: { value: true, message: "La contraseña es requerida" },

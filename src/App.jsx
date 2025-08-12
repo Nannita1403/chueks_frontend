@@ -1,5 +1,5 @@
 import { HStack } from "@chakra-ui/react"
-import { Route, Routes, useNavigate } from "react-router-dom"
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
 import { useContext, useEffect } from "react"
 import { UsersContext } from "./providers/UsersProviders"
 import { ElementsContext } from "./providers/ElementsProviders"
@@ -15,9 +15,9 @@ import Product from "./pages/User/Product/Product"
 import Wishlist from "./pages/User/Wishlist/Wishlist"
 import DashboardAdmin from "./pages/Admin/DashboardAdmin/DashboardAdmin"
 import Categories from "./pages/Admin/Categories/Categories"
-import Customers from "./pages/Admin/Customers/Customers"
-import Analytics from "./pages/Admin/Analytics/Analytics"
-import Orders from "./pages/Admin/Orders/Orders"
+//import Customers from "./pages/Admin/Customers/Customers"
+//import Analytics from "./pages/Admin/Analytics/Analytics"
+//import Orders from "./pages/Admin/Orders/Orders"
 import Products from "./pages/Admin/Products/Products"
 
 
@@ -51,7 +51,7 @@ const App = () => {
         <Route path="/login" element={<AuthPage/>}/>
         <Route path="/verifyaccount" element={<VerifyAccount/>} />
         <Route path="/verifyaccount/:id/:token" element={<VerifyAccount />} />
-        {/* Dashboard Routes */}
+        {/* Dashboard User Routes */}
         <Route path="/dashboard" element={<Home/>}/>
         <Route path="/dashboard/cart" element={<Cart/>} />
         <Route path="/dashboard/category/:id" element={<Category/>} />
@@ -64,6 +64,8 @@ const App = () => {
         {/* <Route path="/admin-analytics" element={<Analytics/>} />*/}
         {/* <Route path="/admin-orders" element={<Orders/>} />*/}
         <Route path="/admin/products" element={<Products/>} />
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </HStack>
     </>
