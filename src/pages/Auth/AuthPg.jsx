@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import logoRedondo from "/logoRedondo.png"
@@ -67,9 +65,9 @@ export default function AuthPg() {
   const bgColor = useColorModeValue("white", "gray.800")
 
   return (
-    <Flex minH="100vh" bg={bgColor} flexDir={{base:'column', md:'row'}} alignContent={'center'} justifyContent={'center'}>
+    <Flex minH="100vh" bg={bgColor} wrap={"wrap"}>
     {/* Form Section */}
-    <Flex align="center" justify="center" py={8}  >
+    <Flex w={{ base: "100%", md: "50%" }} align="center" justify="center" p={8}>
       <Container maxW="md">
         <VStack spacing={8}>
           <VStack spacing={4}>
@@ -83,8 +81,8 @@ export default function AuthPg() {
             <CardBody>
               <Tabs isFitted variant="enclosed">
                 <TabList mb="1em">
-                  <Tab>Iniciar Sesión</Tab>
-                  <Tab>Registrarse</Tab>
+                  <Tab color={"pink.500"}>Iniciar Sesión</Tab>
+                  <Tab color={"cyan.500"}>Registrarse</Tab>
                 </TabList>
                 <TabPanels>
                   <TabPanel>
@@ -111,6 +109,10 @@ export default function AuthPg() {
                           <FormLabel>Nombre</FormLabel>
                           <Input type="text" required />
                         </FormControl>
+                         <FormControl>
+                          <FormLabel>Telefono</FormLabel>
+                          <Input type="telephone" required />
+                        </FormControl>
                         <FormControl>
                           <FormLabel>Email</FormLabel>
                           <Input type="email" required />
@@ -133,7 +135,7 @@ export default function AuthPg() {
       </Container>
     </Flex>
     {/* Description Section */}
-    <Flex bg="black" color="white" p={8} align="center" justify="center">
+    <Flex w={{ base: "100%", md: "50%" }} bg="black" color="white" p={8} align="center" justify="center">
         <Box maxW="md">
           <VStack spacing={6} align="start">
             <Heading size="lg" color="white">
@@ -147,7 +149,7 @@ export default function AuthPg() {
 
               <VStack spacing={2} align="start">
                 <HStack>
-                  <Box w={4} h={4} borderRadius="full" bg="brand.500" />
+                  <Box w={4} h={4} borderRadius="full" bg="pink.500" />
                   <Heading size="sm" color="white">
                     Diseños Exclusivos
                   </Heading>
