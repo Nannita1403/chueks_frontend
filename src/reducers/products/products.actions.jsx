@@ -1,5 +1,5 @@
-import apiService from "../api/api.actions.jsx"
-class ProductsService {
+import apiService from "../api/Api.jsx"
+class ProductsActions {
   // Get all products
   async getProducts() {
     try {
@@ -103,7 +103,7 @@ class ProductsService {
   }
 }
 
-export default new ProductsService()
+export default new ProductsActions()
 
 /*import { API } from "../../utils/API/API";
 

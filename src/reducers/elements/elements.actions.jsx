@@ -1,5 +1,5 @@
-import apiService from "../api/api.actions.jsx"
-class ElementsService {
+import apiService from "../api/Api.jsx"
+class ElementsActions {
   // Get all elements
   async getElements() {
     try {
@@ -87,7 +87,7 @@ class ElementsService {
   }
 }
 
-export default new ElementsService()
+export default new ElementsActions()
 
 
 /*import { API } from "../../utils/API/API";

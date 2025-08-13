@@ -1,29 +1,22 @@
-import { HStack } from "@chakra-ui/react"
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
-import { useContext, useEffect } from "react"
-import { UsersContext } from "./providers/UsersProviders"
-import { ElementsContext } from "./providers/ElementsProviders"
-import { ProductsContext } from "./providers/ProductsProviders"
-import Loading from "./components/Loading/Loading"
-//import VerifyAccount from "./pages/VerifyAccount/VerifyAccount"
-//import { checkSession } from "./reducers/users/users.actions"
-import Home from "./pages/User/Home/Home"
-//import AuthPage from "./pages/Auth/AuthPage"
-import Cart from "./pages/User/Cart/Cart"
-import Category from "./pages/User/Category/Category"
-import Product from "./pages/User/Product/Product"
-import Wishlist from "./pages/User/Wishlist/Wishlist"
-import DashboardAdmin from "./pages/Admin/DashboardAdmin/DashboardAdmin"
-import Categories from "./pages/Admin/Categories/Categories"
-//import Customers from "./pages/Admin/Customers/Customers"
-//import Analytics from "./pages/Admin/Analytics/Analytics"
-//import Orders from "./pages/Admin/Orders/Orders"
-import Products from "./pages/Admin/Products/Products"
-import AuthPg from "./pages/Auth/AuthPg"
+import { Box } from "@chakra-ui/react"
+import { Navigate, Route, Routes } from "react-router-dom"
+import AuthPage from "./pages/Auth/AuthPage.jsx"
+import Home from "./pages/User/Home/Home.jsx"
+import ProductDetail from "./pages/User/Product/Product.jsx"
+import CategoryPage from "./pages/User/Category/Category.jsx"
+import WishlistPage from "./pages/User/Wishlist/Wishlist.jsx"
+import CartPage from "./pages/User/Cart/Cart.jsx"
+import AdminDashboard from "./pages/admin/DashboardAdmin/DashboardAdmin.jsx"
+import AdminProducts from "./pages/admin/Products/Products.jsx"
+import AdminCategories from "./pages/admin/Categories/Categories.jsx"
+import AnalyticsPage from "./pages/admin/Analytics/Analytics.jsx"
+import OrdersPage from "./pages/admin/Orders/Orders.jsx"
+import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx"
+
 
 
 const App = () => {
-  const {
+/*  const {
     state: { loading },
     dispatch,
   } = useContext(UsersContext);
@@ -35,46 +28,111 @@ const App = () => {
   } = useContext(ProductsContext);
   const navigate = useNavigate();
 
-  //useEffect(() => {
- //   if (!window.location.pathname.includes("/verifyAccount/")) {
-  //    checkSession (dispatch, navigate);
-  //  }
-  //}, []);
-
+  useEffect(() => {
+    if (!window.location.pathname.includes("/verifyAccount/")) {
+      checkSession (dispatch, navigate);
+    }
+  }, []);
+*/
 
   return (
-    <>
-    {(loading || loadingProducts || loadingElements) && <Loading/>}
-    <HStack>
+  //  <>
+  // {(loading || loadingProducts || loadingElements) && <Loading/>}
+ <Box minH="100vh">
       <Routes>
         {/* Auth Routes */}
-        <Route path="/auth" element={<AuthPg/>} />
+        <Route path="/auth" element={<AuthPage />} />
 
-        {/*<Route path="/register" element={<AuthPage/>}/>*/}
-        {/*<Route path="/login" element={<AuthPage/>}/>*/}
-        {/* <Route path="/verifyaccount" element={<VerifyAccount/>} /> */}
-        {/* <Route path="/verifyaccount/:id/:token" element={<VerifyAccount />} /> */}
+        {/* Dashboard Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/product/:id"
+          element={
+            <ProtectedRoute>
+              <ProductDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/category/:id"
+          element={
+            <ProtectedRoute>
+              <CategoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/wishlist"
+          element={
+            <ProtectedRoute>
+              <WishlistPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Dashboard User Routes */}
-        <Route path="/dashboard" element={<Home/>}/>
-        <Route path="/dashboard/cart" element={<Cart/>} />
-        <Route path="/dashboard/category/:id" element={<Category/>} />
-        <Route path="/dashboard/product/:id" element={<Product/>} />
-        <Route path="/dashboard/wishlist" element={<Wishlist/>} />
         {/* Admin Routes */}
-        <Route path="/admin" element={<DashboardAdmin/>} />
-        <Route path="/admin/categories" element={<Categories/>} />
-        <Route path="/admin/products" element={<Products/>} />
-        {/* <Route path="/admin-customers" element={<Customers/>} />*/}
-        {/* <Route path="/admin-analytics" element={<Analytics/>} />*/}
-        {/* <Route path="/admin-orders" element={<Orders/>} />*/}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminProducts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/categories"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminCategories />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-    </HStack>
-    </>
-  );
-};
+    </Box>
+  )
+}
 
 export default  App
 

@@ -1,5 +1,5 @@
-import apiService from "../api/api.actions.jsx"
-class AuthService {
+import apiService from "../api/Api.jsx"
+class UsersActions {
   // Register new user
   async register(userData) {
     try {
@@ -77,7 +77,7 @@ class AuthService {
   }
 }
 
-export default new AuthService()
+export default new UsersActions()
 
 
 
