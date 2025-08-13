@@ -25,7 +25,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   }
 
   // If user is admin trying to access user dashboard, redirect to admin
-  if (!adminOnly && isAdmin() && window.location.pathname.startsWith("/dashboard")) {
+  if (!adminOnly && isAdmin() && window.location.pathname === "/dashboard") {
     return <Navigate to="/admin" replace />
   }
 

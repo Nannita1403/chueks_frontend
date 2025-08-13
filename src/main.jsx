@@ -7,19 +7,22 @@ import ElementsProvider from './providers/ElementsProviders';
 import ProductsProvider from './providers/ProductsProviders';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { themeSystem } from './theme/theme';
+import { AuthProvider } from './context/api/api.context';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 <React.StrictMode>
     <ColorModeScript initialColorMode={themeSystem.config.initialColorMode}/>
         <ChakraProvider theme={themeSystem}>
             <Router>
-                <UsersProvider>
+               <AuthProvider> 
+                  <UsersProvider>            
                     <ElementsProvider>
                         <ProductsProvider>
                             <App/>  
                         </ProductsProvider>
                     </ElementsProvider>
-                </UsersProvider>
+                  </UsersProvider>    
+                </AuthProvider>
             </Router>
         </ChakraProvider>
 </React.StrictMode>
