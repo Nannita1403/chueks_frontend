@@ -5,19 +5,22 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import UsersProvider from './providers/UsersProviders';
 import ElementsProvider from './providers/ElementsProviders';
 import ProductsProvider from './providers/ProductsProviders';
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { themeSystem } from './theme/theme';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-<ChakraProvider theme={themeSystem}>
-    <Router>
-        <UsersProvider>
-            <ElementsProvider>
-                <ProductsProvider>
-                    <App/>  
-                </ProductsProvider>
-            </ElementsProvider>
-        </UsersProvider>
-    </Router>
-</ChakraProvider>
+<React.StrictMode>
+    <ColorModeScript initialColorMode={themeSystem.config.initialColorMode}/>
+        <ChakraProvider theme={themeSystem}>
+            <Router>
+                <UsersProvider>
+                    <ElementsProvider>
+                        <ProductsProvider>
+                            <App/>  
+                        </ProductsProvider>
+                    </ElementsProvider>
+                </UsersProvider>
+            </Router>
+        </ChakraProvider>
+</React.StrictMode>
 );

@@ -1,4 +1,87 @@
-import { API } from "../../utils/API/API";
+import apiService from "../api/api.actions.jsx"
+class AuthService {
+  // Register new user
+  async register(userData) {
+    try {
+      const response = await apiService.post("/users/register", userData)
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Login user
+  async login(credentials) {
+    try {
+      const response = await apiService.post("/users/login", credentials)
+
+      if (response.token) {
+        apiService.setToken(response.token)
+        localStorage.setItem("user", JSON.stringify(response.user))
+      }
+
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Verify account
+  async verifyAccount(id) {
+    try {
+      const response = await apiService.get(`/users/verify/${id}`)
+
+      if (response.token) {
+        apiService.setToken(response.token)
+        localStorage.setItem("user", JSON.stringify(response.user))
+      }
+
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Check session
+  async checkSession() {
+    try {
+      const response = await apiService.get("/users/checksession")
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Logout user
+  logout() {
+    apiService.setToken(null)
+    localStorage.removeItem("user")
+    localStorage.removeItem("token")
+  }
+
+  // Get current user from localStorage
+  getCurrentUser() {
+    const user = localStorage.getItem("user")
+    return user ? JSON.parse(user) : null
+  }
+
+  // Check if user is authenticated
+  isAuthenticated() {
+    return !!localStorage.getItem("token")
+  }
+
+  // Check if user is admin
+  isAdmin() {
+    const user = this.getCurrentUser()
+    return user && user.rol === "admin"
+  }
+}
+
+export default new AuthService()
+
+
+
+/*import { API } from "../../utils/API/API";
 
 /*const handleLogin = async () => {
     try {
@@ -20,7 +103,7 @@ import { API } from "../../utils/API/API";
     }
   };*/
 
-
+/*
 export const login = async (body, dispatch, navigate) => {
   dispatch({ type: "LOADING" });
 
@@ -71,7 +154,7 @@ export const checkSession = async (dispatch, navigate) => {
     }
   };
 */
-
+/*
 export const registerUser = async (body, dispatch, navigate) => {
   dispatch({ type: "LOADING" });
 
@@ -109,4 +192,4 @@ export const verifyAccount = async (id, dispatch, navigate) => {
     navigate("/login");
   }
 
-};
+};*/

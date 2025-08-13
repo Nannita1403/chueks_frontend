@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
-import { verifyAccount } from "../../reducers/users/users.actions";
+//import { verifyAccount } from "../../reducers/users/users.actions";
 import { UsersContext } from "../../providers/UsersProviders";
 import { Box, Text } from "@chakra-ui/react";
 

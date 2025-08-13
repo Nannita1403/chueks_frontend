@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useContext } from "react";
 import AlertForm from "../../components/AlertForm/AlerForm";
 import { UsersContext } from "../../providers/UsersProviders";
-import { registerUser } from "../../reducers/users/users.actions";
+//import { registerUser } from "../../reducers/users/users.actions";
 import { Stack, Text } from "@chakra-ui/react";
 
 const Register = () => {

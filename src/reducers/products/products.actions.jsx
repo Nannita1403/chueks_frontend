@@ -1,4 +1,111 @@
-import { API } from "../../utils/API/API";
+import apiService from "../api/api.actions.jsx"
+class ProductsService {
+  // Get all products
+  async getProducts() {
+    try {
+      const response = await apiService.get("/products")
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Get single product
+  async getProduct(id) {
+    try {
+      const response = await apiService.get(`/products/${id}`)
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Create new product (admin only)
+  async createProduct(productData) {
+    try {
+      const formData = new FormData()
+
+      // Add text fields
+      Object.keys(productData).forEach((key) => {
+        if (key !== "imgPrimary" && key !== "imgSecondary") {
+          if (Array.isArray(productData[key])) {
+            formData.append(key, JSON.stringify(productData[key]))
+          } else {
+            formData.append(key, productData[key])
+          }
+        }
+      })
+
+      // Add image files
+      if (productData.imgPrimary) {
+        formData.append("imgPrimary", productData.imgPrimary)
+      }
+      if (productData.imgSecondary) {
+        formData.append("imgSecondary", productData.imgSecondary)
+      }
+
+      const response = await apiService.postFormData("/products", formData)
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Update product (admin only)
+  async updateProduct(id, productData) {
+    try {
+      const formData = new FormData()
+
+      // Add text fields
+      Object.keys(productData).forEach((key) => {
+        if (key !== "imgPrimary" && key !== "imgSecondary") {
+          if (Array.isArray(productData[key])) {
+            formData.append(key, JSON.stringify(productData[key]))
+          } else {
+            formData.append(key, productData[key])
+          }
+        }
+      })
+
+      // Add image files if provided
+      if (productData.imgPrimary) {
+        formData.append("imgPrimary", productData.imgPrimary)
+      }
+      if (productData.imgSecondary) {
+        formData.append("imgSecondary", productData.imgSecondary)
+      }
+
+      const response = await apiService.putFormData(`/products/${id}`, formData)
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Toggle like on product
+  async toggleLike(productId, addLike) {
+    try {
+      const response = await apiService.put(`/products/toggleLike/${productId}/${addLike}`)
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // Delete product (admin only)
+  async deleteProduct(id) {
+    try {
+      const response = await apiService.delete(`/products/${id}`)
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+}
+
+export default new ProductsService()
+
+/*import { API } from "../../utils/API/API";
 
 
 export const getProducts = async (dispatch) => {
@@ -110,4 +217,4 @@ export const getProduct = async (dispatch, id) => {
   } else {
     dispatch({ type: "GET_PRODUCT", payload: response });
   }
-};
+};*/
