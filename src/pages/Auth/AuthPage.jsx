@@ -24,6 +24,7 @@ import {
   useColorModeValue,
   Heading,
 } from "@chakra-ui/react"
+import Loading from "../../components/Loading/Loading.jsx"
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -61,6 +62,9 @@ export default function AuthPage() {
       navigate("/dashboard")
     }, 1000)
   }
+  if (isLoading) {
+    return <Loading />
+  }
 
   const bgColor = useColorModeValue("white", "gray.800")
 
@@ -96,7 +100,7 @@ export default function AuthPage() {
                           <FormLabel>Contraseña</FormLabel>
                           <Input type="password" required />
                         </FormControl>
-                        <Button type="submit" colorScheme="primary" size="lg" w="full" isLoading={isLoading}>
+                        <Button type="submit" colorScheme="primary" size="lg" w="full">
                           Iniciar Sesión
                         </Button>
                       </VStack>
@@ -121,7 +125,7 @@ export default function AuthPage() {
                           <FormLabel>Contraseña</FormLabel>
                           <Input type="password" required />
                         </FormControl>
-                        <Button type="submit" colorScheme="primary" size="lg" w="full" isLoading={isLoading}>
+                        <Button type="submit" colorScheme="primary" size="lg" w="full">
                           Registrarse
                         </Button>
                       </VStack>
