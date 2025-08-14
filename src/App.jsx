@@ -16,28 +16,8 @@ import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx"
 
 
 const App = () => {
-/*  const {
-    state: { loading },
-    dispatch,
-  } = useContext(UsersContext);
-  const {
-    state: { loading: loadingElements },
-  } = useContext(ElementsContext);
-  const {
-    state: { loading: loadingProducts },
-  } = useContext(ProductsContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!window.location.pathname.includes("/verifyAccount/")) {
-      checkSession (dispatch, navigate);
-    }
-  }, []);
-*/
-
   return (
-  //  <>
-  // {(loading || loadingProducts || loadingElements) && <Loading/>}
+
  <Box minH="100vh">
       <Routes>
         {/* Auth Routes */}

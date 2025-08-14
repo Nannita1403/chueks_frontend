@@ -1,17 +1,21 @@
 import { Navigate } from "react-router-dom"
-import { Spinner, Center } from "@chakra-ui/react"
+//import { Spinner, Center } from "@chakra-ui/react"
 import { useAuth } from "../../context/api/api.context.jsx"
+import Loading from "../../components/Loading/Loading.jsx"
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { isAuthenticated, user, loading, isAdmin } = useAuth()
 
   // Show loading spinner while checking authentication
-  if (loading) {
+  /*if (loading) {
     return (
       <Center h="100vh">
         <Spinner size="xl" color="blue.500" />
       </Center>
     )
+  }*/
+ if (loading) {
+    return <Loading />
   }
 
   // Redirect to auth if not authenticated
