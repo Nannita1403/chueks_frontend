@@ -21,7 +21,7 @@ const App = () => {
  <Box minH="100vh">
       <Routes>
         {/* Auth Routes */}
-        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth" element={<AuthPage/>} />
 
         {/* Dashboard Routes */}
         <Route

@@ -31,9 +31,10 @@ import {
 } from "@chakra-ui/react"
 import { FiSearch, FiHeart, FiShoppingBag, FiUser, FiMenu } from "react-icons/fi"
 import { useProducts } from "../../../context/Products/products.context.jsx"
+
+import { useAuth } from "../../../context/Auth/auth.context.jsx"
+import Loading from "../../../components/Loading/Loading.jsx"
 import { useElements } from "../../../context/Elements/elements.context.jsx"
-import { useAuth } from "../context/AuthContext"
-import Loading from "../components/Loading"
 
 const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState("")

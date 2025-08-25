@@ -23,49 +23,135 @@ import {
   Flex,
   useColorModeValue,
   Heading,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from "@chakra-ui/react"
 import Loading from "../../components/Loading/Loading.jsx"
+import { useAuth } from "../../context/Auth/auth.context.jsx"
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const [loginData, setLoginData] = useState({ email: "", password: "" })
+  const [registerData, setRegisterData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    telephone: "",
+  })
+  const [verificationError, setVerificationError] = useState(null)
   const navigate = useNavigate()
   const toast = useToast()
+  const { login, register } = useAuth()
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    setVerificationError(null)
 
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false)
+    const formData = new FormData(e.target)
+    const email = formData.get("email") || loginData.email
+    const password = formData.get("password") || loginData.password
+
+    const credentials = { email, password }
+
+    try {
+      console.log("🔐 Intentando login con:", {
+        email: credentials.email,
+        password: credentials.password,
+        passwordLength: credentials.password.length,
+      })
+      console.log("📤 Datos exactos enviados:", JSON.stringify(credentials))
+
+      const result = await login(credentials)
+      console.log("✅ Login exitoso:", result)
+
       toast({
         title: "Inicio de sesión exitoso",
         status: "success",
         duration: 2000,
       })
-      navigate("/dashboard")
-    }, 1000)
+
+      setTimeout(() => {
+        if (result.user && result.user.rol === "admin") {
+          console.log("🔄 Redirecting admin to /admin")
+          navigate("/admin", { replace: true })
+        } else {
+          console.log("🔄 Redirecting user to /dashboard")
+          navigate("/dashboard", { replace: true })
+        }
+      }, 100)
+    } catch (error) {
+      console.error("❌ Error en login:", error)
+      
+      if (error.isVerificationError) {
+        setVerificationError({
+          email: credentials.email,
+          message: error.message,
+        })
+        toast({
+          title: "Verificación requerida",
+          description: error.message,
+          status: "warning",
+          duration: 5000,
+        })
+      } else {
+      toast({
+        title: "Error al iniciar sesión",
+        description: error.message || "Credenciales incorrectas",
+        status: "error",
+        duration: 3000,
+      })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleRegister = async (e) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate register
-    setTimeout(() => {
-      setIsLoading(false)
+    const formData = new FormData(e.target)
+    const name = formData.get("name") || registerData.name
+    const email = formData.get("email") || registerData.email
+    const password = formData.get("password") || registerData.password
+    const telephone = formData.get("telephone") || registerData.telephone
+
+    const registrationData = { name, email, password, telephone }
+
+    try {
+      console.log("📝 Intentando registro con:", registrationData)
+      console.log("📤 Datos exactos enviados:", JSON.stringify(registrationData))
+
+      const result = await register(registrationData)
+      console.log("✅ Registro exitoso:", result)
+
       toast({
         title: "Registro exitoso",
+        description: "Por favor verifica tu email",
         status: "success",
-        duration: 2000,
+        duration: 3000,
       })
+
       navigate("/dashboard")
-    }, 1000)
+    } catch (error) {
+      console.error("❌ Error en registro:", error)
+      toast({
+        title: "Error al registrarse",
+        description: error.message || "Error en el registro",
+        status: "error",
+        duration: 3000,
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
+
   if (isLoading) {
     return <Loading />
   }
-
   const bgColor = useColorModeValue("white", "gray.800")
 
   return (
@@ -80,6 +166,22 @@ export default function AuthPage() {
               Bienvenido a Chueks
             </Text>
           </VStack>
+          
+          {verificationError && (
+            <Alert status="warning" borderRadius="md">
+              <AlertIcon />
+              <Box>
+                <AlertTitle>¡Verificación requerida!</AlertTitle>
+                <AlertDescription>
+                  {verificationError.message}
+                  <br />
+                  <Text fontSize="sm" mt={2}>
+                    Revisa tu email <strong>{verificationError.email}</strong> y haz clic en el enlace de verificación.
+                  </Text>
+                </AlertDescription>
+              </Box>
+            </Alert>
+          )}
 
           <Card w="full">
             <CardBody>
@@ -94,11 +196,11 @@ export default function AuthPage() {
                       <VStack spacing={4}>
                         <FormControl>
                           <FormLabel>Email</FormLabel>
-                          <Input type="email" required />
+                          <Input name="email" type="email" required />
                         </FormControl>
                         <FormControl>
                           <FormLabel>Contraseña</FormLabel>
-                          <Input type="password" required />
+                          <Input name="password" type="password" required />
                         </FormControl>
                         <Button type="submit" colorScheme="primary" size="lg" w="full">
                           Iniciar Sesión
@@ -111,19 +213,19 @@ export default function AuthPage() {
                       <VStack spacing={4}>
                         <FormControl>
                           <FormLabel>Nombre</FormLabel>
-                          <Input type="text" required />
+                          <Input name="name" type="text" required />
                         </FormControl>
                          <FormControl>
                           <FormLabel>Telefono</FormLabel>
-                          <Input type="telephone" required />
+                          <Input name="telephone" type="telephone" required />
                         </FormControl>
                         <FormControl>
                           <FormLabel>Email</FormLabel>
-                          <Input type="email" required />
+                          <Input name="email" type="email" required />
                         </FormControl>
                         <FormControl>
                           <FormLabel>Contraseña</FormLabel>
-                          <Input type="password" required />
+                          <Input name="password" type="password" required />
                         </FormControl>
                         <Button type="submit" colorScheme="primary" size="lg" w="full">
                           Registrarse

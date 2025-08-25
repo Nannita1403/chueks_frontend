@@ -1,27 +1,64 @@
 import apiService from "../api/Api.jsx"
-class UsersActions {
+
+class authService {
   // Register new user
   async register(userData) {
     try {
+      console.log("📡 Enviando registro a API:", userData)
+
       const response = await apiService.post("/users/register", userData)
+      console.log("📡 Respuesta del registro:", response)
       return response
     } catch (error) {
+      console.error("❌ Error en registro:", error)
       throw error
     }
   }
-
   // Login user
+
   async login(credentials) {
     try {
-      const response = await apiService.post("/users/login", credentials)
+      console.log("📡 Enviando login a API:", credentials)
 
-      if (response.token) {
-        apiService.setToken(response.token)
-        localStorage.setItem("user", JSON.stringify(response.user))
+      const response = await apiService.post("/users/login", credentials)
+      console.log("📡 Respuesta del login:", response)
+
+      if (response && typeof response === "object") {
+        console.log("🔍 Analizando respuesta del login:")
+        console.log("  - Tipo de respuesta:", typeof response)
+        console.log("  - Tiene token:", !!response.token)
+        console.log("  - Tiene user:", !!response.user)
+        console.log("  - Estructura completa:", JSON.stringify(response, null, 2))
       }
 
+      if (response.token) {
+        console.log("🔑 Token recibido, guardando...")
+        apiService.setToken(response.token)
+        localStorage.setItem("token", response.token)
+        localStorage.setItem("user", JSON.stringify(response.user))
+        console.log("✅ Usuario y token guardados en localStorage")
+        console.log("👤 Usuario guardado:", response.user)
+      } else {
+        console.warn("⚠️ No se recibió token en la respuesta")
+        console.warn("⚠️ Respuesta completa:", response)
+      }
+
+      console.log("🎯 Login completado, retornando respuesta")
       return response
     } catch (error) {
+      console.error("❌ Error en login:", error)
+
+      if (error.response && error.response.data) {
+        const errorMessage = error.response.data
+        console.log("📝 Mensaje de error del backend:", errorMessage)
+
+        // Crear error personalizado con el mensaje exacto del backend
+        const customError = new Error(errorMessage)
+        customError.isVerificationError = errorMessage.includes("Verifica tu correo")
+        customError.originalError = error
+        throw customError
+      }
+
       throw error
     }
   }
@@ -29,15 +66,19 @@ class UsersActions {
   // Verify account
   async verifyAccount(id) {
     try {
+      console.log("📡 Verificando cuenta:", id)
       const response = await apiService.get(`/users/verify/${id}`)
+      console.log("📡 Respuesta de verificación:", response)
 
       if (response.token) {
         apiService.setToken(response.token)
+        localStorage.setItem("token", response.token)
         localStorage.setItem("user", JSON.stringify(response.user))
       }
 
       return response
     } catch (error) {
+      console.error("❌ Error en verificación:", error)
       throw error
     }
   }
@@ -45,18 +86,23 @@ class UsersActions {
   // Check session
   async checkSession() {
     try {
+      console.log("📡 Verificando sesión...")
       const response = await apiService.get("/users/checksession")
+      console.log("📡 Respuesta de sesión:", response)
       return response
     } catch (error) {
+      console.error("❌ Error verificando sesión:", error)
       throw error
     }
   }
 
   // Logout user
   logout() {
+    console.log("🚪 Cerrando sesión...")
     apiService.setToken(null)
     localStorage.removeItem("user")
     localStorage.removeItem("token")
+    console.log("✅ Sesión cerrada")
   }
 
   // Get current user from localStorage
@@ -67,129 +113,20 @@ class UsersActions {
 
   // Check if user is authenticated
   isAuthenticated() {
-    return !!localStorage.getItem("token")
+    const token = localStorage.getItem("token")
+    const user = localStorage.getItem("user")
+    const isAuth = !!(token && user)
+    console.log("🔍 Verificando autenticación:", { token: !!token, user: !!user, isAuth })
+    return isAuth
   }
 
   // Check if user is admin
   isAdmin() {
     const user = this.getCurrentUser()
-    return user && user.rol === "admin"
+    const isAdmin = user && user.rol === "admin"
+    console.log("👑 Verificando admin:", { user: user?.name, rol: user?.rol, isAdmin })
+    return isAdmin
   }
 }
 
-export default new UsersActions()
-
-
-
-/*import { API } from "../../utils/API/API";
-
-/*const handleLogin = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data);
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      Toaster({ title: 'Login exitoso', status: 'success', duration: 3000, isClosable: true });
-    } catch (error) {
-      Toaster({ title: 'Error al iniciar sesión', description: error.message, status: 'error', duration: 3000, isClosable: true });
-    }
-  };*/
-
-/*
-export const login = async (body, dispatch, navigate) => {
-  dispatch({ type: "LOADING" });
-
-  const { error, response } = await API({
-    endpoint: "/users/login",
-    method: "POST",
-    body,
-    content_type: true,
-  });
-
-  if (error) {
-    dispatch({ type: "ERROR", payload: error });
-  } else {
-    dispatch({ type: "LOGIN", payload: response });
-    localStorage.setItem("token", response.token);
-    navigate("/");
-  }
-};
-
-export const checkSession = async (dispatch, navigate) => {
-  dispatch({ type: "LOADING" });
-
-  const { error, response } = await API({ endpoint: "/users/checksession" });
-
-  if (error) {
-    dispatch({ type: "LOGOUT" });
-    navigate("/login");
-  } else {
-    dispatch({ type: "LOGIN", payload: response });
-    navigate("/");
-  }
-};
-
-/*const handleRegister = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, telephone, password })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data);
-
-      Toaster({ title: 'Registro exitoso', description: 'Verifica tu email para continuar.', status: 'success', duration: 4000, isClosable: true });
-    } catch (error) {
-      Toaster({ title: 'Error al registrarse', description: error.message, status: 'error', duration: 3000, isClosable: true });
-    }
-  };
-*/
-/*
-export const registerUser = async (body, dispatch, navigate) => {
-  dispatch({ type: "LOADING" });
-
-  const { error } = await API({
-    endpoint: "/users/register",
-    method: "POST",
-    body,
-    content_type: true,
-  });
-
-  if (error) {
-    dispatch({ type: "ERROR", payload: error });
-  } else {
-    dispatch({
-      type: "REGISTER",
-      payload: { email: body.email, password: body.password },
-    });
-    navigate("/verifyaccount");
-  }
-};
-
-export const verifyAccount = async (id, dispatch, navigate) => {
-  dispatch({ type: "LOADING" });
-
-  const { error, response } = await API({ endpoint: `/users/verifyaccount/${id}` });
-
-  if (!error) {
-    dispatch({ type: "LOGIN", payload: response });
-    localStorage.setItem("token", response.token);
-    setTimeout(() => {
-      navigate("/");
-    }, 2000);
-  } else {
-    dispatch({ type: "LOGOUT" });
-    navigate("/login");
-  }
-
-};*/
+export default new authService()

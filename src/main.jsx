@@ -7,7 +7,7 @@ import ElementsProvider from './providers/ElementsProviders';
 import ProductsProvider from './providers/ProductsProviders';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { themeSystem } from './theme/theme';
-import { AuthProvider } from './context/api/api.context';
+import { AuthProvider } from '../src/context/Auth/auth.context.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 <React.StrictMode>

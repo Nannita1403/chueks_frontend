@@ -1,5 +1,3 @@
-"use client"
-
 import { useContext } from "react"
 import { ProductsContext } from "../../providers/ProductsProviders.jsx"
 

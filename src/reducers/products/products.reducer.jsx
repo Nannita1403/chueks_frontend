@@ -12,6 +12,8 @@ export const productsReducer = (state, action) => {
       return { ...state, loading: true, error: null };
     case "ERROR":
       return { ...state, error: action.payload, loading: false };
+    case "CLEAR_ERROR":
+      return { ...state, error: null };   
     case "GET_PRODUCTS":
       return {
         ...state,

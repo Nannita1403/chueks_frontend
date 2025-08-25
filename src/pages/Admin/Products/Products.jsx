@@ -35,9 +35,10 @@ import {
 } from "@chakra-ui/react"
 import { FiPlus, FiSearch, FiFilter, FiMoreHorizontal, FiEdit, FiTrash2, FiCopy, FiEye } from "react-icons/fi"
 import { useProducts } from "../../../context/Products/products.context.jsx"
-import { useElements } from "../../../context/Elements/ElementsContext.jsx"
+
 import Loading from "../../../components/Loading/Loading.jsx"
-import { productsReducer } from "../../..products.reducer.jsx"
+import { productsReducer } from "../../../reducers/products/products.reducer.jsx"
+import { useElements } from "../../../context/Elements/elements.context.jsx"
 
 const AdminProducts = () => {
   const { state: productsState, dispatch: productsDispatch } = useProducts()

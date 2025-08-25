@@ -5,6 +5,7 @@ class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL
     this.token = localStorage.getItem("token")
+    console.log("🔧 ApiService inicializado con URL:", this.baseURL)
   }
 
   // Set authorization token
@@ -12,8 +13,10 @@ class ApiService {
     this.token = token
     if (token) {
       localStorage.setItem("token", token)
+      console.log("🔑 Token configurado")
     } else {
       localStorage.removeItem("token")
+      console.log("🔑 Token removido")
     }
   }
 
@@ -24,7 +27,10 @@ class ApiService {
     }
 
     if (this.token) {
-      headers.Authorization = this.token
+      headers.Authorization = `Bearer ${this.token}`
+      console.log("📋 Headers con autorización configurados")
+    } else {
+      console.log("📋 Headers sin autorización")
     }
 
     return headers
@@ -38,17 +44,72 @@ class ApiService {
       ...options,
     }
 
+    console.log("📡 Haciendo petición:", { url, method: options.method || "GET", headers: config.headers })
+
     try {
-      const response = await fetch(url, config)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => {
+        console.error("⏰ Petición timeout después de 10 segundos")
+        controller.abort()
+      }, 10000)
+
+      const response = await fetch(url, {
+        ...config,
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+      console.log("📡 Respuesta recibida:", {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText,
+      })
+
+      if (response.status === 404) {
+        console.error("❌ Endpoint no encontrado:", url)
+        throw new Error(
+          `Endpoint no encontrado: ${endpoint}. Verifica que el backend esté corriendo en ${this.baseURL}`,
+        )
+      }
+
+      const contentType = response.headers.get("content-type")
+      console.log("📡 Content-Type:", contentType)
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("❌ Respuesta no es JSON:", contentType)
+        const text = await response.text()
+        console.error("❌ Contenido de respuesta:", text)
+        throw new Error(`El servidor no devolvió JSON válido. Contenido: ${text}`)
+      }
+
+      console.log("📡 Parseando JSON...")
       const data = await response.json()
+      console.log("📡 JSON parseado exitosamente")
+      console.log("📡 Datos de respuesta completos:", JSON.stringify(data, null, 2))
+      console.log("📡 Estructura de respuesta:", {
+        hasMessage: !!data.message,
+        hasToken: !!data.token,
+        hasUser: !!data.user,
+        keys: Object.keys(data),
+      })
+
 
       if (!response.ok) {
+        console.error("❌ Error en respuesta:", data)
         throw new Error(data.message || data || "Error en la petición")
       }
 
+      console.log("✅ Petición exitosa:", { endpoint, data })
       return data
     } catch (error) {
-      console.error("API Error:", error)
+      console.error("❌ Error en petición:", error)
+      if (error.name === "AbortError") {
+        throw new Error("La petición tardó demasiado tiempo. Verifica la conexión con el backend.")
+      }
+
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        throw new Error(`No se puede conectar al servidor en ${this.baseURL}. Verifica que el backend esté corriendo.`)
+      }
+      
       throw error
     }
   }
@@ -85,8 +146,10 @@ class ApiService {
     const headers = {}
 
     if (this.token) {
-      headers.Authorization = this.token
+      headers.Authorization = `Bearer ${this.token}`
     }
+
+    console.log("📡 Enviando FormData:", { url, headers })
 
     try {
       const response = await fetch(url, {
@@ -103,7 +166,7 @@ class ApiService {
 
       return data
     } catch (error) {
-      console.error("API Error:", error)
+      console.error("❌ Error en FormData:", error)
       throw error
     }
   }
@@ -114,7 +177,7 @@ class ApiService {
     const headers = {}
 
     if (this.token) {
-      headers.Authorization = this.token
+      headers.Authorization = `Bearer ${this.token}`
     }
 
     try {
@@ -132,7 +195,7 @@ class ApiService {
 
       return data
     } catch (error) {
-      console.error("API Error:", error)
+      console.error("❌ Error en FormData PUT:", error)
       throw error
     }
   }

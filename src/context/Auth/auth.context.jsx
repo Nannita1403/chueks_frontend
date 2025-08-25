@@ -1,18 +1,20 @@
-
-import usersActions from "../../reducers/users/users.actions.jsx"
 import { createContext, useContext, useReducer, useEffect } from "react"
+import authService from "../../reducers/users/users.actions.jsx"
 
 const AuthContext = createContext()
 
 const authReducer = (state, action) => {
+  console.log("[v0] AuthContext - Reducer action:", action.type, action.payload)
   switch (action.type) {
     case "LOGIN_START":
+      console.log("[v0] AuthContext - Setting loading to true")
       return {
         ...state,
         loading: true,
         error: null,
       }
     case "LOGIN_SUCCESS":
+      console.log("[v0] AuthContext - Login success, setting user:", action.payload.user)
       return {
         ...state,
         loading: false,
@@ -22,6 +24,7 @@ const authReducer = (state, action) => {
         error: null,
       }
     case "LOGIN_FAILURE":
+      console.log("[v0] AuthContext - Login failure:", action.payload)
       return {
         ...state,
         loading: false,
@@ -37,7 +40,7 @@ const authReducer = (state, action) => {
         user: null,
         token: null,
         error: null,
-        loading: false, // Set loading to false on logout
+        loading: false,
       }
     case "SET_USER":
       return {
@@ -59,31 +62,27 @@ const initialState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  loading: true, // Start with loading true to check initial auth state
+  loading: true,
   error: null,
 }
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
 
-  // Check if user is logged in on app start
   useEffect(() => {
     const checkAuth = async () => {
+      console.log("[v0] AuthContext - Checking initial auth state")
       const token = localStorage.getItem("token")
-      const user = usersActions.getCurrentUser()
+      const user = authService.getCurrentUser()
 
       if (token && user) {
-        try {
-          await UsersActions.checkSession()
+        console.log("[v0] AuthContext - Found token and user in localStorage")
           dispatch({
             type: "LOGIN_SUCCESS",
             payload: { user, token },
           })
-        } catch (error) {
-          UsersActions.logout()
-          dispatch({ type: "LOGOUT" })
-        }
       } else {
+        console.log("[v0] AuthContext - No token or user found, setting unauthenticated")
         dispatch({ type: "LOGOUT" })
       }
     }
@@ -94,13 +93,24 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     dispatch({ type: "LOGIN_START" })
     try {
-      const response = await rvice.login(credentials)
+      console.log("[v0] AuthContext - Attempting login with:", credentials)
+      const response = await authService.login(credentials)
+      console.log("[v0] AuthContext - Login response received:", response)
+      console.log("[v0] AuthContext - Response has user:", !!response.user)
+      console.log("[v0] AuthContext - Response has token:", !!response.token)
+
       dispatch({
         type: "LOGIN_SUCCESS",
-        payload: response,
+        payload: {
+          user: response.user,
+          token: response.token,
+        },
       })
+      console.log("[v0] AuthContext - LOGIN_SUCCESS dispatched")
+
       return response
     } catch (error) {
+      console.error("[v0] AuthContext - Login failed:", error)
       dispatch({
         type: "LOGIN_FAILURE",
         payload: error.message,
@@ -112,7 +122,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     dispatch({ type: "LOGIN_START" })
     try {
-      const response = await UsersActions.register(userData)
+      const response = await authService.register(userData)
       return response
     } catch (error) {
       dispatch({
@@ -124,7 +134,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = () => {
-    UsersActions.logout()
+    authService.logout()
     dispatch({ type: "LOGOUT" })
   }
 
@@ -151,3 +161,4 @@ export const useAuth = () => {
   }
   return context
 }
+
