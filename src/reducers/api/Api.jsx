@@ -1,204 +1,78 @@
-// API configuration and base service
-const API_BASE_URL = "http://localhost:3000/api/v1"
+// api.jsx
+const API_BASE_URL = "http://localhost:3000/api/v1";
 
 class ApiService {
   constructor() {
-    this.baseURL = API_BASE_URL
-    this.token = localStorage.getItem("token")
-    console.log("🔧 ApiService inicializado con URL:", this.baseURL)
+    this.baseURL = API_BASE_URL;
+    this.token = localStorage.getItem("token");
+    console.log("🔧 ApiService inicializado con URL:", this.baseURL);
   }
 
   // Set authorization token
   setToken(token) {
-    this.token = token
+    this.token = token;
     if (token) {
-      localStorage.setItem("token", token)
-      console.log("🔑 Token configurado")
+      localStorage.setItem("token", token);
+      console.log("🔑 Token configurado");
     } else {
-      localStorage.removeItem("token")
-      console.log("🔑 Token removido")
+      localStorage.removeItem("token");
+      console.log("🔑 Token removido");
     }
   }
 
-  // Get authorization headers
-  getHeaders() {
-    const headers = {
-      "Content-Type": "application/json",
-    }
+  // Headers para requests JSON
+  getHeaders(isFormData = false) {
+    const headers = {};
 
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`
-      console.log("📋 Headers con autorización configurados")
-    } else {
-      console.log("📋 Headers sin autorización")
-    }
+    if (!isFormData) headers["Content-Type"] = "application/json";
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
 
-    return headers
+    return headers;
   }
 
-  // Generic request method
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`
+  async request(endpoint, options = {}, isFormData = false) {
+    const url = `${this.baseURL}${endpoint}`;
     const config = {
-      headers: this.getHeaders(),
+      headers: this.getHeaders(isFormData),
       ...options,
-    }
+    };
 
-    console.log("📡 Haciendo petición:", { url, method: options.method || "GET", headers: config.headers })
-
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => {
-        console.error("⏰ Petición timeout después de 10 segundos")
-        controller.abort()
-      }, 10000)
-
-      const response = await fetch(url, {
-        ...config,
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId)
-      console.log("📡 Respuesta recibida:", {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText,
-      })
-
-      if (response.status === 404) {
-        console.error("❌ Endpoint no encontrado:", url)
-        throw new Error(
-          `Endpoint no encontrado: ${endpoint}. Verifica que el backend esté corriendo en ${this.baseURL}`,
-        )
-      }
-
-      const contentType = response.headers.get("content-type")
-      console.log("📡 Content-Type:", contentType)
-      if (!contentType || !contentType.includes("application/json")) {
-        console.error("❌ Respuesta no es JSON:", contentType)
-        const text = await response.text()
-        console.error("❌ Contenido de respuesta:", text)
-        throw new Error(`El servidor no devolvió JSON válido. Contenido: ${text}`)
-      }
-
-      console.log("📡 Parseando JSON...")
-      const data = await response.json()
-      console.log("📡 JSON parseado exitosamente")
-      console.log("📡 Datos de respuesta completos:", JSON.stringify(data, null, 2))
-      console.log("📡 Estructura de respuesta:", {
-        hasMessage: !!data.message,
-        hasToken: !!data.token,
-        hasUser: !!data.user,
-        keys: Object.keys(data),
-      })
-
-
-      if (!response.ok) {
-        console.error("❌ Error en respuesta:", data)
-        throw new Error(data.message || data || "Error en la petición")
-      }
-
-      console.log("✅ Petición exitosa:", { endpoint, data })
-      return data
-    } catch (error) {
-      console.error("❌ Error en petición:", error)
-      if (error.name === "AbortError") {
-        throw new Error("La petición tardó demasiado tiempo. Verifica la conexión con el backend.")
-      }
-
-      if (error.name === "TypeError" && error.message.includes("fetch")) {
-        throw new Error(`No se puede conectar al servidor en ${this.baseURL}. Verifica que el backend esté corriendo.`)
-      }
-      
-      throw error
-    }
-  }
-
-  // GET request
-  async get(endpoint) {
-    return this.request(endpoint, { method: "GET" })
-  }
-
-  // POST request
-  async post(endpoint, data) {
-    return this.request(endpoint, {
-      method: "POST",
-      body: JSON.stringify(data),
-    })
-  }
-
-  // PUT request
-  async put(endpoint, data) {
-    return this.request(endpoint, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    })
-  }
-
-  // DELETE request
-  async delete(endpoint) {
-    return this.request(endpoint, { method: "DELETE" })
-  }
-
-  // POST with FormData (for file uploads)
-  async postFormData(endpoint, formData) {
-    const url = `${this.baseURL}${endpoint}`
-    const headers = {}
-
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`
-    }
-
-    console.log("📡 Enviando FormData:", { url, headers })
+    console.log("📡 Petición:", { url, method: config.method || "GET", headers: config.headers });
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: formData,
-      })
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const data = await response.json()
+      const response = await fetch(url, { ...config, signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      const contentType = response.headers.get("content-type");
+      const data = contentType && contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
 
       if (!response.ok) {
-        throw new Error(data.message || data || "Error en la petición")
+        throw new Error(data.message || data || "Error en la petición");
       }
 
-      return data
+      console.log("✅ Petición exitosa:", { endpoint, data });
+      return data;
     } catch (error) {
-      console.error("❌ Error en FormData:", error)
-      throw error
+      if (error.name === "AbortError") throw new Error("⏰ La petición tardó demasiado");
+      if (error.name === "TypeError") throw new Error(`❌ No se puede conectar al servidor en ${this.baseURL}`);
+      throw error;
     }
   }
 
-  // PUT with FormData (for file uploads)
-  async putFormData(endpoint, formData) {
-    const url = `${this.baseURL}${endpoint}`
-    const headers = {}
+  // Métodos HTTP
+  get(endpoint) { return this.request(endpoint, { method: "GET" }); }
+  post(endpoint, data) { return this.request(endpoint, { method: "POST", body: JSON.stringify(data) }); }
+  put(endpoint, data) { return this.request(endpoint, { method: "PUT", body: JSON.stringify(data) }); }
+  delete(endpoint) { return this.request(endpoint, { method: "DELETE" }); }
 
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: "PUT",
-        headers,
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || data || "Error en la petición")
-      }
-
-      return data
-    } catch (error) {
-      console.error("❌ Error en FormData PUT:", error)
-      throw error
-    }
-  }
+  // Métodos con FormData (subida de archivos)
+  postFormData(endpoint, formData) { return this.request(endpoint, { method: "POST", body: formData }, true); }
+  putFormData(endpoint, formData) { return this.request(endpoint, { method: "PUT", body: formData }, true); }
 }
 
-export default new ApiService()
+export default new ApiService();

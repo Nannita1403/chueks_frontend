@@ -1,220 +1,82 @@
-import apiService from "../api/Api.jsx"
+import apiService from "../api/Api.jsx";
+
 class ProductsActions {
-  // Get all products
+  // Obtener todos los productos
   async getProducts() {
     try {
-      const response = await apiService.get("/products")
-      return response
+      return await apiService.get("/products");
     } catch (error) {
-      throw error
+      console.error("❌ Error obteniendo productos:", error);
+      throw error;
     }
   }
 
-  // Get single product
+  // Obtener un producto por ID
   async getProduct(id) {
     try {
-      const response = await apiService.get(`/products/${id}`)
-      return response
+      return await apiService.get(`/products/${id}`);
     } catch (error) {
-      throw error
+      console.error(`❌ Error obteniendo producto ${id}:`, error);
+      throw error;
     }
   }
 
-  // Create new product (admin only)
+  // Crear un producto (admin)
   async createProduct(productData) {
     try {
-      const formData = new FormData()
-
-      // Add text fields
-      Object.keys(productData).forEach((key) => {
-        if (key !== "imgPrimary" && key !== "imgSecondary") {
-          if (Array.isArray(productData[key])) {
-            formData.append(key, JSON.stringify(productData[key]))
-          } else {
-            formData.append(key, productData[key])
-          }
-        }
-      })
-
-      // Add image files
-      if (productData.imgPrimary) {
-        formData.append("imgPrimary", productData.imgPrimary)
-      }
-      if (productData.imgSecondary) {
-        formData.append("imgSecondary", productData.imgSecondary)
-      }
-
-      const response = await apiService.postFormData("/products", formData)
-      return response
+      const formData = this.buildFormData(productData);
+      return await apiService.postFormData("/products", formData);
     } catch (error) {
-      throw error
+      console.error("❌ Error creando producto:", error);
+      throw error;
     }
   }
 
-  // Update product (admin only)
+  // Actualizar un producto (admin)
   async updateProduct(id, productData) {
     try {
-      const formData = new FormData()
-
-      // Add text fields
-      Object.keys(productData).forEach((key) => {
-        if (key !== "imgPrimary" && key !== "imgSecondary") {
-          if (Array.isArray(productData[key])) {
-            formData.append(key, JSON.stringify(productData[key]))
-          } else {
-            formData.append(key, productData[key])
-          }
-        }
-      })
-
-      // Add image files if provided
-      if (productData.imgPrimary) {
-        formData.append("imgPrimary", productData.imgPrimary)
-      }
-      if (productData.imgSecondary) {
-        formData.append("imgSecondary", productData.imgSecondary)
-      }
-
-      const response = await apiService.putFormData(`/products/${id}`, formData)
-      return response
+      const formData = this.buildFormData(productData);
+      return await apiService.putFormData(`/products/${id}`, formData);
     } catch (error) {
-      throw error
+      console.error(`❌ Error actualizando producto ${id}:`, error);
+      throw error;
     }
   }
 
-  // Toggle like on product
-  async toggleLike(productId, addLike) {
-    try {
-      const response = await apiService.put(`/products/toggleLike/${productId}/${addLike}`)
-      return response
-    } catch (error) {
-      throw error
-    }
-  }
-
-  // Delete product (admin only)
+  // Eliminar un producto (admin)
   async deleteProduct(id) {
     try {
-      const response = await apiService.delete(`/products/${id}`)
-      return response
+      return await apiService.delete(`/products/${id}`);
     } catch (error) {
-      throw error
+      console.error(`❌ Error eliminando producto ${id}:`, error);
+      throw error;
     }
+  }
+
+  // Alternar "like" de un producto
+  async toggleLike(productId, addLike) {
+    try {
+      return await apiService.put(`/products/toggleLike/${productId}/${addLike}`);
+    } catch (error) {
+      console.error(`❌ Error toggling like producto ${productId}:`, error);
+      throw error;
+    }
+  }
+
+  // Construir FormData para creación/actualización
+  buildFormData(data) {
+    const formData = new FormData();
+
+    Object.keys(data).forEach((key) => {
+      if (key === "imgPrimary" || key === "imgSecondary") {
+        if (data[key]) formData.append(key, data[key]);
+      } else {
+        formData.append(key, Array.isArray(data[key]) ? JSON.stringify(data[key]) : data[key]);
+      }
+    });
+
+    return formData;
   }
 }
 
-export default new ProductsActions()
-
-/*import { API } from "../../utils/API/API";
-
-
-export const getProducts = async (dispatch) => {
-  dispatch({ type: "LOADING" });
-
-  const { error, response } = await API({ endpoint: "/products" });
-
-  if (error) {
-    dispatch({ type: "ERROR", payload: error });
-  } else {
-    dispatch({ type: "GET_PRODUCTS", payload: response });
-  }
-};
-
-export const filterProducts = async (dispatch, data) => {
-  dispatch({ type: "LOADING" });
-
-  let query = "/products?";
-
-  for (const key in data) {
-    if (data[key]) {
-      query += `${key}=${data[key]}&`;
-    }
-  }
-
-  const { error, response } = await API({
-    endpoint: query,
-  });
-
-  if (error) {
-    dispatch({ type: "ERROR", payload: error });
-  } else {
-    console.log(response);
-    dispatch({ type: "GET_PRODUCTS", payload: response });
-  }
-};
-
-export const toggleLike = async (
-  idProduct,
-  dispatch,
-  idUser,
-  addLike = true,
-  products
-) => {
-  let newProducts = [];
-
-  newProducts = products.map((product) => {
-    if (product._id === idProduct) {
-      addLike
-        ? product.likes.push(idUser)
-        : product.likes.splice(product.likes.indexOf(idUser), 1);
-    }
-    return product;
-  });
-
-  dispatch({ type: "TOGGLE_LIKE", payload: newProducts });
-
-  const { error, response } = await API({
-    method: "PUT",
-    endpoint: `/products/toggleLike/${idProduct}/${addLike}`,
-    content_type: true,
-    body: { likes: [idUser] },
-  });
-};
-
-export const createProduct = async (body, dispatch, setStep) => {
-  dispatch({ type: "LOADING" });
-
-  console.log(body);
-
-  const { error, response } = await API({
-    method: "POST",
-    endpoint: "/products",
-    body,
-  });
-
-  if (!error) {
-    setStep(1);
-    dispatch({ type: "CREATE_PRODUCT", payload: response.product._id });
-  }
-
-  console.log(error);
-  console.log(response);
-};
-
-export const updateProduct = async (body, dispatch, navigate, id) => {
-  dispatch({ type: "LOADING" });
-
-  const { error, response } = await API({
-    method: "PUT",
-    endpoint: `/products/${id}`,
-    body,
-    content_type: true,
-  });
-
-  if (!error) {
-    dispatch({ type: "UPDATE_PRODUCT", payload: response.product });
-    navigate(`/product/${response.product._id}`);
-  }
-};
-
-export const getProduct = async (dispatch, id) => {
-  dispatch({ type: "LOADING" });
-
-  const { error, response } = await API({ endpoint: `/products/${id}` });
-
-  if (error) {
-    dispatch({ type: "ERROR", payload: error });
-  } else {
-    dispatch({ type: "GET_PRODUCT", payload: response });
-  }
-};*/
+export default new ProductsActions();

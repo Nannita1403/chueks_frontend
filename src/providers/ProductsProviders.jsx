@@ -11,8 +11,10 @@ const ProductsProvider = ({ children }) => {
     dispatch({ type: "LOADING" });
     try {
       const res = await productsActions.getProducts();
+      // Revisar si es array directo o viene como products
       const list = Array.isArray(res.data) ? res.data : res.data.products || [];
       dispatch({ type: "GET_PRODUCTS", payload: list });
+      console.log("Productos cargados:", list);
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }

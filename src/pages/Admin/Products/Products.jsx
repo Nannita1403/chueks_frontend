@@ -72,7 +72,7 @@ const AdminProducts = () => {
       }
     }
     loadData()
-  }, []) // 👈 Dependencias vacías, solo 1 vez
+ }, [getProducts, getElements]);// 👈 Dependencias llenas useCallback, solo 1 vez
 
   if (loading) return <Loading />
 

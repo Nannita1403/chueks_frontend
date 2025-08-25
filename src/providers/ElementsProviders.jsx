@@ -7,18 +7,19 @@ export const ElementsContext = createContext();
 const ElementsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(elementsReducer, INITIAL_ELEMENTS_STATE);
 
-  // Obtener todos los elementos
   const getElements = useCallback(async () => {
     dispatch({ type: "LOADING" });
     try {
       const res = await ElementsActions.getElements();
-      dispatch({ type: "GET_ELEMENTS", payload: res.data.elements });
+      // Si viene como array directo o como res.data.elements
+      const list = Array.isArray(res.data) ? res.data : res.data.elements || [];
+      dispatch({ type: "GET_ELEMENTS", payload: list });
+      console.log("Elements cargados:", list);
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }
   }, []);
 
-  // Obtener un elemento por id
   const getElement = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
@@ -29,7 +30,6 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Crear un elemento
   const createElement = useCallback(async (data) => {
     dispatch({ type: "LOADING" });
     try {
@@ -40,7 +40,6 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Actualizar un elemento
   const updateElement = useCallback(async (id, data) => {
     dispatch({ type: "LOADING" });
     try {
@@ -51,7 +50,6 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Eliminar un elemento
   const deleteElement = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
