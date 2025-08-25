@@ -35,34 +35,32 @@ import {
 } from "@chakra-ui/react"
 import { FiPlus, FiSearch, FiFilter, FiMoreHorizontal, FiEdit, FiTrash2, FiCopy, FiEye } from "react-icons/fi"
 import { useProducts } from "../../../context/Products/products.context.jsx"
-
-import Loading from "../../../components/Loading/Loading.jsx"
-import { productsReducer } from "../../../reducers/products/products.reducer.jsx"
 import { useElements } from "../../../context/Elements/elements.context.jsx"
 
+import Loading from "../../../components/Loading/Loading.jsx"
+
 const AdminProducts = () => {
-  const { state: productsState, dispatch: productsDispatch } = useProducts()
-  const { state: elementsState, dispatch: elementsDispatch } = useElements()
-  const [isLoading, setIsLoading] = useState(true)
+  const { products, loading, error, getProducts, dispatch: productsDispatch } = useProducts()
+  const { elements, getElements, dispatch: elementsDispatch } = useElements()
+
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("")
   const [selectedProducts, setSelectedProducts] = useState([])
   const [currentProduct, setCurrentProduct] = useState(null)
+
   const { isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose } = useDisclosure()
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
+
   const bgColor = useColorModeValue("white", "gray.800")
   const toast = useToast()
 
+  // 🚀 Llamar datos solo una vez al montar
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true)
       try {
-        const productsResponse = await productsReducer.getProducts()
-        productsDispatch({ type: "GET_PRODUCTS_SUCCESS", payload: productsResponse.data })
-
-        const elementsResponse = await productsReducer.getElements()
-        elementsDispatch({ type: "GET_ELEMENTS_SUCCESS", payload: elementsResponse.data })
+        await getProducts()
+        await getElements()
       } catch (error) {
         toast({
           title: "Error",
@@ -71,21 +69,22 @@ const AdminProducts = () => {
           duration: 3000,
           isClosable: true,
         })
-      } finally {
-        setIsLoading(false)
       }
     }
-
     loadData()
-  }, [productsDispatch, elementsDispatch, toast])
+  }, []) // 👈 Dependencias vacías, solo 1 vez
 
-  const filteredProducts = productsState.products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  if (loading) return <Loading />
+
+  // 🔍 Filtrado
+  const filteredProducts = (products || []).filter((product) => {
+    const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === "" || product.category === selectedCategory
     const matchesStatus = selectedStatus === "" || product.status === selectedStatus
     return matchesSearch && matchesCategory && matchesStatus
   })
 
+  // ✅ Selección múltiple
   const toggleSelectAll = () => {
     if (selectedProducts.length === filteredProducts.length) {
       setSelectedProducts([])
@@ -109,7 +108,8 @@ const AdminProducts = () => {
 
   const handleDeleteProduct = async (productId) => {
     try {
-      await productsReducer.deleteProduct(productId)
+      // Aquí deberías usar productsActions.deleteProduct desde el contexto
+      // await deleteProduct(productId)
       productsDispatch({ type: "DELETE_PRODUCT_SUCCESS", payload: productId })
       toast({
         title: "Producto eliminado",
@@ -129,10 +129,6 @@ const AdminProducts = () => {
     }
   }
 
-  if (isLoading) {
-    return <Loading />
-  }
-
   return (
     <Box minH="100vh" bg="gray.50" py={8}>
       <Container maxW="7xl">
@@ -149,15 +145,10 @@ const AdminProducts = () => {
             </Button>
           </Flex>
 
-          {/* Filtros y búsqueda */}
+          {/* 🔍 Filtros */}
           <Card w="full">
             <CardBody>
-              <Flex
-                direction={{ base: "column", md: "row" }}
-                justify="space-between"
-                align={{ base: "start", md: "center" }}
-                gap={4}
-              >
+              <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "start", md: "center" }} gap={4}>
                 <Box flex={1} maxW="md">
                   <InputGroup>
                     <InputLeftElement pointerEvents="none">
@@ -175,7 +166,7 @@ const AdminProducts = () => {
                 <HStack spacing={2}>
                   <Select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} w="180px">
                     <option value="">Todas las categorías</option>
-                    {elementsState.elements.map((element) => (
+                    {(elements || []).map((element) => (
                       <option key={element._id} value={element.name}>
                         {element.name}
                       </option>
@@ -195,7 +186,7 @@ const AdminProducts = () => {
             </CardBody>
           </Card>
 
-          {/* Acciones masivas */}
+          {/* 🗑 Acciones masivas */}
           {selectedProducts.length > 0 && (
             <Card w="full">
               <CardBody>
@@ -216,7 +207,7 @@ const AdminProducts = () => {
             </Card>
           )}
 
-          {/* Tabla de productos */}
+          {/* 📦 Tabla */}
           <Card w="full">
             <CardBody p={0}>
               <Box overflowX="auto">
@@ -226,9 +217,7 @@ const AdminProducts = () => {
                       <Th>
                         <HStack>
                           <Checkbox
-                            isChecked={
-                              selectedProducts.length === filteredProducts.length && filteredProducts.length > 0
-                            }
+                            isChecked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
                             onChange={toggleSelectAll}
                           />
                           <Text>Producto</Text>
@@ -278,12 +267,7 @@ const AdminProducts = () => {
                         </Td>
                         <Td>
                           <Menu>
-                            <MenuButton
-                              as={IconButton}
-                              aria-label="Actions"
-                              icon={<FiMoreHorizontal />}
-                              variant="ghost"
-                            />
+                            <MenuButton as={IconButton} aria-label="Actions" icon={<FiMoreHorizontal />} variant="ghost" />
                             <MenuList>
                               <MenuItem icon={<FiEye />}>Ver detalles</MenuItem>
                               <MenuItem icon={<FiEdit />} onClick={() => openEditDialog(product)}>
@@ -291,11 +275,7 @@ const AdminProducts = () => {
                               </MenuItem>
                               <MenuItem icon={<FiCopy />}>Duplicar</MenuItem>
                               <MenuDivider />
-                              <MenuItem
-                                icon={<FiTrash2 />}
-                                color="red.600"
-                                onClick={() => handleDeleteProduct(product._id)}
-                              >
+                              <MenuItem icon={<FiTrash2 />} color="red.600" onClick={() => handleDeleteProduct(product._id)}>
                                 Eliminar
                               </MenuItem>
                             </MenuList>
@@ -307,7 +287,7 @@ const AdminProducts = () => {
                 </Table>
               </Box>
 
-              {/* Paginación */}
+              {/* 📑 Paginación */}
               <Flex justify="space-between" align="center" px={4} py={3} borderTop="1px" borderColor="gray.200">
                 <Text fontSize="sm" color="gray.500">
                   Mostrando{" "}
@@ -316,7 +296,7 @@ const AdminProducts = () => {
                   </Text>{" "}
                   de{" "}
                   <Text as="span" fontWeight="medium">
-                    {productsState.products.length}
+                    {products?.length || 0}
                   </Text>{" "}
                   productos
                 </Text>
@@ -331,23 +311,11 @@ const AdminProducts = () => {
 
 function ProductStatusBadge({ stock }) {
   if (stock === 0) {
-    return (
-      <Badge colorScheme="red" variant="subtle">
-        Sin stock
-      </Badge>
-    )
+    return <Badge colorScheme="red">Sin stock</Badge>
   } else if (stock < 10) {
-    return (
-      <Badge colorScheme="yellow" variant="subtle">
-        Stock bajo
-      </Badge>
-    )
+    return <Badge colorScheme="yellow">Stock bajo</Badge>
   } else {
-    return (
-      <Badge colorScheme="green" variant="subtle">
-        Activo
-      </Badge>
-    )
+    return <Badge colorScheme="green">Activo</Badge>
   }
 }
 

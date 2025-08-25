@@ -3,7 +3,7 @@ export const INITIAL_PRODUCTS_STATE = {
   loading: false,
   error: null,
   productId: null,
-  product: null
+  product: null,
 };
 
 export const productsReducer = (state, action) => {
@@ -13,36 +13,41 @@ export const productsReducer = (state, action) => {
     case "ERROR":
       return { ...state, error: action.payload, loading: false };
     case "CLEAR_ERROR":
-      return { ...state, error: null };   
+      return { ...state, error: null };
     case "GET_PRODUCTS":
       return {
         ...state,
         loading: false,
         products: action.payload,
-        };
+      };
     case "TOGGLE_LIKE":
       return {
         ...state,
-        products: [...action.payload],
+        products: state.products.map((p) =>
+          p._id === action.payload._id ? action.payload : p
+        ),
       };
     case "CREATE_PRODUCT":
       return {
         ...state,
         loading: false,
-        productId: action.payload,
+        products: [...state.products, action.payload],
+        productId: action.payload._id || action.payload.id,
       };
     case "UPDATE_PRODUCT":
       return {
         ...state,
         loading: false,
-        products: [...state.products, action.payload],
+        products: state.products.map((p) =>
+          p._id === action.payload._id ? action.payload : p
+        ),
       };
-    case "GET_PRODUCT": 
+    case "GET_PRODUCT":
       return {
-        ...state, 
+        ...state,
         product: { ...action.payload },
-        loading: false
-      }
+        loading: false,
+      };
     default:
       return state;
   }

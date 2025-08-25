@@ -31,31 +31,39 @@ import {
 } from "@chakra-ui/react"
 import { FiSearch, FiHeart, FiShoppingBag, FiUser, FiMenu } from "react-icons/fi"
 import { useProducts } from "../../../context/Products/products.context.jsx"
-
+import { useElements } from "../../../context/Elements/elements.context.jsx"
 import { useAuth } from "../../../context/Auth/auth.context.jsx"
 import Loading from "../../../components/Loading/Loading.jsx"
-import { useElements } from "../../../context/Elements/elements.context.jsx"
 
 const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState("")
+  const [localLoading, setLocalLoading] = useState(true)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const bgColor = useColorModeValue("white", "gray.800")
   const borderColor = useColorModeValue("gray.200", "gray.600")
 
-  const { products, loading: productsLoading, getProducts } = useProducts()
-  const { elements, loading: elementsLoading, getElements } = useElements()
+  const { products, getProducts } = useProducts()
+  const { elements, getElements } = useElements()
   const { user, cartItems, wishlistItems } = useAuth()
 
   useEffect(() => {
-    getProducts()
-    getElements()
-  }, [])
+    const loadData = async () => {
+      try {
+        setLocalLoading(true)
+        await getProducts()
+        await getElements()
+      } catch (error) {
+        console.error("Error cargando productos o elementos:", error)
+      } finally {
+        setLocalLoading(false)
+      }
+    }
+    loadData()
+  }, [getProducts, getElements])
 
-  if (productsLoading || elementsLoading) {
-    return <Loading />
-  }
+  if (localLoading) return <Loading />
 
-  // Obtener categorías de elements
+  // Categorías
   const categories = elements || []
 
   // Productos destacados (primeros 6)
@@ -145,7 +153,7 @@ const DashboardPage = () => {
         </Container>
       </Box>
 
-      {/* Drawer para móvil */}
+      {/* Drawer móvil */}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
@@ -165,7 +173,7 @@ const DashboardPage = () => {
         </DrawerContent>
       </Drawer>
 
-      {/* Mensaje destacado de compra mínima */}
+      {/* Mensaje importante */}
       <Box bg="black" color="white" py={2} px={4} textAlign="center" fontSize="sm">
         <Text>
           <Text as="span" fontWeight="bold">
@@ -176,7 +184,7 @@ const DashboardPage = () => {
       </Box>
 
       <Container maxW="container.xl" py={8}>
-        {/* Nueva Temporada - Productos destacados */}
+        {/* Productos destacados */}
         <Box mb={12}>
           <Heading size="xl" textAlign="center" mb={6}>
             NUEVA TEMPORADA
@@ -240,7 +248,7 @@ const DashboardPage = () => {
   )
 }
 
-// Componente de tarjeta de producto
+// Tarjeta de producto
 function ProductCard({ product }) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const { addToWishlist, removeFromWishlist } = useAuth()

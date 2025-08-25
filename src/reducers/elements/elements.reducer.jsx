@@ -3,7 +3,7 @@ export const INITIAL_ELEMENTS_STATE = {
   loading: false,
   error: null,
   element: null,
-  elementId: null
+  elementId: null,
 };
 
 export const elementsReducer = (state, action) => {
@@ -18,29 +18,29 @@ export const elementsReducer = (state, action) => {
       return {
         ...state,
         loading: false,
-        elements: action.payload, // 👈 ya llega un array limpio
+        elements: action.payload,
       };
     case "CREATE_ELEMENT":
       return {
-          ...state,
+        ...state,
         loading: false,
         elements: [...state.elements, action.payload],
-        elementId: action.payload.id, // si tu backend devuelve el objeto completo
+        elementId: action.payload._id || action.payload.id,
       };
     case "UPDATE_ELEMENT":
       return {
         ...state,
         loading: false,
         elements: state.elements.map((el) =>
-        el.id === action.payload.id ? action.payload : el
-    ),
-  };
-    case "GET_ELEMENT": 
+          el._id === action.payload._id ? action.payload : el
+        ),
+      };
+    case "GET_ELEMENT":
       return {
-        ...state, 
+        ...state,
         element: { ...action.payload },
-        loading: false
-      }
+        loading: false,
+      };
     default:
       return state;
   }

@@ -1,8 +1,6 @@
 import ElementsActions from "../../src/reducers/elements/elements.actions.jsx";
 import { elementsReducer, INITIAL_ELEMENTS_STATE } from "../../src/reducers/elements/elements.reducer.jsx";
-import { createContext, useReducer } from "react";
-
-
+import { createContext, useReducer, useCallback } from "react";
 
 export const ElementsContext = createContext();
 
@@ -10,19 +8,18 @@ const ElementsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(elementsReducer, INITIAL_ELEMENTS_STATE);
 
   // Obtener todos los elementos
-  const getElements = async () => {
-  dispatch({ type: "LOADING" });
-  try {
-    const res = await ElementsActions.getElements();
-    const list = res.data.elements; 
-    dispatch({ type: "GET_ELEMENTS", payload: list });
-  } catch (err) {
-    dispatch({ type: "ERROR", payload: err.message });
-  }
-};
+  const getElements = useCallback(async () => {
+    dispatch({ type: "LOADING" });
+    try {
+      const res = await ElementsActions.getElements();
+      dispatch({ type: "GET_ELEMENTS", payload: res.data.elements });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
 
   // Obtener un elemento por id
-  const getElement = async (id) => {
+  const getElement = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
       const res = await ElementsActions.getElement(id);
@@ -30,8 +27,45 @@ const ElementsProvider = ({ children }) => {
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }
-  };
-  const clearError = () => dispatch({ type: "CLEAR_ERROR" });
+  }, []);
+
+  // Crear un elemento
+  const createElement = useCallback(async (data) => {
+    dispatch({ type: "LOADING" });
+    try {
+      const res = await ElementsActions.createElement(data);
+      dispatch({ type: "CREATE_ELEMENT", payload: res.data });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  // Actualizar un elemento
+  const updateElement = useCallback(async (id, data) => {
+    dispatch({ type: "LOADING" });
+    try {
+      const res = await ElementsActions.updateElement(id, data);
+      dispatch({ type: "UPDATE_ELEMENT", payload: res.data });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  // Eliminar un elemento
+  const deleteElement = useCallback(async (id) => {
+    dispatch({ type: "LOADING" });
+    try {
+      await ElementsActions.deleteElement(id);
+      dispatch({
+        type: "GET_ELEMENTS",
+        payload: (prevElements) => prevElements.filter((el) => el._id !== id),
+      });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  const clearError = useCallback(() => dispatch({ type: "CLEAR_ERROR" }), []);
 
   return (
     <ElementsContext.Provider
@@ -42,6 +76,9 @@ const ElementsProvider = ({ children }) => {
         error: state.error,
         getElements,
         getElement,
+        createElement,
+        updateElement,
+        deleteElement,
         dispatch,
         clearError,
       }}

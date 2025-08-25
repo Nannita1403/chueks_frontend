@@ -1,36 +1,67 @@
-import productsActions from "../../src/reducers/products/products.actions.jsx"
+import productsActions from "../../src/reducers/products/products.actions.jsx";
 import { INITIAL_PRODUCTS_STATE, productsReducer } from "../reducers/products/products.reducer";
-import { createContext, useReducer } from "react";
-
+import { createContext, useReducer, useCallback } from "react";
 
 export const ProductsContext = createContext();
 
 const ProductsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productsReducer, INITIAL_PRODUCTS_STATE);
 
-  // Actions que llaman a la API y actualizan el reducer
-  const getProducts = async () => {
-  dispatch({ type: "LOADING" });
-  try {
-    const res = await productsActions.getProducts();
-    const list = Array.isArray(res.data) ? res.data : res.data.products || [];
-    dispatch({ type: "GET_PRODUCTS", payload: list });
-  } catch (err) {
-    dispatch({ type: "ERROR", payload: err.message });
-  }
-};
-
-  const getProduct = async (id) => {
+  const getProducts = useCallback(async () => {
     dispatch({ type: "LOADING" });
     try {
-      const res = await ProductsActions.getProduct(id);
+      const res = await productsActions.getProducts();
+      const list = Array.isArray(res.data) ? res.data : res.data.products || [];
+      dispatch({ type: "GET_PRODUCTS", payload: list });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  const getProduct = useCallback(async (id) => {
+    dispatch({ type: "LOADING" });
+    try {
+      const res = await productsActions.getProduct(id);
       dispatch({ type: "GET_PRODUCT", payload: res.data });
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }
-  };
+  }, []);
 
-  const clearError = () => dispatch({ type: "CLEAR_ERROR" });
+  const createProduct = useCallback(async (data) => {
+    dispatch({ type: "LOADING" });
+    try {
+      const res = await productsActions.createProduct(data);
+      dispatch({ type: "CREATE_PRODUCT", payload: res.data });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  const updateProduct = useCallback(async (id, data) => {
+    dispatch({ type: "LOADING" });
+    try {
+      const res = await productsActions.updateProduct(id, data);
+      dispatch({ type: "UPDATE_PRODUCT", payload: res.data });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  const deleteProduct = useCallback(async (id) => {
+    dispatch({ type: "LOADING" });
+    try {
+      await productsActions.deleteProduct(id);
+      dispatch({
+        type: "GET_PRODUCTS",
+        payload: (prevProducts) => prevProducts.filter((p) => p._id !== id),
+      });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  }, []);
+
+  const clearError = useCallback(() => dispatch({ type: "CLEAR_ERROR" }), []);
 
   return (
     <ProductsContext.Provider
@@ -41,6 +72,9 @@ const ProductsProvider = ({ children }) => {
         error: state.error,
         getProducts,
         getProduct,
+        createProduct,
+        updateProduct,
+        deleteProduct,
         dispatch,
         clearError,
       }}
