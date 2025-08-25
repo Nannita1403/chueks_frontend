@@ -17,10 +17,9 @@ export const productsReducer = (state, action) => {
     case "GET_PRODUCTS":
       return {
         ...state,
-        error: null,
         loading: false,
-        products: [...action.payload],
-      };
+        products: action.payload,
+        };
     case "TOGGLE_LIKE":
       return {
         ...state,

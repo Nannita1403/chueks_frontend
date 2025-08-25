@@ -10,14 +10,15 @@ const ProductsProvider = ({ children }) => {
 
   // Actions que llaman a la API y actualizan el reducer
   const getProducts = async () => {
-    dispatch({ type: "LOADING" });
-    try {
-      const res = await productsActions.getProducts();
-      dispatch({ type: "GET_PRODUCTS", payload: res.data }); // 👈 importante usar .data
-    } catch (err) {
-      dispatch({ type: "ERROR", payload: err.message });
-    }
-  };
+  dispatch({ type: "LOADING" });
+  try {
+    const res = await productsActions.getProducts();
+    const list = Array.isArray(res.data) ? res.data : res.data.products || [];
+    dispatch({ type: "GET_PRODUCTS", payload: list });
+  } catch (err) {
+    dispatch({ type: "ERROR", payload: err.message });
+  }
+};
 
   const getProduct = async (id) => {
     dispatch({ type: "LOADING" });
