@@ -11,8 +11,13 @@ const Home = () => {
       setLoading(true);
       try {
         const response = await productsActions.getProducts();
-        // Accede al array real de productos
-        setProducts(response.products || []); 
+        // ✅ Aquí accedemos correctamente al array de productos
+        if (response && Array.isArray(response.products)) {
+          setProducts(response.products);
+        } else {
+          setProducts([]);
+          console.warn("No se encontró el array de productos en la respuesta:", response);
+        }
       } catch (err) {
         console.error("Error al cargar productos:", err);
         setError("No se pudieron cargar los productos");
