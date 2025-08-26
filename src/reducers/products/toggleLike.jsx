@@ -1,7 +1,7 @@
-// src/actions/toggleLike.js
+// src/actions/toggleLike.jsx
 import ProductsActions from "../../reducers/products/products.actions.jsx";
 
-// 👉 función independiente que combina API + dispatch
+// 👉 Función que combina API + dispatch
 export const toggleLike = async (productId, dispatch, addLike, products) => {
   try {
     console.log("[toggleLike] Enviando petición al backend...", { productId, addLike });

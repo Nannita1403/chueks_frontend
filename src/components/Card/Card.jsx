@@ -1,7 +1,7 @@
 import React from "react"
 import { Box, Flex, Text, Heading } from "@chakra-ui/react"
 
-const Card = React.forwardRef(({ children, variant = "outline", ...props }, ref) => (
+const CustomCard = React.forwardRef(({ children, variant = "outline", ...props }, ref) => (
   <Box
     ref={ref}
     borderWidth="1px"
@@ -14,7 +14,7 @@ const Card = React.forwardRef(({ children, variant = "outline", ...props }, ref)
     {children}
   </Box>
 ))
-Card.displayName = "Card"
+CustomCard.displayName = "CustomCard"
 
 const CardHeader = React.forwardRef(({ children, ...props }, ref) => (
   <Box ref={ref} p={6} {...props}>
@@ -51,5 +51,5 @@ const CardFooter = React.forwardRef(({ children, ...props }, ref) => (
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export { CustomCard, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
     

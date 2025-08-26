@@ -1,77 +1,119 @@
-import { useContext } from "react";
-import Button from "../../components/Button/Button.jsx";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../../context/Auth/auth.context.jsx";
-import { ProductsContext } from "../../providers/ProductsProviders.jsx";
-import { toggleLike } from "../../reducers/products/toggleLike.jsx";
-import { Card, Flex } from "@chakra-ui/react";
+import { Flex, Box, Text, Image } from "@chakra-ui/react";
+import { useProducts } from "../../context/Products/products.context.jsx";
+import { useAuth } from "../../context/Auth/auth.context.jsx";
+import ProductsActions from "../../reducers/products/products.actions.jsx";
+import { CustomButton } from "../../components/Button/Button.jsx";
+import { CustomCard } from "../../components/Card/Card.jsx";
 
 const Product = ({ product }) => {
-  const { state: productsState, dispatch } = useContext(ProductsContext);
-  const { state } = useContext(AuthContext);
-  const { user } = state;
-  const { products } = productsState;
+  const { products, dispatch: productsDispatch } = useProducts();
+  const { user } = useAuth();
+
+  const isLiked = user ? product?.likes?.includes(user._id) : false;
+
+  const handleToggleLike = async () => {
+    if (!user) return;
+
+    try {
+      // Alternamos el like
+      const updatedProduct = await ProductsActions.toggleLike(
+        product._id,
+        !isLiked, // true si queremos agregar, false si queremos quitar
+        user._id // enviamos el ID del usuario
+      );
+
+      // Actualizamos el estado local de productos
+      productsDispatch({
+        type: "UPDATE_PRODUCT",
+        payload: updatedProduct,
+      });
+    } catch (error) {
+      console.error(`[toggleLike] Error toggling like para producto ${product._id}:`, error);
+    }
+  };
 
   return (
-    <Flex className="product" direction="column" gap="4" p="4" border="1px solid #eee" borderRadius="lg">
+    <Flex
+      direction="column"
+      gap="4"
+      p="4"
+      border="1px solid #eee"
+      borderRadius="lg"
+    >
       {/* Botón Like */}
-      <Card
-        className="like"
-        onClick={() =>
-          toggleLike(
-            product._id,
-            dispatch,
-            user._id,
-            !product?.likes?.includes(user?._id),
-            products
-          )
-        }
-        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", padding: "8px" }}
+      <CustomCard
+        onClick={handleToggleLike}
+        style={{
+          cursor: user ? "pointer" : "not-allowed",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "8px",
+        }}
       >
-        <p style={{ color: product?.likes?.includes(user?._id) ? "red" : "black" }}>
-          {product.likes.length}
-        </p>
-        {product?.likes?.includes(user?._id) ? (
-          <img src="/icons/corazon-relleno.png" className="heart" />
-        ) : (
-          <img src="/icons/corazon-vacio.png" className="heart" />
-        )}
-      </Card>
+        <Text color={isLiked ? "red" : "black"} fontWeight="bold">
+          {product?.likes?.length || 0}
+        </Text>
+        <Image
+          src={isLiked ? "/icons/corazon-relleno.png" : "/icons/corazon-vacio.png"}
+          alt={isLiked ? "Liked" : "Not liked"}
+          boxSize={5}
+        />
+      </CustomCard>
 
       {/* Imagen */}
-      <div className="img">
-        <img src={product.imgPrimary} alt={product.name} style={{ width: "100%", borderRadius: "8px" }} />
-      </div>
+      <Box>
+        <Image
+          src={product?.imgPrimary || "/placeholder.svg"}
+          alt={product?.name || "Producto"}
+          borderRadius="8px"
+          objectFit="cover"
+          width="100%"
+        />
+      </Box>
 
-      {/* Info */}
-      <div className="info">
-        <h3>{product.name}</h3>
-        <p>{product.description}</p>
+      {/* Información del producto */}
+      <Box>
+        <Text fontWeight="bold" fontSize="lg" mb={1}>
+          {product?.name || "Sin nombre"}
+        </Text>
+        <Text fontSize="sm" mb={2}>
+          {product?.description || "Sin descripción"}
+        </Text>
 
-        <div>
-          <p><strong>Precio Unitario:</strong> ${product.priceMin}</p>
-          <p><strong>Mayorista:</strong> ${product.priceMay}</p>
-        </div>
+        <Box mb={2}>
+          <Text fontSize="sm">
+            <strong>Precio Unitario:</strong> ${product?.priceMin ?? "N/A"}
+          </Text>
+          <Text fontSize="sm">
+            <strong>Mayorista:</strong> ${product?.priceMay ?? "N/A"}
+          </Text>
+        </Box>
 
-        <p><strong>Categoría:</strong> {product.category?.join(", ")}</p>
-        <p><strong>Estilo:</strong> {product.style?.join(", ")}</p>
+        <Text fontSize="sm">
+          <strong>Categoría:</strong> {product?.category?.join(", ") || "N/A"}
+        </Text>
+        <Text fontSize="sm" mb={2}>
+          <strong>Estilo:</strong> {product?.style?.join(", ") || "N/A"}
+        </Text>
 
         {/* Colores */}
-        <div style={{ marginTop: "8px" }}>
-          {product.colors?.map((color, i) => (
-            <span key={i} style={{ marginRight: "8px", fontSize: "12px" }}>
-              {color.name?.join(", ")} ({color.stock})
-            </span>
+        <Box>
+          {product?.colors?.map((color, i) => (
+            <Text key={i} fontSize="xs" display="inline-block" mr={2}>
+              {Array.isArray(color.name) ? color.name.join(", ") : color.name} ({color.stock ?? 0})
+            </Text>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Ver Producto */}
-      <Card className="categories">
-        <Button width="auto">
-          <Link to={`/product/${product._id}`}>Ver Producto</Link>
-        </Button>
-      </Card>
+      <CustomCard>
+        <CustomButton width="auto">
+          <Link to={`/product/${product?._id}`}>Ver Producto</Link>
+        </CustomButton>
+      </CustomCard>
     </Flex>
   );
 };

@@ -10,10 +10,9 @@ const ProductsProvider = ({ children }) => {
   const getProducts = useCallback(async () => {
   dispatch({ type: "LOADING" });
   try {
-    const res = await productsActions.getProducts();
-    dispatch({ type: "GET_PRODUCTS", payload: res });
-    console.log("✅ Productos cargados:", res);
-
+    const products = await productsActions.getProducts(); // ← ya es array
+    dispatch({ type: "GET_PRODUCTS", payload: products });
+    console.log("✅ Productos cargados (provider):", products);
   } catch (err) {
     dispatch({ type: "ERROR", payload: err.message });
     console.error("❌ Error al cargar productos:", err);
@@ -24,8 +23,8 @@ const ProductsProvider = ({ children }) => {
   const getProduct = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
-      const res = await productsActions.getProduct(id);
-      dispatch({ type: "GET_PRODUCT", payload: res.data });
+    const product = await productsActions.getProduct(id);
+    dispatch({ type: "GET_PRODUCT", payload: product });
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }

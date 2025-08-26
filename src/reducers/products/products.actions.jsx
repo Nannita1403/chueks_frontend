@@ -1,22 +1,19 @@
-// products.actions.jsx
 import apiService from "../api/Api.jsx";
 
 class ProductsActions {
   // Obtener todos los productos
-async getProducts() {
-  try {
-    const response = await apiService.get("/products");
-
-    // Extraer los productos de forma segura
-    const products = response?.data?.products ?? [];
-    
-    console.log("✅ Productos obtenidos (actions):", products);
-    return products; 
-  } catch (error) {
-    console.error("❌ Error obteniendo productos:", error);
-    throw error;
+  async getProducts() {
+    try {
+      const response = await apiService.get("/products");
+      // Api puede devolver { products: [...] } o response.data.products
+      const products = response.products || response.data?.products || [];
+      console.log("✅ Productos obtenidos (actions):", products);
+      return products;
+    } catch (error) {
+      console.error("❌ Error obteniendo productos:", error);
+      throw error;
+    }
   }
-}
 
   // Obtener un producto por ID
   async getProduct(id) {
@@ -35,7 +32,8 @@ async getProducts() {
     try {
       const formData = this.buildFormData(productData);
       const response = await apiService.postFormData("/products", formData);
-      return response.product || response.data?.product || null;
+      const product = response.product || response.data?.product || null;
+      return product;
     } catch (error) {
       console.error("❌ Error creando producto:", error);
       throw error;
@@ -47,7 +45,8 @@ async getProducts() {
     try {
       const formData = this.buildFormData(productData);
       const response = await apiService.putFormData(`/products/${id}`, formData);
-      return response.product || response.data?.product || null;
+      const product = response.product || response.data?.product || null;
+      return product;
     } catch (error) {
       console.error(`❌ Error actualizando producto ${id}:`, error);
       throw error;
@@ -65,10 +64,13 @@ async getProducts() {
   }
 
   // Alternar "like" de un producto
-  async toggleLike(productId, addLike) {
+  async toggleLike(productId, addLike, userId) {
     try {
-      const response = await apiService.put(`/products/toggleLike/${productId}/${addLike}`);
-      const product = response.product || response.data?.product || null;
+      // Construimos la URL con ambos parámetros
+      const url = `/products/toggleLike/${productId}/${addLike}`;
+      // Enviamos el userId en el body para que el backend lo agregue o elimine
+      const response = await apiService.put(url, { likes: [userId] });
+      const product = response.data?.product || null;
       console.log("✅ Like actualizado:", product);
       return product;
     } catch (error) {
@@ -91,4 +93,5 @@ async getProducts() {
   }
 }
 
+// Exportamos la instancia directamente
 export default new ProductsActions();

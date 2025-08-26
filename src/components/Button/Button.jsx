@@ -1,7 +1,7 @@
 import React from "react"
 import { Button as ChakraButton } from "@chakra-ui/react"
 
-const Button = React.forwardRef(
+const CustomButton = React.forwardRef(
   ({ variant = "solid", size = "md", colorScheme = "brand", children, ...props }, ref) => {
     const getChakraVariant = (variant) => {
       switch (variant) {
@@ -57,9 +57,9 @@ const Button = React.forwardRef(
   },
 )
 
-Button.displayName = "Button"
+CustomButton.displayName = "CustomButton"
 
-export default { Button }
+export { CustomButton }
 
 
 /*import { Button } from "@chakra-ui/react"
