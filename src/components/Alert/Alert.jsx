@@ -1,18 +1,50 @@
-import { Box, Image, Text } from "@chakra-ui/react";
+import React from "react"
+import {
+  Alert as ChakraAlert,
+  AlertIcon,
+  AlertTitle as ChakraAlertTitle,
+  AlertDescription as ChakraAlertDescription,
+} from "@chakra-ui/react"
 
-const Alert = ({ children }) => {
+const Alert = React.forwardRef(({ variant = "subtle", status = "info", children, ...props }, ref) => {
+  const getChakraStatus = (variant) => {
+    switch (variant) {
+      case "destructive":
+        return "error"
+      case "default":
+        return "info"
+      default:
+        return status
+    }
+  }
+
   return (
-    <Box padding="10px 35px 0px 35px" borderRadius="10px" fontWeight={500} color="#ff0000"
-    flex={1} justifyContent={start} alignItems={start} flexDir={column} position={relative}>
-      <Box flex={1} alignItems={center} gap="20px">
-        <Image w="20px" position={absolute} top="10px" left="10px" src="/icons/error.png" alt="error" />
-        <Text fontSize="16px">Error</Text>
-      </Box>
-      <Text fontSize="14px" p="10px 0px" 
-      maxW={auto} minW={auto} textAlign={start} color="ActiveCaption"  >
-     {children}</Text>
-    </Box>
-  );
-};
+    <ChakraAlert
+      ref={ref}
+      status={getChakraStatus(variant)}
+      variant={variant === "destructive" ? "subtle" : variant}
+      borderRadius="lg"
+      {...props}
+    >
+      <AlertIcon />
+      {children}
+    </ChakraAlert>
+  )
+})
+Alert.displayName = "Alert"
 
-export default Alert;
+const AlertTitle = React.forwardRef(({ children, ...props }, ref) => (
+  <ChakraAlertTitle ref={ref} fontWeight="medium" fontSize="sm" {...props}>
+    {children}
+  </ChakraAlertTitle>
+))
+AlertTitle.displayName = "AlertTitle"
+
+const AlertDescription = React.forwardRef(({ children, ...props }, ref) => (
+  <ChakraAlertDescription ref={ref} fontSize="sm" {...props}>
+    {children}
+  </ChakraAlertDescription>
+))
+AlertDescription.displayName = "AlertDescription"
+
+export { Alert, AlertTitle, AlertDescription, AlertIcon }

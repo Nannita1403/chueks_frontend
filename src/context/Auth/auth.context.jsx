@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect } from "react"
 import authService from "../../reducers/users/users.actions.jsx"
 
-const AuthContext = createContext()
+export const AuthContext = createContext()
 
 const authReducer = (state, action) => {
   console.log("[v0] AuthContext - Reducer action:", action.type, action.payload)

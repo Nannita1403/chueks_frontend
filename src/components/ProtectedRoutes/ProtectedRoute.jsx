@@ -14,32 +14,32 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     )
   }*/
  
- console.log("[v0] ProtectedRoute - isAuthenticated:", isAuthenticated, "user:", user, "loading:", loading)
+ console.log("ProtectedRoute - isAuthenticated:", isAuthenticated, "user:", user, "loading:", loading)
 
  if (loading) {
-    console.log("[v0] ProtectedRoute - Still loading, showing Loading component")
+    console.log("ProtectedRoute - Still loading, showing Loading component")
     return <Loading />
   }
 
   // Redirect to auth if not authenticated
   if (!isAuthenticated) {
-    console.log("[v0] ProtectedRoute - Not authenticated, redirecting to /auth")
+    console.log("ProtectedRoute - Not authenticated, redirecting to /auth")
     return <Navigate to="/auth" replace />
   }
 
   // If admin route is required, check admin role
   if (adminOnly && !isAdmin()) {
-    console.log("[v0] ProtectedRoute - Admin required but user is not admin, redirecting to /dashboard")
+    console.log("ProtectedRoute - Admin required but user is not admin, redirecting to /dashboard")
     return <Navigate to="/dashboard" replace />
   }
 
   // If user is admin trying to access user dashboard, redirect to admin
   if (!adminOnly && isAdmin() && window.location.pathname === "/dashboard") {
-    console.log("[v0] ProtectedRoute - Admin user accessing /dashboard, redirecting to /admin")
+    console.log("ProtectedRoute - Admin user accessing /dashboard, redirecting to /admin")
     return <Navigate to="/admin" replace />
   }
   
-  console.log("[v0] ProtectedRoute - Authentication passed, rendering children")
+  console.log("ProtectedRoute - Authentication passed, rendering children")
   return children
 }
 

@@ -8,7 +8,7 @@ class ApiService {
     console.log("🔧 ApiService inicializado con URL:", this.baseURL);
   }
 
-  // Set authorization token
+  // Configura o elimina token
   setToken(token) {
     this.token = token;
     if (token) {
@@ -20,13 +20,11 @@ class ApiService {
     }
   }
 
-  // Headers para requests JSON
+  // Encabezados
   getHeaders(isFormData = false) {
     const headers = {};
-
     if (!isFormData) headers["Content-Type"] = "application/json";
     if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
-
     return headers;
   }
 
@@ -55,7 +53,12 @@ class ApiService {
         throw new Error(data.message || data || "Error en la petición");
       }
 
-      console.log("✅ Petición exitosa:", { endpoint, data });
+      console.log("✅ Petición exitosa:", { data });
+
+      // Normaliza la respuesta para que siempre tenga .products
+      if (Array.isArray(data)) {
+        return { products: data };
+      }
       return data;
     } catch (error) {
       if (error.name === "AbortError") throw new Error("⏰ La petición tardó demasiado");
@@ -70,7 +73,7 @@ class ApiService {
   put(endpoint, data) { return this.request(endpoint, { method: "PUT", body: JSON.stringify(data) }); }
   delete(endpoint) { return this.request(endpoint, { method: "DELETE" }); }
 
-  // Métodos con FormData (subida de archivos)
+  // FormData
   postFormData(endpoint, formData) { return this.request(endpoint, { method: "POST", body: formData }, true); }
   putFormData(endpoint, formData) { return this.request(endpoint, { method: "PUT", body: formData }, true); }
 }

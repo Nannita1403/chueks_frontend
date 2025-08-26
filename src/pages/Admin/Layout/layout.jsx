@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { AdminSidebar } from "../../components/admin/admin-sidebar"
+import { Flex } from "@chakra-ui/react"
 
 export const metadata = {
   title: "CHUEKS Admin - Panel de Administración",
@@ -28,10 +29,12 @@ export default function AdminLayout({ children }) {
     redirect("/")
   }
 
-  return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f7fafc", display: "flex" }}>
+ return (
+    <Flex minH="100vh" bg="gray.50">
       <AdminSidebar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>{children}</div>
-    </div>
+      <Flex flex={1} direction="column" overflow="hidden">
+        {children}
+      </Flex>
+    </Flex>
   )
 }
