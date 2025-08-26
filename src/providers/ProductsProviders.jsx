@@ -8,17 +8,18 @@ const ProductsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productsReducer, INITIAL_PRODUCTS_STATE);
 
   const getProducts = useCallback(async () => {
-    dispatch({ type: "LOADING" });
-    try {
-      const res = await productsActions.getProducts();
-      // Revisar si es array directo o viene como products
-      const list = Array.isArray(res.data) ? res.data : res.data.products || [];
-      dispatch({ type: "GET_PRODUCTS", payload: list });
-      console.log("Productos cargados:", list);
-    } catch (err) {
-      dispatch({ type: "ERROR", payload: err.message });
-    }
-  }, []);
+  dispatch({ type: "LOADING" });
+  try {
+    const res = await productsActions.getProducts();
+    dispatch({ type: "GET_PRODUCTS", payload: res });
+    console.log("✅ Productos cargados:", res);
+
+  } catch (err) {
+    dispatch({ type: "ERROR", payload: err.message });
+    console.error("❌ Error al cargar productos:", err);
+  }
+}, []);
+
 
   const getProduct = useCallback(async (id) => {
     dispatch({ type: "LOADING" });

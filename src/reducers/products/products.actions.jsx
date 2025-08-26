@@ -3,15 +3,15 @@ import apiService from "../api/Api.jsx";
 
 class ProductsActions {
   // Obtener todos los productos
-  async getProducts() {
+async getProducts() {
   try {
     const response = await apiService.get("/products");
 
-    // ApiService devuelve { endpoint, data }
-    const products = Array.isArray(response.data) ? response.data : response.data?.products || [];
+    // Extraer los productos de forma segura
+    const products = response?.data?.products ?? [];
     
-    console.log("✅ Productos obtenidos:", products);
-    return products;
+    console.log("✅ Productos obtenidos (actions):", products);
+    return products; 
   } catch (error) {
     console.error("❌ Error obteniendo productos:", error);
     throw error;
