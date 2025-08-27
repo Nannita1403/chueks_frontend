@@ -12,6 +12,7 @@ import AdminCategories from "./pages/admin/Categories/Categories.jsx"
 import AnalyticsPage from "./pages/admin/Analytics/Analytics.jsx"
 import OrdersPage from "./pages/admin/Orders/Orders.jsx"
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx"
+import ProfilePage from "./pages/User/Profile/Profile.jsx"
 
 
 
@@ -23,47 +24,55 @@ const App = () => {
         {/* Auth Routes */}
         <Route path="/auth" element={<AuthPage/>} />
 
-        {/* Dashboard Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/product/:id"
-          element={
-            <ProtectedRoute>
-              <ProductDetail />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/category/:id"
-          element={
-            <ProtectedRoute>
-              <CategoryPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/wishlist"
-          element={
-            <ProtectedRoute>
-              <WishlistPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/cart"
-          element={
-            <ProtectedRoute>
-              <CartPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* User Routes */}
+    <Route
+      path="/home"
+      element={
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/product/:id"
+      element={
+        <ProtectedRoute>
+          <ProductDetail />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/category/:id"
+      element={
+        <ProtectedRoute>
+          <CategoryPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/wishlist"
+      element={
+        <ProtectedRoute>
+          <WishlistPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/cart"
+      element={
+        <ProtectedRoute>
+         <CartPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/profile"
+      element={
+        <ProtectedRoute>
+        <ProfilePage /> 
+        </ProtectedRoute>
+      }
+    />
 
         {/* Admin Routes */}
         <Route
@@ -108,7 +117,7 @@ const App = () => {
         />
 
         {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
       </Routes>
     </Box>
   )

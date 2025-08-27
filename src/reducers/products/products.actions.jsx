@@ -1,3 +1,4 @@
+import axios from "axios";
 import apiService from "../api/Api.jsx";
 
 class ProductsActions {
@@ -65,19 +66,16 @@ class ProductsActions {
 
   // Alternar "like" de un producto
   async toggleLike(productId, addLike, userId) {
-    try {
-      // Construimos la URL con ambos parámetros
-      const url = `/products/toggleLike/${productId}/${addLike}`;
-      // Enviamos el userId en el body para que el backend lo agregue o elimine
-      const response = await apiService.put(url, { likes: [userId] });
-      const product = response.data?.product || null;
-      console.log("✅ Like actualizado:", product);
-      return product;
-    } catch (error) {
-      console.error(`❌ Error toggling like producto ${productId}:`, error);
-      throw error;
+  const res = await axios.put(
+    `http://localhost:3000/api/v1/products/toggleLike/${productId}/${addLike}`,
+    {},
+    {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     }
-  }
+  );
+  return res.data.product; // ⬅️ muy importante
+}
+
 
   // Construir FormData para creación/actualización
   buildFormData(data) {

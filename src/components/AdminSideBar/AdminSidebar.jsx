@@ -131,7 +131,7 @@ export function AdminSidebar() {
       </Box>
 
       <Box p={4} borderTop="1px" borderColor={borderColor}>
-        <Link to="/dashboard" style={{ width: "100%" }}>
+        <Link to="/home" style={{ width: "100%" }}>
           <Flex
             align="center"
             px={3}

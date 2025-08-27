@@ -27,14 +27,13 @@ import { FiSearch, FiHeart, FiShoppingBag, FiUser, FiMenu } from "react-icons/fi
 
 import ProductsActions from "../../../reducers/products/products.actions.jsx";
 import { toggleLike } from "../../../reducers/products/toggleLike.jsx";
-import ProductComponent from "../../../components/Product/Product.jsx"; // tu componente Product
+import ProductComponent from "../../../components/Product/Product.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
-import { useIsMobile} from "../../../Hooks/useMobile.jsx"; 
-import { useToast} from "../../../Hooks/useToast.jsx";
-
+import { useIsMobile } from "../../../Hooks/useMobile.jsx"; 
+import { useToast } from "../../../Hooks/useToast.jsx";
 
 const Home = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]); // siempre empieza en []
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,11 +50,12 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const productsData = await ProductsActions.getProducts();
-        setProducts(productsData);
 
-        // Opcional: obtener categorías si tienes endpoint similar
-        // const categoriesData = await CategoriesActions.getCategories();
-        // setCategories(categoriesData);
+        // 👇 si el backend devuelve objeto {products: [...]}, normalízalo
+        const normalized =
+          Array.isArray(productsData) ? productsData : productsData?.products || [];
+
+        setProducts(normalized);
       } catch (error) {
         console.error("❌ Error cargando productos en Home:", error);
       } finally {
@@ -68,28 +68,42 @@ const Home = () => {
 
   if (loading) return <p>Cargando productos...</p>;
 
-  const featuredProducts = products.slice(0, 6);
+  // ✅ proteger: solo si es array
+  const safeProducts = Array.isArray(products) ? products : [];
+  const featuredProducts = safeProducts.slice(0, 6);
 
   // Función para manejar like en Home
-  const handleToggleLike = async (productId, liked) => {
-    if (!user) {
-      toast({ title: "Debes iniciar sesión para dar like", status: "warning" });
-      return;
-    }
+const handleToggleLike = async (productId, liked) => {
+  if (!user) {
+    toast({ title: "Debes iniciar sesión para dar like", status: "warning" });
+    return;
+  }
 
-    try {
-      await toggleLike(productId, (updatedProducts) => setProducts(updatedProducts), liked, products);
-      toast({ title: liked ? "Producto marcado como favorito" : "Producto removido de favoritos", status: "success" });
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      toast({ title: "Error al actualizar like", status: "error" });
-    }
-  };
+  try {
+    await toggleLike(productId, liked, products, setProducts);
+
+    toast({
+      title: liked ? "Producto marcado como favorito" : "Producto removido de favoritos",
+      status: "success",
+    });
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    toast({ title: "Error al actualizar like", status: "error" });
+  }
+};
+
 
   return (
     <Box minH="100vh" bg={bgColor}>
       {/* Header */}
-      <Box position="sticky" top={0} zIndex={50} bg={bgColor} borderBottom="1px" borderColor={borderColor}>
+      <Box
+        position="sticky"
+        top={0}
+        zIndex={50}
+        bg={bgColor}
+        borderBottom="1px"
+        borderColor={borderColor}
+      >
         <Container maxW="container.xl" py={3}>
           <Flex align="center" justify="space-between">
             <HStack spacing={4}>
@@ -102,7 +116,12 @@ const Home = () => {
                 />
               )}
               <Link to="/">
-                <Image src="/logo-chueks.png" alt="CHUEKS Logo" width={120} height={40} />
+                <Image
+                  src="/logo-chueks.png"
+                  alt="CHUEKS Logo"
+                  width={120}
+                  height={40}
+                />
               </Link>
             </HStack>
 
@@ -125,12 +144,20 @@ const Home = () => {
             <HStack spacing={2}>
               {isMobile && (
                 <Link to="/search">
-                  <IconButton aria-label="Search" icon={<FiSearch />} variant="ghost" />
+                  <IconButton
+                    aria-label="Search"
+                    icon={<FiSearch />}
+                    variant="ghost"
+                  />
                 </Link>
               )}
               <Link to="/wishlist">
                 <Box position="relative">
-                  <IconButton aria-label="Wishlist" icon={<FiHeart />} variant="ghost" />
+                  <IconButton
+                    aria-label="Wishlist"
+                    icon={<FiHeart />}
+                    variant="ghost"
+                  />
                   <Badge
                     position="absolute"
                     top="-1"
@@ -147,7 +174,11 @@ const Home = () => {
               </Link>
               <Link to="/cart">
                 <Box position="relative">
-                  <IconButton aria-label="Cart" icon={<FiShoppingBag />} variant="ghost" />
+                  <IconButton
+                    aria-label="Cart"
+                    icon={<FiShoppingBag />}
+                    variant="ghost"
+                  />
                   <Badge
                     position="absolute"
                     top="-1"
@@ -163,7 +194,11 @@ const Home = () => {
                 </Box>
               </Link>
               <Link to="/profile">
-                <IconButton aria-label="Profile" icon={<FiUser />} variant="ghost" />
+                <IconButton
+                  aria-label="Profile"
+                  icon={<FiUser />}
+                  variant="ghost"
+                />
               </Link>
             </HStack>
           </Flex>
@@ -171,7 +206,11 @@ const Home = () => {
       </Box>
 
       {/* Drawer para móvil */}
-      <Drawer isOpen={isDrawerOpen} placement="left" onClose={() => setDrawerOpen(false)}>
+      <Drawer
+        isOpen={isDrawerOpen}
+        placement="left"
+        onClose={() => setDrawerOpen(false)}
+      >
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
@@ -230,7 +269,7 @@ const Home = () => {
             templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
             gap={6}
           >
-            {products.map((product) => (
+            {safeProducts.map((product) => (
               <ProductComponent
                 key={product._id}
                 product={product}

@@ -78,8 +78,8 @@ export default function AuthPage() {
           console.log("🔄 Redirecting admin to /admin")
           navigate("/admin", { replace: true })
         } else {
-          console.log("🔄 Redirecting user to /dashboard")
-          navigate("/dashboard", { replace: true })
+          console.log("🔄 Redirecting user to /home")
+          navigate("/home", { replace: true })
         }
       }, 100)
     } catch (error) {
@@ -135,7 +135,7 @@ export default function AuthPage() {
         duration: 3000,
       })
 
-      navigate("/dashboard")
+      navigate("/home")
     } catch (error) {
       console.error("❌ Error en registro:", error)
       toast({

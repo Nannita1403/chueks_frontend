@@ -1,11 +1,12 @@
-import React from 'react'
+// pages/User/Wishlist/Wishlist.jsx
+import { Box, Heading } from "@chakra-ui/react"
 
-const Wishlist = () => {
+const WishlistPage = () => {
   return (
-    <div>
-      
-    </div>
+    <Box p={6}>
+      <Heading size="lg">❤️ Wishlist</Heading>
+      <p>Aquí verás tus productos guardados.</p>
+    </Box>
   )
 }
-
-export default Wishlist
+export default WishlistPage

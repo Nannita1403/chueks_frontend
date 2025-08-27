@@ -1,9 +1,11 @@
-import React from 'react'
+import { Box, Heading } from "@chakra-ui/react"
 
-const Cart = () => {
+const CartPage = () => {
   return (
-    <div>Cart</div>
+    <Box p={6}>
+      <Heading size="lg">🛒 Carrito</Heading>
+      <p>Aquí van los productos añadidos al carrito.</p>
+    </Box>
   )
 }
-
-export default Cart
+export default CartPage
