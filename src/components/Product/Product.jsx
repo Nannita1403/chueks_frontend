@@ -1,8 +1,8 @@
-import { Box, Image, Text, Flex } from "@chakra-ui/react";
+import { Box, Image, Text, Flex, Button } from "@chakra-ui/react"; 
 import { CustomButton } from "../Button/Button.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 
-const ProductComponent = ({ product, onToggleLike }) => {
+const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   const { user } = useAuth();
   const isLiked = user ? product.likes?.includes(user.id) : false;
 
@@ -14,9 +14,7 @@ const ProductComponent = ({ product, onToggleLike }) => {
         mb={4}
         borderRadius="md"
       />
-      <Text fontWeight="bold" mb={2}>
-        {product.name}
-      </Text>
+      <Text fontWeight="bold" mb={2}>{product.name}</Text>
       <Text mb={2}>${product.priceMin}</Text>
 
       <Flex align="center" gap={2} mt={2}>
@@ -27,6 +25,11 @@ const ProductComponent = ({ product, onToggleLike }) => {
         >
           {isLiked ? "❤️" : "🤍"} {product.likes?.length || 0}
         </CustomButton>
+
+        {/* 👇 Botón para abrir el modal */}
+        <Button size="sm" colorScheme="teal" onClick={onViewDetail}>
+          Ver detalle
+        </Button>
       </Flex>
     </Box>
   );
