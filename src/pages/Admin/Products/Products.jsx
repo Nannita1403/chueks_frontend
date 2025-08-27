@@ -1,115 +1,139 @@
+// AdminProducts.jsx
 import { useState, useEffect } from "react"
 import {
   Box,
   Flex,
   VStack,
-  HStack,
   Text,
+  Heading,
   Button,
   Input,
-  InputGroup,
-  InputLeftElement,
-  IconButton,
+  FormControl,
+  FormLabel,
   Badge,
-  Select,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
   Card,
   CardBody,
+  Grid,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
   useDisclosure,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   MenuDivider,
-  Checkbox,
+  IconButton,
   useColorModeValue,
   Container,
-  Heading,
-  Image,
   useToast,
 } from "@chakra-ui/react"
-import { FiPlus, FiSearch, FiFilter, FiMoreHorizontal, FiEdit, FiTrash2, FiCopy, FiEye } from "react-icons/fi"
+import { FiPlus, FiEdit, FiTrash2, FiMoreHorizontal } from "react-icons/fi"
 import { useProducts } from "../../../context/Products/products.context.jsx"
-import { useElements } from "../../../context/Elements/elements.context.jsx"
-
+import ProductsActions from "../../../reducers/products/products.actions.jsx"
 import Loading from "../../../components/Loading/Loading.jsx"
 
 const AdminProducts = () => {
-  const { products, loading, error, getProducts, dispatch: productsDispatch } = useProducts()
-  const { elements, getElements, dispatch: elementsDispatch } = useElements()
-
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("")
-  const [selectedProducts, setSelectedProducts] = useState([])
+  const { state: productsState, dispatch: productsDispatch } = useProducts()
+  const [isLoading, setIsLoading] = useState(true)
   const [currentProduct, setCurrentProduct] = useState(null)
-
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: 0,
+    category: "",
+    description: "",
+  })
   const { isOpen: isCreateOpen, onOpen: onCreateOpen, onClose: onCreateClose } = useDisclosure()
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure()
-
-  const bgColor = useColorModeValue("white", "gray.800")
   const toast = useToast()
+  const bgColor = useColorModeValue("white", "gray.800")
 
-  // 🚀 Llamar datos solo una vez al montar
   useEffect(() => {
-    const loadData = async () => {
+    const loadProducts = async () => {
+      setIsLoading(true)
       try {
-        await getProducts()
-        await getElements()
+        const response = await ProductsActions.getProducts()
+        productsDispatch({ type: "GET_PRODUCTS_SUCCESS", payload: response.data })
       } catch (error) {
         toast({
           title: "Error",
-          description: "No se pudieron cargar los datos",
+          description: "No se pudieron cargar los productos",
           status: "error",
           duration: 3000,
           isClosable: true,
         })
+      } finally {
+        setIsLoading(false)
       }
     }
-    loadData()
- }, [getProducts, getElements]);// 👈 Dependencias llenas useCallback, solo 1 vez
 
-  if (loading) return <Loading />
-
-  // 🔍 Filtrado
-  const filteredProducts = (products || []).filter((product) => {
-    const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "" || product.category === selectedCategory
-    const matchesStatus = selectedStatus === "" || product.status === selectedStatus
-    return matchesSearch && matchesCategory && matchesStatus
-  })
-
-  // ✅ Selección múltiple
-  const toggleSelectAll = () => {
-    if (selectedProducts.length === filteredProducts.length) {
-      setSelectedProducts([])
-    } else {
-      setSelectedProducts(filteredProducts.map((product) => product._id))
-    }
-  }
-
-  const toggleProductSelection = (productId) => {
-    if (selectedProducts.includes(productId)) {
-      setSelectedProducts(selectedProducts.filter((id) => id !== productId))
-    } else {
-      setSelectedProducts([...selectedProducts, productId])
-    }
-  }
+    loadProducts()
+  }, [productsDispatch, toast])
 
   const openEditDialog = (product) => {
     setCurrentProduct(product)
     onEditOpen()
   }
 
+  const handleNewProductChange = (e) => {
+    const { name, value } = e.target
+    setNewProduct((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleCreateProduct = async () => {
+    try {
+      const response = await ProductsActions.createProduct(newProduct)
+      productsDispatch({ type: "CREATE_PRODUCT_SUCCESS", payload: response.data })
+      toast({
+        title: "Producto creado",
+        description: "El producto se creó correctamente",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      })
+      onCreateClose()
+      setNewProduct({ name: "", price: 0, category: "", description: "" })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo crear el producto",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      })
+    }
+  }
+
+  const handleUpdateProduct = async () => {
+    try {
+      const response = await ProductsActions.updateProduct(currentProduct._id, currentProduct)
+      productsDispatch({ type: "UPDATE_PRODUCT_SUCCESS", payload: response.data })
+      toast({
+        title: "Producto actualizado",
+        description: "El producto se actualizó correctamente",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      })
+      onEditClose()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el producto",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      })
+    }
+  }
+
   const handleDeleteProduct = async (productId) => {
     try {
-      // Aquí deberías usar productsActions.deleteProduct desde el contexto
-      // await deleteProduct(productId)
+      await ProductsActions.deleteProduct(productId)
       productsDispatch({ type: "DELETE_PRODUCT_SUCCESS", payload: productId })
       toast({
         title: "Producto eliminado",
@@ -129,6 +153,8 @@ const AdminProducts = () => {
     }
   }
 
+  if (isLoading) return <Loading />
+
   return (
     <Box minH="100vh" bg="gray.50" py={8}>
       <Container maxW="7xl">
@@ -138,185 +164,163 @@ const AdminProducts = () => {
               <Heading size="xl" mb={2}>
                 Gestión de Productos
               </Heading>
-              <Text color="gray.600">Administra tu catálogo de productos</Text>
+              <Text color="gray.600">Administra los productos de la tienda</Text>
             </Box>
             <Button leftIcon={<FiPlus />} colorScheme="pink" onClick={onCreateOpen}>
               Nuevo Producto
             </Button>
           </Flex>
 
-          {/* 🔍 Filtros */}
-          <Card w="full">
-            <CardBody>
-              <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "start", md: "center" }} gap={4}>
-                <Box flex={1} maxW="md">
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <FiSearch color="gray" />
-                    </InputLeftElement>
-                    <Input
-                      type="search"
-                      placeholder="Buscar productos..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </InputGroup>
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={6} w="full">
+            {productsState.products.map((product) => (
+              <Card key={product._id} overflow="hidden">
+                <Box bg={bgColor} h={32} position="relative">
+                  <Box position="absolute" top={2} right={2}>
+                    <Menu>
+                      <MenuButton
+                        as={IconButton}
+                        aria-label="Actions"
+                        icon={<FiMoreHorizontal />}
+                        variant="ghost"
+                      />
+                      <MenuList>
+                        <MenuItem icon={<FiEdit />} onClick={() => openEditDialog(product)}>
+                          Editar
+                        </MenuItem>
+                        <MenuDivider />
+                        <MenuItem icon={<FiTrash2 />} color="red.600" onClick={() => handleDeleteProduct(product._id)}>
+                          Eliminar
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
+                  </Box>
+                  <Box
+                    position="absolute"
+                    bottom={0}
+                    left={0}
+                    w="full"
+                    p={4}
+                    bgGradient="linear(to-t, blackAlpha.600, transparent)"
+                  >
+                    <Heading size="lg" color="white">
+                      {product.name}
+                    </Heading>
+                  </Box>
                 </Box>
-
-                <HStack spacing={2}>
-                  <Select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} w="180px">
-                    <option value="">Todas las categorías</option>
-                    {(elements || []).map((element) => (
-                      <option key={element._id} value={element.name}>
-                        {element.name}
-                      </option>
-                    ))}
-                  </Select>
-
-                  <Select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} w="180px">
-                    <option value="">Todos los estados</option>
-                    <option value="active">Activo</option>
-                    <option value="low-stock">Stock bajo</option>
-                    <option value="out-of-stock">Sin stock</option>
-                  </Select>
-
-                  <IconButton aria-label="Filter" icon={<FiFilter />} variant="outline" />
-                </HStack>
-              </Flex>
-            </CardBody>
-          </Card>
-
-          {/* 🗑 Acciones masivas */}
-          {selectedProducts.length > 0 && (
-            <Card w="full">
-              <CardBody>
-                <Flex justify="space-between" align="center">
-                  <Text fontSize="sm" fontWeight="medium">
-                    {selectedProducts.length} {selectedProducts.length === 1 ? "producto" : "productos"} seleccionados
+                <CardBody p={4}>
+                  <Flex justify="space-between" align="center" mb={2}>
+                    <Badge variant="outline" bg="gray.100">
+                      {product.category}
+                    </Badge>
+                  </Flex>
+                  <Text fontSize="sm" color="gray.600">
+                    {product.description}
                   </Text>
-                  <HStack spacing={2}>
-                    <Button variant="outline" size="sm" colorScheme="red" leftIcon={<FiTrash2 />}>
-                      Eliminar
-                    </Button>
-                    <Button variant="outline" size="sm" leftIcon={<FiEdit />}>
-                      Editar
-                    </Button>
-                  </HStack>
-                </Flex>
-              </CardBody>
-            </Card>
-          )}
-
-          {/* 📦 Tabla */}
-          <Card w="full">
-            <CardBody p={0}>
-              <Box overflowX="auto">
-                <Table variant="simple">
-                  <Thead>
-                    <Tr bg="gray.50">
-                      <Th>
-                        <HStack>
-                          <Checkbox
-                            isChecked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
-                            onChange={toggleSelectAll}
-                          />
-                          <Text>Producto</Text>
-                        </HStack>
-                      </Th>
-                      <Th>Categoría</Th>
-                      <Th>Precio</Th>
-                      <Th>Stock</Th>
-                      <Th>Estado</Th>
-                      <Th>Acciones</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {filteredProducts.map((product) => (
-                      <Tr key={product._id} _hover={{ bg: "gray.50" }}>
-                        <Td>
-                          <HStack>
-                            <Checkbox
-                              isChecked={selectedProducts.includes(product._id)}
-                              onChange={() => toggleProductSelection(product._id)}
-                            />
-                            <HStack>
-                              <Box w={10} h={10} borderRadius="md" overflow="hidden">
-                                <Image
-                                  src={product.imgPrimary || "/placeholder.svg"}
-                                  alt={product.name}
-                                  boxSize="40px"
-                                  objectFit="cover"
-                                />
-                              </Box>
-                              <Text fontWeight="medium">{product.name}</Text>
-                            </HStack>
-                          </HStack>
-                        </Td>
-                        <Td>{product.category}</Td>
-                        <Td>${product.price?.toLocaleString()}</Td>
-                        <Td>
-                          <VStack spacing={1} align="start">
-                            <Text fontWeight="medium">{product.totalStock || 0} total</Text>
-                            <Text fontSize="xs" color="gray.500">
-                              {product.colors?.map((color) => `${color.name}: ${color.stock}`).join(", ")}
-                            </Text>
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <ProductStatusBadge stock={product.totalStock || 0} />
-                        </Td>
-                        <Td>
-                          <Menu>
-                            <MenuButton as={IconButton} aria-label="Actions" icon={<FiMoreHorizontal />} variant="ghost" />
-                            <MenuList>
-                              <MenuItem icon={<FiEye />}>Ver detalles</MenuItem>
-                              <MenuItem icon={<FiEdit />} onClick={() => openEditDialog(product)}>
-                                Editar
-                              </MenuItem>
-                              <MenuItem icon={<FiCopy />}>Duplicar</MenuItem>
-                              <MenuDivider />
-                              <MenuItem icon={<FiTrash2 />} color="red.600" onClick={() => handleDeleteProduct(product._id)}>
-                                Eliminar
-                              </MenuItem>
-                            </MenuList>
-                          </Menu>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
-
-              {/* 📑 Paginación */}
-              <Flex justify="space-between" align="center" px={4} py={3} borderTop="1px" borderColor="gray.200">
-                <Text fontSize="sm" color="gray.500">
-                  Mostrando{" "}
-                  <Text as="span" fontWeight="medium">
-                    {filteredProducts.length}
-                  </Text>{" "}
-                  de{" "}
-                  <Text as="span" fontWeight="medium">
-                    {products?.length || 0}
-                  </Text>{" "}
-                  productos
-                </Text>
-              </Flex>
-            </CardBody>
-          </Card>
+                  <Text fontWeight="bold" mt={2}>
+                    ${product.price.toLocaleString()}
+                  </Text>
+                </CardBody>
+              </Card>
+            ))}
+          </Grid>
         </VStack>
       </Container>
+
+      {/* Modal Crear */}
+      <Modal isOpen={isCreateOpen} onClose={onCreateClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Crear Nuevo Producto</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl>
+                <FormLabel>Nombre</FormLabel>
+                <Input name="name" value={newProduct.name} onChange={handleNewProductChange} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Categoría</FormLabel>
+                <Input name="category" value={newProduct.category} onChange={handleNewProductChange} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Precio</FormLabel>
+                <Input
+                  name="price"
+                  type="number"
+                  value={newProduct.price}
+                  onChange={handleNewProductChange}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Descripción</FormLabel>
+                <Input name="description" value={newProduct.description} onChange={handleNewProductChange} />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="outline" mr={3} onClick={onCreateClose}>
+              Cancelar
+            </Button>
+            <Button colorScheme="pink" onClick={handleCreateProduct}>
+              Crear
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Editar */}
+      {currentProduct && (
+        <Modal isOpen={isEditOpen} onClose={onEditClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Editar Producto: {currentProduct.name}</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <VStack spacing={4}>
+                <FormControl>
+                  <FormLabel>Nombre</FormLabel>
+                  <Input
+                    value={currentProduct.name}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, name: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Categoría</FormLabel>
+                  <Input
+                    value={currentProduct.category}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, category: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Precio</FormLabel>
+                  <Input
+                    type="number"
+                    value={currentProduct.price}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, price: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Descripción</FormLabel>
+                  <Input
+                    value={currentProduct.description}
+                    onChange={(e) => setCurrentProduct({ ...currentProduct, description: e.target.value })}
+                  />
+                </FormControl>
+              </VStack>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="outline" mr={3} onClick={onEditClose}>
+                Cancelar
+              </Button>
+              <Button colorScheme="pink" onClick={handleUpdateProduct}>
+                Guardar Cambios
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </Box>
   )
-}
-
-function ProductStatusBadge({ stock }) {
-  if (stock === 0) {
-    return <Badge colorScheme="red">Sin stock</Badge>
-  } else if (stock < 10) {
-    return <Badge colorScheme="yellow">Stock bajo</Badge>
-  } else {
-    return <Badge colorScheme="green">Activo</Badge>
-  }
 }
 
 export default AdminProducts
