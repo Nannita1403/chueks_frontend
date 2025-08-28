@@ -9,11 +9,12 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={4} bg="white" _dark={{ bg: "gray.800" }}>
       <Image
-        src={product.imgPrimary || "/placeholder.svg"}
+        src={product.imgPrimary?.url || product.imgPrimary || "/placeholder.svg"}
         alt={product.name}
         mb={4}
         borderRadius="md"
       />
+
       <Text fontWeight="bold" mb={2}>{product.name}</Text>
       <Text mb={2}>${product.priceMin}</Text>
 

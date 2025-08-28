@@ -5,7 +5,6 @@ import Home from "./pages/User/Home/Home.jsx"
 import ProductDetail from "./pages/User/Product/Product.jsx"
 import CategoryPage from "./pages/User/Category/Category.jsx"
 import WishlistPage from "./pages/User/Wishlist/Wishlist.jsx"
-import CartPage from "./pages/User/Cart/Cart.jsx"
 import AdminDashboard from "./pages/admin/DashboardAdmin/DashboardAdmin.jsx"
 import AdminProducts from "./pages/admin/Products/Products.jsx"
 import AdminCategories from "./pages/admin/Categories/Categories.jsx"
@@ -14,6 +13,7 @@ import OrdersPage from "./pages/admin/Orders/Orders.jsx"
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx"
 import ProfilePage from "./pages/User/Profile/Profile.jsx"
 import AdminLayout from "./pages/Admin/Layout/AdminLayout.jsx"
+import Cart from "./pages/User/Cart/Cart.jsx"
 
 
 
@@ -62,7 +62,7 @@ const App = () => {
       path="/cart"
       element={
         <ProtectedRoute>
-         <CartPage />
+         <Cart />
         </ProtectedRoute>
       }
     />

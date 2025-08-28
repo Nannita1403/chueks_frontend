@@ -58,8 +58,9 @@ class ApiService {
 
       console.log("✅ Petición exitosa:", rawData);
 
-      // 🔹 Normalización: siempre devolvemos el array directamente si existe
+    
       if (rawData?.data) return rawData.data;
+      if (rawData?.products) return rawData.products; 
       if (Array.isArray(rawData)) return rawData;
       return rawData;
     } catch (error) {
