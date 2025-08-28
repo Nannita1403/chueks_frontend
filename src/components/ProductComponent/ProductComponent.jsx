@@ -21,12 +21,11 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
         <CustomButton
           size="sm"
           isDisabled={!user}
-          onClick={() => onToggleLike(!isLiked)}
+          onClick={onToggleLike}
         >
           {isLiked ? "❤️" : "🤍"} {product.likes?.length || 0}
         </CustomButton>
 
-        {/* 👇 Botón para abrir el modal */}
         <Button size="sm" colorScheme="teal" onClick={onViewDetail}>
           Ver detalle
         </Button>

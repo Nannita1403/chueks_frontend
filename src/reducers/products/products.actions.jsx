@@ -4,19 +4,19 @@ import apiService from "../api/Api.jsx";
 class ProductsActions {
   // Obtener todos los productos
   async getProducts() {
-    try {
-      const response = await apiService.get("/products");
-      // Api puede devolver { products: [...] } o response.data.products
-      const products = response.products || response.data?.products || [];
-      console.log("✅ Productos obtenidos (actions):", products);
-      return products;
-    } catch (error) {
-      console.error("❌ Error obteniendo productos:", error);
-      throw error;
-    }
+  try {
+    const response = await apiService.get("/products");
+    // Dependiendo de apiService, puede que response ya sea data
+    const products = response?.data?.products || response?.products || [];
+    console.log("✅ Productos obtenidos (actions):", products);
+    return products;
+  } catch (error) {
+    console.error("❌ Error obteniendo productos:", error);
+    throw error;
   }
+}
 
-  // Obtener un producto por ID
+  // Obtener un prodcto por ID
   async getProduct(id) {
     try {
       const response = await apiService.get(`/products/${id}`);

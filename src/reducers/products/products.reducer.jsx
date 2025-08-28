@@ -15,11 +15,12 @@ export const productsReducer = (state, action) => {
     case "CLEAR_ERROR":
       return { ...state, error: null };
     case "GET_PRODUCTS":
-      return {
-        ...state,
-        loading: false,
-        products: action.payload,
-      };
+  return {
+    ...state,
+    loading: false,
+    products: action.payload, 
+  };
+
     case "TOGGLE_LIKE":
       return {
         ...state,

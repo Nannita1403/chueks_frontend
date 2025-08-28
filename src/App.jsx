@@ -13,6 +13,7 @@ import AnalyticsPage from "./pages/admin/Analytics/Analytics.jsx"
 import OrdersPage from "./pages/admin/Orders/Orders.jsx"
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx"
 import ProfilePage from "./pages/User/Profile/Profile.jsx"
+import AdminLayout from "./pages/Admin/Layout/AdminLayout.jsx"
 
 
 
@@ -73,45 +74,20 @@ const App = () => {
         </ProtectedRoute>
       }
     />
-
-        {/* Admin Routes */}
+{/* Protected admin routes */}
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
-            <ProtectedRoute adminOnly={true}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/products"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AdminProducts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/categories"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AdminCategories />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/analytics"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <AnalyticsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/orders"
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <OrdersPage />
+            <ProtectedRoute>
+              <AdminLayout>
+                <Routes>
+                  <Route path="" element={<AdminDashboard />} />
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="categories" element={<AdminCategories />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="orders" element={<OrdersPage />} />
+                </Routes>
+              </AdminLayout>
             </ProtectedRoute>
           }
         />

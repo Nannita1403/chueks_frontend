@@ -29,7 +29,7 @@ import { FiSearch, FiHeart, FiShoppingBag, FiUser, FiMenu } from "react-icons/fi
 
 import ProductsActions from "../../../reducers/products/products.actions.jsx";
 import { toggleLike } from "../../../reducers/products/toggleLike.jsx";
-import ProductComponent from "../../../components/Product/Product.jsx";
+import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useIsMobile } from "../../../Hooks/useMobile.jsx"; 
 import { useToast } from "../../../Hooks/useToast.jsx";
