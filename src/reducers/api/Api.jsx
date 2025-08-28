@@ -1,4 +1,3 @@
-// api.jsx
 const API_BASE_URL = "http://localhost:3000/api/v1";
 
 class ApiService {
@@ -35,7 +34,11 @@ class ApiService {
       ...options,
     };
 
-    console.log("📡 Petición:", { url, method: config.method || "GET", headers: config.headers });
+    console.log("📡 Petición:", {
+      url,
+      method: config.method || "GET",
+      headers: config.headers,
+    });
 
     try {
       const controller = new AbortController();
@@ -45,21 +48,20 @@ class ApiService {
       clearTimeout(timeoutId);
 
       const contentType = response.headers.get("content-type");
-      const data = contentType && contentType.includes("application/json")
+      const rawData = contentType && contentType.includes("application/json")
         ? await response.json()
         : await response.text();
 
       if (!response.ok) {
-        throw new Error(data.message || data || "Error en la petición");
+        throw new Error(rawData.message || rawData || "Error en la petición");
       }
 
-      console.log("✅ Petición exitosa:", { data });
+      console.log("✅ Petición exitosa:", rawData);
 
-      // Normaliza la respuesta para que siempre tenga .products
-      if (Array.isArray(data)) {
-        return { products: data };
-      }
-      return data;
+      // 🔹 Normalización: siempre devolvemos el array directamente si existe
+      if (rawData?.data) return rawData.data;
+      if (Array.isArray(rawData)) return rawData;
+      return rawData;
     } catch (error) {
       if (error.name === "AbortError") throw new Error("⏰ La petición tardó demasiado");
       if (error.name === "TypeError") throw new Error(`❌ No se puede conectar al servidor en ${this.baseURL}`);

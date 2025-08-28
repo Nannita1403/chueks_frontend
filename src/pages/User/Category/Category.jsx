@@ -1,32 +1,38 @@
-import { useParams } from "react-router-dom"
-import { Box, Heading, SimpleGrid, Text } from "@chakra-ui/react"
-import { useProducts } from "../../../context/Products/products.context.jsx"
-import Product from "../Product/Product.jsx"
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { SimpleGrid, Spinner, Text } from "@chakra-ui/react";
+import ApiService from "../../../reducers/api/Api.jsx"; //
+import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 
 const CategoryPage = () => {
-  const { id } = useParams()
-  const { products } = useProducts()
+  const { id } = useParams(); // ej: mochilas, bolsos, etc.
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filtramos productos que incluyan la categoría en su array
-  const filteredProducts = products.filter(p => p.category?.includes(id))
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const { data } = await ApiService.get(`/products?category=${id}`);
+        setProducts(data.data || data);
+      } catch (err) {
+        console.error("Error cargando productos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategory();
+  }, [id]);
+
+  if (loading) return <Spinner size="xl" />;
+  if (!products.length) return <Text>No hay productos en esta categoría</Text>;
 
   return (
-    <Box p={6}>
-      <Heading size="lg" mb={4}>
-        Categoría: {id}
-      </Heading>
+    <SimpleGrid columns={[1, 2, 3]} spacing={6} p={6}>
+      {products.map((p) => (
+        <ProductComponent key={p._id} product={p} />
+      ))}
+    </SimpleGrid>
+  );
+};
 
-      {filteredProducts.length === 0 ? (
-        <Text>No hay productos en esta categoría.</Text>
-      ) : (
-        <SimpleGrid columns={[1, 2, 3]} spacing={6}>
-          {filteredProducts.map(product => (
-            <Product key={product._id} product={product} />
-          ))}
-        </SimpleGrid>
-      )}
-    </Box>
-  )
-}
-
-export default CategoryPage
+export default CategoryPage;
