@@ -1,6 +1,7 @@
+// src/pages/Cart/Cart.jsx
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
-  Box, Grid, GridItem, Heading, Text, HStack, VStack, Image, Divider, IconButton,
+  Box, Grid, GridItem, Text, HStack, VStack, Image, Divider, IconButton,
   Tooltip, Alert, AlertIcon, useColorModeValue, Container
 } from "@chakra-ui/react";
 import { CloseIcon, AddIcon, MinusIcon } from "@chakra-ui/icons";
@@ -18,21 +19,13 @@ import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 
-/** Config */
 const MIN_ITEMS = 10;
-
-/** Formato moneda */
 const money = (n) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-/** Normaliza items para soportar {product?...} o campos planos */
+// Normaliza con id de línea que viene del backend
 function normalizeItem(it) {
   const p = it.product || {};
-  const productId = p._id || it.productId || it.id;
-  const name = p.name || it.name || "Producto";
-  const color = it.color ?? it?.color;
-  const price = typeof it.price === "number" ? it.price : p.priceMin || 0;
-  const quantity = Math.max(1, it.quantity || 1);
   const image =
     it.image ||
     p?.imgPrimary?.url ||
@@ -40,49 +33,51 @@ function normalizeItem(it) {
     p?.image ||
     (Array.isArray(p?.images) && p.images[0]) ||
     "";
-  return { ...it, _id: String(productId), productId: String(productId), name, color, price, quantity, image };
+  return {
+    id: it.id, // ← lineId EXACTO del backend (p.ej. "pid:color" o "pid")
+    productId: String(p._id || it.productId || it.id),
+    name: p.name || it.name || "Producto",
+    color: it.color,
+    price: typeof it.price === "number" ? it.price : (p.priceMin || 0),
+    quantity: Math.max(1, it.quantity || 1),
+    image,
+  };
 }
 
 export default function Cart() {
+  // ---- state / hooks de datos ----
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({ items: [], shipping: 0 });
   const [error, setError] = useState("");
-
-  const [selected, setSelected] = useState(null);          // Product para el modal
-  const [opening, setOpening] = useState(false);           // spinner opcional para abrir modal
+  const [selected, setSelected] = useState(null);
 
   const { toast } = useToast();
-  const { refreshCart } = useAuth(); // para refrescar badge del header
+  const { refreshCart } = useAuth();
 
-  // Tokens de color
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
-  const muted = useColorModeValue("gray.600", "gray.400");
-  const panelBg = useColorModeValue("white", "gray.800");
-  const warnBg = useColorModeValue("orange.50", "orange.900");
+  // 🔧 tokens de color (orden estable)
+  const pageBg     = useColorModeValue("gray.50", "gray.900");
+  const headerBg   = useColorModeValue("pink.500", "pink.400");
+  const borderColor= useColorModeValue("gray.200", "whiteAlpha.300");
+  const muted      = useColorModeValue("gray.600", "gray.400");
+  const panelBg    = useColorModeValue("white", "gray.800");
+  const warnBg     = useColorModeValue("orange.50", "orange.900");
   const warnBorder = useColorModeValue("orange.200", "orange.700");
+  const thumbBg    = useColorModeValue("gray.100", "whiteAlpha.100");
 
-  /* ------------ API helpers (con ApiService) ------------ */
-  const apiFetchCart = useCallback(async () => {
-    return ApiService.get("/cart"); // { items, subtotal, shipping, total, minItems, itemCount, missing }
-  }, []);
+  // ---- API helpers ----
+  const apiFetchCart = useCallback(() => ApiService.get("/cart"), []);
+  const apiPatchQtyByLine = useCallback((lineId, delta) =>
+  ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta })
+, []);
 
-  const apiPatchQty = useCallback(async (productId, delta, color) => {
-    return ApiService.request(`/cart/${productId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ delta, color }),
-    });
-  }, []);
+const apiRemoveByLine = useCallback((lineId) =>
+  ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`)
+, []);
 
-  const apiRemove = useCallback(async (productId, color) => {
-    const qs = color ? `?color=${encodeURIComponent(color)}` : "";
-    return await ApiService.delete(`/cart/${productId}?color=${encodeURIComponent(color || "")}`);
-  }, []);
 
-  const apiCheckout = useCallback(async () => {
-    return ApiService.post("/cart/checkout", {});
-  }, []);
+  const apiCheckout = useCallback(() => ApiService.post("/cart/checkout", {}), []);
 
-  /* ------------ load cart ------------ */
+  // ---- load cart ----
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -95,20 +90,19 @@ export default function Cart() {
         if (mounted) setLoading(false);
       }
     })();
-    return () => (mounted = false);
+    return () => { mounted = false; };
   }, [apiFetchCart]);
 
-  const items = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
+  const items     = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
   const itemCount = useMemo(() => items.reduce((acc, it) => acc + (it.quantity || 0), 0), [items]);
-  const subtotal = useMemo(() => items.reduce((acc, it) => acc + (it.price || 0) * (it.quantity || 0), 0), [items]);
-
-  const missing = Math.max(0, MIN_ITEMS - itemCount);
+  const subtotal  = useMemo(() => items.reduce((acc, it) => acc + (it.price || 0) * (it.quantity || 0), 0), [items]);
+  const missing   = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
 
-  /* ------------ UI handlers ------------ */
-  const onChangeQty = async (productId, delta, color) => {
+  // ---- handlers por línea (it.id) ----
+  const onChangeQtyLine = async (lineId, delta) => {
     try {
-      const data = await apiPatchQty(productId, delta, color);
+      const data = await apiPatchQtyByLine(lineId, delta);
       setCart(data);
       await refreshCart?.();
     } catch (e) {
@@ -116,9 +110,9 @@ export default function Cart() {
     }
   };
 
-  const onRemove = async (productId, color) => {
+  const onRemoveLine = async (lineId) => {
     try {
-      const data = await apiRemove(productId, color);
+      const data = await apiRemoveByLine(lineId);
       setCart(data);
       await refreshCart?.();
       toast({ title: "Producto eliminado", status: "success" });
@@ -137,25 +131,19 @@ export default function Cart() {
     }
   };
 
-  // Abrir detalle de producto desde el carrito
   const openProductDetail = async (productId) => {
     try {
-      setOpening(true);
       const p = await ApiService.get(`/products/${productId}`);
-      // normalizo por si tu endpoint devuelve {product} o el producto plano
-      const product = p?.product || p;
-      setSelected(product);
-    } catch (e) {
+      setSelected(p?.product || p);
+    } catch {
       toast({ title: "No se pudo abrir el producto", status: "error" });
-    } finally {
-      setOpening(false);
     }
   };
 
-  /* ------------ Loading/Errores ------------ */
+  // ---- Loading / Error ----
   if (loading) {
     return (
-      <Box minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
+      <Box minH="100vh" bg={pageBg}>
         <AppHeader />
         <Container maxW="container.xl" py={6}>
           <BackButton mb={4} />
@@ -170,7 +158,7 @@ export default function Cart() {
 
   if (error) {
     return (
-      <Box minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
+      <Box minH="100vh" bg={pageBg}>
         <AppHeader />
         <Container maxW="container.xl" py={6}>
           <BackButton mb={4} />
@@ -180,11 +168,11 @@ export default function Cart() {
     );
   }
 
-  /* ------------ Render ------------ */
+  // ---- Render ----
   return (
-    <Box minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
+    <Box minH="100vh" bg={pageBg}>
       <AppHeader />
-      <Box bg={useColorModeValue("pink.500", "pink.400")} color="white" py={3}>
+      <Box bg={headerBg} color="white" py={3}>
         <Container maxW="container.xl">
           <HStack justify="space-between">
             <BackButton color="white" variant="link" />
@@ -199,7 +187,6 @@ export default function Cart() {
           {itemCount} {itemCount === 1 ? "producto" : "productos"} en tu carrito
         </Text>
 
-        {/* Aviso compra mínima */}
         <Card borderColor={warnBorder} bg={warnBg} mb={4}>
           <CardContent py={3}>
             {missing > 0 ? (
@@ -225,13 +212,13 @@ export default function Cart() {
             ) : (
               <VStack spacing={3} align="stretch">
                 {items.map((it) => (
-                  <Card key={`${it.productId}-${it.color || "x"}`} bg={panelBg} borderColor={borderColor}>
+                  <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns="72px 1fr 170px" gap={3} alignItems="center">
-                        {/* Imagen (abre modal) */}
+                        {/* Miniatura */}
                         <Box
                           w="72px" h="72px" rounded="md" overflow="hidden"
-                          bg={useColorModeValue("gray.100", "whiteAlpha.100")}
+                          bg={thumbBg}
                           cursor="pointer"
                           onClick={() => openProductDetail(it.productId)}
                         >
@@ -252,10 +239,7 @@ export default function Cart() {
                               >
                                 {it.name}
                               </Text>
-                              {!!it.color && (
-                                <Text fontSize="xs" color={muted}>Color: {it.color}</Text>
-                              )}
-                              {/* 🧮 Precio unitario */}
+                              {!!it.color && <Text fontSize="xs" color={muted}>Color: {it.color}</Text>}
                               <Text fontSize="xs" color={muted}>Unitario: {money(it.price)}</Text>
                             </Box>
                             <IconButton
@@ -264,7 +248,7 @@ export default function Cart() {
                               size="sm"
                               variant="ghost"
                               color={muted}
-                              onClick={() => onRemove(it.productId, it.color)}
+                              onClick={() => onRemoveLine(it.id)}   // ← DELETE por línea
                             />
                           </HStack>
                         </VStack>
@@ -275,16 +259,18 @@ export default function Cart() {
                             <IconButton
                               aria-label="Restar"
                               icon={<MinusIcon boxSize={3} />}
-                              size="sm" variant="ghost"
-                              onClick={() => onChangeQty(it.productId, -1, it.color)}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => onChangeQtyLine(it.id, -1)}  // ← PATCH por línea
                               isDisabled={it.quantity <= 1}
                             />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
                             <IconButton
                               aria-label="Sumar"
                               icon={<AddIcon boxSize={3} />}
-                              size="sm" variant="ghost"
-                              onClick={() => onChangeQty(it.productId, +1, it.color)}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => onChangeQtyLine(it.id, +1)}  // ← PATCH por línea
                             />
                           </HStack>
                           <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
@@ -340,7 +326,7 @@ export default function Cart() {
           </GridItem>
         </Grid>
 
-        {/* Modal de producto (al abrir desde la imagen/nombre) */}
+        {/* Modal de producto */}
         <ProductModal
           isOpen={!!selected}
           onClose={() => setSelected(null)}
@@ -350,7 +336,7 @@ export default function Cart() {
             await ApiService.post("/cart/add", {
               productId: product._id,
               quantity: qty,
-              color: (color?.name || "").trim(),
+              color: color?.name,
             });
             await refreshCart?.();
             toast({ title: `Agregado ${qty} al carrito`, status: "success" });

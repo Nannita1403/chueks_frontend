@@ -1,4 +1,9 @@
-const API_BASE_URL = "http://localhost:3000/api/v1";
+// reducers/api/Api.jsx
+const DEFAULT_BASE = "http://localhost:3000/api/v1";
+const API_BASE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL) ||
+  (typeof window !== "undefined" && window.__API_BASE_URL__) ||
+  DEFAULT_BASE;
 
 class ApiService {
   constructor() {
@@ -7,7 +12,6 @@ class ApiService {
     console.log("🔧 ApiService inicializado con URL:", this.baseURL);
   }
 
-  // Configura o elimina token
   setToken(token) {
     this.token = token;
     if (token) {
@@ -19,7 +23,6 @@ class ApiService {
     }
   }
 
-  // Encabezados
   getHeaders(isFormData = false) {
     const headers = {};
     if (!isFormData) headers["Content-Type"] = "application/json";
@@ -30,55 +33,60 @@ class ApiService {
   async request(endpoint, options = {}, isFormData = false) {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
-      headers: this.getHeaders(isFormData),
-      ...options,
+    method: options.method || "GET",
+    headers: this.getHeaders(isFormData),
+    body: options.body ?? undefined,
     };
 
     console.log("📡 Petición:", {
       url,
       method: config.method || "GET",
       headers: config.headers,
+      body: options?.body || undefined,
     });
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       const response = await fetch(url, { ...config, signal: controller.signal });
       clearTimeout(timeoutId);
 
-      const contentType = response.headers.get("content-type");
-      const rawData = contentType && contentType.includes("application/json")
-        ? await response.json()
-        : await response.text();
+      const ct = response.headers.get("content-type") || "";
+      const data = ct.includes("application/json") ? await response.json() : await response.text();
 
       if (!response.ok) {
-        throw new Error(rawData.message || rawData || "Error en la petición");
+        const message = typeof data === "object" && data?.message ? data.message : data;
+        throw new Error(message || "Error en la petición");
       }
 
-      console.log("✅ Petición exitosa:", rawData);
+      console.log("✅ Petición exitosa:", data);
 
-    
-      if (rawData?.data) return rawData.data;
-      if (rawData?.products) return rawData.products; 
-      if (Array.isArray(rawData)) return rawData;
-      return rawData;
+      // Normalizaciones comunes
+      if (data?.data) return data.data;
+      if (data?.products) return data.products;
+      if (Array.isArray(data)) return data;
+      return data;
     } catch (error) {
       if (error.name === "AbortError") throw new Error("⏰ La petición tardó demasiado");
-      if (error.name === "TypeError") throw new Error(`❌ No se puede conectar al servidor en ${this.baseURL}`);
+      if (error.name === "TypeError") {
+        // Esto pasa cuando el host:puerto NO responde → connection refused
+        throw new Error(`❌ No se puede conectar al servidor en ${this.baseURL}`);
+      }
       throw error;
     }
   }
 
   // Métodos HTTP
-  get(endpoint) { return this.request(endpoint, { method: "GET" }); }
+  get(endpoint)   { return this.request(endpoint, { method: "GET" }); }
   post(endpoint, data) { return this.request(endpoint, { method: "POST", body: JSON.stringify(data) }); }
-  put(endpoint, data) { return this.request(endpoint, { method: "PUT", body: JSON.stringify(data) }); }
-  delete(endpoint) { return this.request(endpoint, { method: "DELETE" }); }
+  put(endpoint, data)  { return this.request(endpoint, { method: "PUT",  body: JSON.stringify(data) }); }
+  patch(endpoint, data){ return this.request(endpoint, { method: "PATCH",body: JSON.stringify(data) }); }
+  delete(endpoint)     { return this.request(endpoint, { method: "DELETE" }); }
 
   // FormData
   postFormData(endpoint, formData) { return this.request(endpoint, { method: "POST", body: formData }, true); }
-  putFormData(endpoint, formData) { return this.request(endpoint, { method: "PUT", body: formData }, true); }
+  putFormData(endpoint, formData)  { return this.request(endpoint, { method: "PUT",  body: formData }, true); }
 }
 
 export default new ApiService();
