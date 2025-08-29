@@ -15,14 +15,13 @@ import { toggleLike } from "../../../reducers/products/toggleLike.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 
+import AppHeader from "../../../components/Header/AppHeader.jsx";
+import BackButton from "../../../components/Nav/BackButton.jsx";
+
 /* ---------- helpers ---------- */
 const normalize = (p) => ({
   ...p,
-  imgPrimary:
-    p?.imgPrimary?.url ||
-    p?.imgPrimary ||
-    (Array.isArray(p?.images) ? p.images[0] : p?.image) ||
-    "/placeholder.svg",
+  imgPrimary: p?.imgPrimary?.url || p?.imgPrimary || (Array.isArray(p?.images) ? p.images[0] : p?.image) || "/placeholder.svg",
   priceMin: p?.priceMin ?? p?.price ?? 0,
 });
 
@@ -38,22 +37,18 @@ const slugToEnum = {
   accesorios:"Accesorios",
   neceseres: "Neceser",
 };
-
 const normalizeList = (resp) => (Array.isArray(resp) ? resp : resp?.products || resp?.data || []);
-
-// match por categoría cuando p.category es array
 const categoryMatches = (product, target) => {
-  const cats = Array.isArray(product.category)
-    ? product.category
-    : product.category ? [product.category] : [];
+  const cats = Array.isArray(product.category) ? product.category : product.category ? [product.category] : [];
   return cats.some((c) => removeAccents(String(c)).toLowerCase() === target);
 };
 
-/* ---------- page ---------- */
 export default function CategoryPage() {
   const { id } = useParams(); // slug
-  const { user, token } = useAuth();
+  const { user, token, /* opcional: cartItems, wishlistItems */ } = useAuth();
   const { toast } = useToast();
+  const { refreshCart } = useAuth();
+
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -69,20 +64,18 @@ export default function CategoryPage() {
   const enumCategory = useMemo(() => slugToEnum[(id || "").toLowerCase()] || id, [id]);
   const bannerTitle = useMemo(() => titleCase(enumCategory), [enumCategory]);
 
-  // Opciones de filtros derivadas de los productos (por si /meta está vacío)
+  // Opciones de filtros derivadas de los productos (si /meta está vacío)
   const filterOptions = useMemo(() => {
     const colors = new Set();
     const styles = new Set();
     for (const p of products) {
-      // colors: [{ name: string[] }]
       if (Array.isArray(p.colors)) {
         p.colors.forEach((c) => {
-          const arr = Array.isArray(c?.name) ? c.name : (c?.name ? [c.name] : []);
+          const arr = Array.isArray(c?.name) ? c.name : c?.name ? [c.name] : [];
           arr.forEach((n) => n && colors.add(n));
         });
       }
-      // style: string | string[]
-      const st = Array.isArray(p.style) ? p.style : (p.style ? [p.style] : []);
+      const st = Array.isArray(p.style) ? p.style : p.style ? [p.style] : [];
       st.forEach((s) => s && styles.add(s));
     }
     return { colorOptions: Array.from(colors), styleOptions: Array.from(styles) };
@@ -92,18 +85,18 @@ export default function CategoryPage() {
     (async () => {
       setLoading(true);
       try {
-        // 1) intento directo con enum singular (con ñ)
+        // 1) backend directo
         let resp = await ApiService.get(`/products?category=${encodeURIComponent(enumCategory)}`);
         let list = normalizeList(resp);
 
-        // 2) si vacío y tiene ñ, prueba con n
+        // 2) ñ → n
         if (!list.length && /ñ/i.test(enumCategory)) {
           const alt = enumCategory.replace(/ñ/gi, "n");
           resp = await ApiService.get(`/products?category=${encodeURIComponent(alt)}`);
           list = normalizeList(resp);
         }
 
-        // 3) si sigue vacío → carga todo y filtra cliente ignorando acentos
+        // 3) fallback: todo y filtro en cliente
         if (!list.length) {
           const allResp = await ApiService.get("/products");
           const all = normalizeList(allResp);
@@ -111,16 +104,14 @@ export default function CategoryPage() {
           list = all.filter((p) => categoryMatches(p, target));
         }
 
-        // Normaliza
+        // filtros locales
         let normalized = list.map(normalize);
-
-        // Aplica filtros locales
         if (filters.colors.length) {
           const setColors = new Set(filters.colors);
           normalized = normalized.filter((p) =>
             Array.isArray(p.colors) &&
             p.colors.some((c) => {
-              const arr = Array.isArray(c?.name) ? c.name : (c?.name ? [c.name] : []);
+              const arr = Array.isArray(c?.name) ? c.name : c?.name ? [c.name] : [];
               return arr.some((n) => setColors.has(n));
             })
           );
@@ -128,12 +119,12 @@ export default function CategoryPage() {
         if (filters.styles.length) {
           const setStyles = new Set(filters.styles);
           normalized = normalized.filter((p) => {
-            const st = Array.isArray(p.style) ? p.style : (p.style ? [p.style] : []);
+            const st = Array.isArray(p.style) ? p.style : p.style ? [p.style] : [];
             return st.some((s) => setStyles.has(s));
           });
         }
 
-        // Orden local
+        // ordenar local
         if (sortBy === "price_asc")  normalized.sort((a, b) => (a.priceMin || 0) - (b.priceMin || 0));
         if (sortBy === "price_desc") normalized.sort((a, b) => (b.priceMin || 0) - (a.priceMin || 0));
 
@@ -168,44 +159,67 @@ export default function CategoryPage() {
     }
   };
 
-  // Add to cart desde modal
-  const addToCartHandler = async (product, qty, color) => {
-    try {
-      await fetch("/api/cart/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        credentials: "include",
-        body: JSON.stringify({ productId: product._id, quantity: qty, color: color?.name }),
-      });
-      toast({ title: `Agregado ${qty} al carrito`, status: "success" });
-    } catch {
-      toast({ title: "No se pudo agregar al carrito", status: "error" });
-    }
+  // Fallback localStorage si no hay endpoint de cart
+  const addToLocalCart = ({ productId, quantity, color }) => {
+    const key = "cart";
+    const curr = (() => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } })();
+    const idx = curr.findIndex((i) => i.productId === productId && i.color === color);
+    if (idx >= 0) curr[idx].quantity += quantity;
+    else curr.push({ productId, quantity, color });
+    localStorage.setItem(key, JSON.stringify(curr));
   };
+
+  // Add to cart
+const addToCartHandler = async (product, qty, color) => {
+  const payload = { productId: product._id, quantity: qty, color: color?.name };
+  try {
+    await ApiService.post("/cart/add", payload);  // ✅ usa el payload
+    await refreshCart?.();                       // ✅ actualiza contador header
+    toast({ title: `Agregado ${qty} al carrito`, status: "success" });
+  } catch (e) {
+    console.warn("POST /cart/add falló; guardo en localStorage. Detalle:", e);
+    // fallback local opcional
+    const key = "cart";
+    const curr = (() => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } })();
+    const idx = curr.findIndex((i) => i.productId === payload.productId && i.color === payload.color);
+    if (idx >= 0) curr[idx].quantity += payload.quantity; else curr.push(payload);
+    localStorage.setItem(key, JSON.stringify(curr));
+    toast({ title: `Agregado ${qty} al carrito (local)`, status: "success" });
+  }
+};
 
   if (loading) {
     return (
       <Box maxW="container.xl" mx="auto" px={4} py={8}>
         <Spinner />
-        <Text ml={2} color={useColorModeValue("gray.600","gray.400")} display="inline-block">Cargando productos…</Text>
+        <Text ml={2} color={muted} display="inline-block">Cargando productos…</Text>
       </Box>
     );
   }
 
   return (
-    <Box>
-      {/* Banner título */}
-      <Box bg={bannerBg} color="white" py={3} textAlign="center" fontWeight="bold" fontSize="xl">
-        {titleCase(enumCategory)}
+    <Box minH="100vh">
+      {/* 1) Header fijo */}
+      <AppHeader /* wishlistCount={...} cartCount={...} */ />
+
+      {/* Banner + 2) Botón Volver */}
+      <Box bg={bannerBg} color="white" py={3}>
+        <Container maxW="container.xl">
+          <HStack justify="space-between">
+            <BackButton />
+            <Text fontWeight="bold" fontSize="xl">{bannerTitle}</Text>
+            <Box w="88px" /> {/* spacer para mantener centrado el título */}
+          </HStack>
+        </Container>
       </Box>
 
+      {/* Contenido */}
       <Container maxW="container.xl" py={6}>
         {/* Controles */}
         <HStack justify="space-between" mb={4}>
           <Button leftIcon={<Icon as={FiFilter} />} variant="outline" onClick={() => setDrawerOpen(true)}>
             Filtrar
           </Button>
-
           <HStack>
             <Text color={muted} fontSize="sm">Ordenar por:</Text>
             <Select size="sm" value={sortBy} onChange={(e) => setSortBy(e.target.value)} w="180px">
@@ -235,7 +249,7 @@ export default function CategoryPage() {
         )}
       </Container>
 
-      {/* Drawer filtros */}
+      {/* Filtros */}
       <CategoryFiltersDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}

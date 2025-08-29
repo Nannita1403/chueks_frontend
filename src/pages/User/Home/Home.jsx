@@ -17,7 +17,7 @@ export default function Home() {
 
   const { toast } = useToast();
   const { user, token, cartItems, wishlistItems } = useAuth();
-
+  const { refreshCart } = useAuth();
   const muted = useColorModeValue("gray.600", "gray.400");
 
   // 6 categorías (ajusta IDs a tus rutas reales)
@@ -98,21 +98,19 @@ export default function Home() {
   const openDetail = (p) => setSelectedProduct(p);
 
   const addToCartHandler = async (product, qty, color) => {
-    try {
-      await fetch("/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        credentials: "include",
-        body: JSON.stringify({ productId: product._id, quantity: qty, color: color?.name }),
-      });
-      toast({ title: `Agregado ${qty} al carrito`, status: "success" });
-    } catch (e) {
-      toast({ title: "No se pudo agregar al carrito", status: "error" });
-    }
-  };
+  try {
+    await ApiService.post("/cart/add", {
+      productId: product._id,
+      quantity: qty,
+      color: color?.name,
+    });
+    await refreshCart?.(); // 🔁 actualiza badge del header
+    toast({ title: `${qty} ${product.name} agregados al carrito`, status: "success" });
+  } catch (e) {
+    console.error(e);
+    toast({ title: "No se pudo agregar al carrito", status: "error" });
+  }
+};
 
   if (loading) {
     return (

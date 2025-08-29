@@ -1,3 +1,4 @@
+// src/components/Header/AppHeader.jsx
 import { Link } from "react-router-dom";
 import {
   Box,
@@ -13,15 +14,15 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FiSearch, FiHeart, FiShoppingBag, FiUser, FiMenu } from "react-icons/fi";
+import { useAuth } from "../../context/Auth/auth.context.jsx";
 
-export default function AppHeader({
-  logoSrc = "/logoRedondo.png",
-  wishlistCount = 0,
-  cartCount = 0,
-  onOpenMenu,
-}) {
+export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+
+  // ✅ leemos directamente del contexto
+  const { cartCount, wishlistItems } = useAuth();
+  const wishlistCount = wishlistItems?.length || 0;
 
   return (
     <Box position="sticky" top={0} zIndex={50} bg={bgColor} borderBottom="1px" borderColor={borderColor}>
@@ -53,19 +54,43 @@ export default function AppHeader({
             <Link to="/wishlist">
               <Box position="relative">
                 <IconButton aria-label="Wishlist" icon={<FiHeart />} variant="ghost" />
-                <Badge position="absolute" top="-1" right="-1" colorScheme="pink" borderRadius="full" fontSize="xs" minW={5} h={5}>
+                <Badge
+                  position="absolute"
+                  top="-1"
+                  right="-1"
+                  colorScheme="pink"
+                  borderRadius="full"
+                  fontSize="xs"
+                  minW={5}
+                  h={5}
+                  display="grid"
+                  placeItems="center"
+                >
                   {wishlistCount}
                 </Badge>
               </Box>
             </Link>
+
             <Link to="/cart">
               <Box position="relative">
                 <IconButton aria-label="Cart" icon={<FiShoppingBag />} variant="ghost" />
-                <Badge position="absolute" top="-1" right="-1" colorScheme="pink" borderRadius="full" fontSize="xs" minW={5} h={5}>
+                <Badge
+                  position="absolute"
+                  top="-1"
+                  right="-1"
+                  colorScheme="pink"
+                  borderRadius="full"
+                  fontSize="xs"
+                  minW={5}
+                  h={5}
+                  display="grid"
+                  placeItems="center"
+                >
                   {cartCount}
                 </Badge>
               </Box>
             </Link>
+
             <Link to="/profile">
               <IconButton aria-label="Profile" icon={<FiUser />} variant="ghost" />
             </Link>

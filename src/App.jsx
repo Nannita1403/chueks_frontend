@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx"
 import ProfilePage from "./pages/User/Profile/Profile.jsx"
 import AdminLayout from "./pages/Admin/Layout/AdminLayout.jsx"
 import Cart from "./pages/User/Cart/Cart.jsx"
+import OrderConfirm from "./pages/User/Order/OrderConfirm.jsx"
 
 
 
@@ -74,6 +75,15 @@ const App = () => {
         </ProtectedRoute>
       }
     />
+<Route
+      path="/order/confirm"
+      element={
+        <ProtectedRoute>
+        <OrderConfirm /> 
+        </ProtectedRoute>
+      }
+    />
+
 {/* Protected admin routes */}
         <Route
           path="/admin/*"

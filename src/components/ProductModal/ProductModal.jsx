@@ -1,46 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
   ModalBody, ModalFooter, Button, Image, Text, Flex, Select, useToast
 } from "@chakra-ui/react";
 import { toggleLike } from "../../reducers/products/toggleLike.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
+import ApiService from "../../reducers/api/Api.jsx";
+
+function flattenColors(colors = []) {
+  const out = [];
+  colors.forEach((c) => {
+    const names = Array.isArray(c?.name) ? c.name : (c?.name ? [c.name] : []);
+    names.forEach((n) => out.push({ name: n, stock: Number(c?.stock) || 0 }));
+  });
+  return out;
+}
 
 const ProductModal = ({ isOpen, onClose, product, products, setProducts, addToCartHandler }) => {
-  const { user } = useAuth();
+  const { user, refreshCart } = useAuth(); // 👈 usaremos refreshCart si está disponible
   const toast = useToast();
 
   const [modalProduct, setModalProduct] = useState(product);
-  const [selectedColor, setSelectedColor] = useState(null);
+  const colorItems = useMemo(() => flattenColors(product?.colors), [product]);
+  const [selectedColor, setSelectedColor] = useState(colorItems?.[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [liked, setLiked] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
-  // Normaliza los colores para que siempre tengan un name string
-  const normalizeColors = (colors) =>
-    colors?.map(c => ({
-      ...c,
-      name: Array.isArray(c.name) ? c.name.join(" / ") : c.name
-    }));
 
-  // Inicializar cuando se abre el modal o cambia el producto
   useEffect(() => {
     if (!product) return;
-    const normalizedColors = normalizeColors(product.colors);
-    setModalProduct({ ...product, colors: normalizedColors });
-    setSelectedColor(normalizedColors?.[0] || null);
+    setModalProduct(product);
+    setSelectedColor(colorItems?.[0] || null);
     setQuantity(1);
-    setLiked(user && product.likes?.includes(user.id));
-    setInWishlist(user && user.wishlist?.includes(product._id));
+    setLiked(Boolean(user && product.likes?.includes(user.id)));
+    setInWishlist(Boolean(user && user.wishlist?.includes?.(product._id)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product?._id, user]);
+
+  const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
   const handleToggleLike = async () => {
     if (!user) return toast({ title: "Debes iniciar sesión", status: "warning" });
     try {
       await toggleLike(modalProduct._id, !liked, products, setProducts);
-      setLiked(prev => !prev);
-      // Actualizamos modalProduct para reflejar cambios en cantidad de likes
-      const updated = products.find(p => p._id === modalProduct._id);
+      setLiked((prev) => !prev);
+      const updated = products.find((p) => p._id === modalProduct._id);
       if (updated) setModalProduct(updated);
       toast({ title: liked ? "Quitado de favoritos" : "Agregado a favoritos", status: "success" });
     } catch (err) {
@@ -49,18 +55,43 @@ const ProductModal = ({ isOpen, onClose, product, products, setProducts, addToCa
     }
   };
 
-  const handleAddToCart = () => {
-    if (!selectedColor) return toast({ title: "Selecciona un color", status: "warning" });
-    const qty = Math.min(quantity, selectedColor.stock || 1);
-    addToCartHandler(modalProduct, qty, selectedColor);
+const handleAddToCart = async () => {
+  if (!selectedColor) return toast({ title: "Selecciona un color", status: "warning" });
+  if (!user) return toast({ title: "Debes iniciar sesión para agregar al carrito", status: "warning" });
+
+  const qty = Math.min(quantity, maxQty);
+
+  try {
+    if (typeof addToCartHandler === "function") {
+      await addToCartHandler(modalProduct, qty, { name: selectedColor.name });
+    } else {
+      await ApiService.post("/cart/add", {
+        productId: modalProduct._id,
+        quantity: qty,
+        color: (color?.name || "").trim(),
+      });
+    }
+
+    // 🔁 refresca el contador del header
+    if (typeof refreshCart === "function") await refreshCart();
+    window.dispatchEvent(new CustomEvent("cart:updated"));
+
     toast({ title: `${qty} ${modalProduct.name} agregados al carrito`, status: "success" });
     setQuantity(1);
-  };
+    // onClose(); // si quieres cerrar el modal al agregar
+  } catch (e) {
+    console.error(e);
+    toast({ title: "No se pudo agregar al carrito", status: "error" });
+  }
+};
 
   const handleToggleWishlist = () => {
-    setInWishlist(prev => !prev);
-    toast({ title: `${modalProduct.name} ${inWishlist ? "eliminado de" : "agregado a"} wishlist`, status: "success" });
-    // Aquí podés hacer dispatch o API para wishlist real
+    setInWishlist((prev) => !prev);
+    toast({
+      title: `${modalProduct?.name} ${inWishlist ? "eliminado de" : "agregado a"} wishlist`,
+      status: "success",
+    });
+    // TODO: llamar a tu endpoint real de wishlist si lo tienes
   };
 
   return (
@@ -70,45 +101,56 @@ const ProductModal = ({ isOpen, onClose, product, products, setProducts, addToCa
         <ModalHeader>{modalProduct?.name}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Image src={modalProduct?.imgPrimary || "/placeholder.svg"} alt={modalProduct?.name} mb={4} borderRadius="md" />
-          <Text mb={2}>{modalProduct?.description}</Text>
-          <Text><strong>Precio Unitario:</strong> ${modalProduct?.priceMin}</Text>
-          <Text><strong>Precio Mayorista:</strong> ${modalProduct?.priceMay}</Text>
-          <Text mb={2}><strong>Stock total:</strong> {modalProduct?.stock}</Text>
-          {selectedColor?.stock < 5 && <Text color="red.500">¡Solo quedan {selectedColor?.stock} unidades de este color!</Text>}
+          <Image
+            src={modalProduct?.imgPrimary || "/placeholder.svg"}
+            alt={modalProduct?.name}
+            mb={4}
+            borderRadius="md"
+            objectFit="cover"
+            w="100%"
+            maxH="320px"
+          />
+          {modalProduct?.description && <Text mb={2}>{modalProduct.description}</Text>}
 
-          {/* Selección de colores */}
+          <Text><strong>Precio Unitario:</strong> ${modalProduct?.priceMin}</Text>
+          {typeof modalProduct?.priceMay === "number" && (
+            <Text><strong>Precio Mayorista:</strong> ${modalProduct.priceMay}</Text>
+          )}
+
+          {selectedColor && (
+            <Text mt={1}><strong>Stock color:</strong> {selectedColor.stock}</Text>
+          )}
+          {selectedColor?.stock > 0 && selectedColor.stock < 5 && (
+            <Text color="red.500">¡Solo quedan {selectedColor.stock} unidades de este color!</Text>
+          )}
+
           <Select
-            mt={2}
+            mt={3}
             value={selectedColor?.name || ""}
             onChange={(e) => {
-              const color = modalProduct.colors.find(c => c.name === e.target.value);
-              setSelectedColor(color);
+              const color = colorItems.find((c) => c.name === e.target.value);
+              setSelectedColor(color || null);
               setQuantity(1);
             }}
           >
-            {modalProduct?.colors?.map(c => (
+            {colorItems.map((c) => (
               <option key={c.name} value={c.name}>
                 {c.name} ({c.stock} disponibles)
               </option>
             ))}
           </Select>
 
-          {/* Cantidad */}
-          <Flex mt={2} align="center" gap={2}>
-            <Button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</Button>
+          <Flex mt={3} align="center" gap={2}>
+            <Button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>-</Button>
             <Text>{quantity}</Text>
-            <Button onClick={() => setQuantity(q => Math.min(selectedColor?.stock || 1, q + 1))}>+</Button>
+            <Button onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}>+</Button>
           </Flex>
 
-          {/* Botones acción */}
-          <Flex mt={3} gap={2}>
-            <Button colorScheme="teal" onClick={handleAddToCart}>Agregar al carrito</Button>
-
-            <Button onClick={handleToggleLike}>
-              {liked ? "❤️" : "🤍"} 
+          <Flex mt={4} gap={2} wrap="wrap">
+            <Button colorScheme="teal" onClick={handleAddToCart} isDisabled={selectedColor?.stock === 0}>
+              Agregar al carrito
             </Button>
-
+            <Button onClick={handleToggleLike}>{liked ? "❤️" : "🤍"}</Button>
             <Button
               onClick={handleToggleWishlist}
               bg={inWishlist ? "black" : "white"}

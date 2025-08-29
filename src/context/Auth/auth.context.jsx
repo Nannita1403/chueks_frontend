@@ -1,5 +1,7 @@
-import { createContext, useContext, useReducer, useEffect } from "react";
+// src/context/Auth/auth.context.jsx
+import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
 import authService from "../../reducers/users/users.actions.jsx";
+import ApiService from "../../reducers/api/Api.jsx";
 
 export const AuthContext = createContext();
 
@@ -9,12 +11,15 @@ const initialState = {
   isAuthenticated: false,
   loading: true,
   error: null,
+  cartItems: [],       // <- items del carrito (para contar unidades)
+  wishlistItems: [],   // opcional
 };
 
 const authReducer = (state, action) => {
   switch (action.type) {
     case "LOGIN_START":
       return { ...state, loading: true, error: null };
+
     case "LOGIN_SUCCESS":
       return {
         ...state,
@@ -24,14 +29,25 @@ const authReducer = (state, action) => {
         token: action.payload.token,
         error: null,
       };
+
     case "LOGIN_FAILURE":
       return { ...state, loading: false, isAuthenticated: false, user: null, token: null, error: action.payload };
+
     case "LOGOUT":
       return { ...initialState, loading: false };
+
     case "SET_USER":
-      return { ...state, user: action.payload, isAuthenticated: true };
+      return { ...state, user: action.payload, isAuthenticated: true, loading: false };
+
     case "CLEAR_ERROR":
       return { ...state, error: null };
+
+    case "SET_CART_ITEMS":
+      return { ...state, cartItems: Array.isArray(action.payload) ? action.payload : [] };
+
+    case "SET_WISHLIST_ITEMS":
+      return { ...state, wishlistItems: Array.isArray(action.payload) ? action.payload : [] };
+
     default:
       return state;
   }
@@ -40,24 +56,52 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  // Chequeo inicial de sesión
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      const user = authService.getCurrentUser();
-      if (token && user) {
-        dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
-      } else {
-        dispatch({ type: "LOGOUT" });
-      }
-    };
-    checkAuth();
+    const token = localStorage.getItem("token");
+    const user = authService.getCurrentUser();
+    if (token && user) {
+      dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+    } else {
+      dispatch({ type: "LOGOUT" });
+    }
   }, []);
+
+  // Refresca carrito desde el backend (siempre unidades)
+  const refreshCart = useCallback(async () => {
+    try {
+      const data = await ApiService.get("/cart"); // { items, itemCount, ... }
+      dispatch({ type: "SET_CART_ITEMS", payload: data?.items || [] });
+      return data;
+    } catch {
+      // si falla, limpiamos para que el header no quede desfasado
+      dispatch({ type: "SET_CART_ITEMS", payload: [] });
+      return null;
+    }
+  }, []);
+
+  // Cuando cambia la auth, actualizamos carrito
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      refreshCart();
+    } else {
+      dispatch({ type: "SET_CART_ITEMS", payload: [] });
+    }
+  }, [state.isAuthenticated, refreshCart]);
+
+  // Listener opcional para eventos globales
+  useEffect(() => {
+    const onCartUpdated = () => refreshCart();
+    window.addEventListener("cart:updated", onCartUpdated);
+    return () => window.removeEventListener("cart:updated", onCartUpdated);
+  }, [refreshCart]);
 
   const login = async (credentials) => {
     dispatch({ type: "LOGIN_START" });
     try {
       const response = await authService.login(credentials);
       dispatch({ type: "LOGIN_SUCCESS", payload: { user: response.user, token: response.token } });
+      await refreshCart(); // actualiza contador tras login
       return response;
     } catch (error) {
       dispatch({ type: "LOGIN_FAILURE", payload: error.message });
@@ -68,12 +112,26 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     authService.logout();
     dispatch({ type: "LOGOUT" });
+    dispatch({ type: "SET_CART_ITEMS", payload: [] });
   };
 
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
 
+  // Conteo de unidades (unificado para Home, Header y Carrito)
+  const cartCount = state.cartItems.reduce((acc, it) => acc + (Number(it?.quantity) || 0), 0);
+
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, clearError, isAdmin: () => state.user?.rol === "admin" }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        cartCount,        // <- para el badge del header
+        login,
+        logout,
+        clearError,
+        refreshCart,      // <- llamalo después de /cart/add, /cart/:id, etc.
+        isAdmin: () => state.user?.rol === "admin",
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
