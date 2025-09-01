@@ -1,47 +1,47 @@
-import React from "react"
-import { Button as ChakraButton } from "@chakra-ui/react"
+import React from "react";
+import { Button as ChakraButton } from "@chakra-ui/react";
 
 const CustomButton = React.forwardRef(
   ({ variant = "solid", size = "md", colorScheme = "brand", children, ...props }, ref) => {
     const getChakraVariant = (variant) => {
       switch (variant) {
         case "default":
-          return "solid"
+          return "solid";
         case "destructive":
-          return "solid"
+          return "solid";
         case "outline":
-          return "outline"
+          return "outline";
         case "secondary":
-          return "solid"
+          return "solid";
         case "ghost":
-          return "ghost"
+          return "ghost";
         case "link":
-          return "link"
+          return "link";
         default:
-          return "solid"
+          return "solid";
       }
-    }
+    };
 
     const getChakraSize = (size) => {
       switch (size) {
         case "sm":
-          return "sm"
+          return "sm";
         case "default":
-          return "md"
+          return "md";
         case "lg":
-          return "lg"
+          return "lg";
         case "icon":
-          return "sm"
+          return "sm";
         default:
-          return "md"
+          return "md";
       }
-    }
+    };
 
     const getColorScheme = (variant) => {
-      if (variant === "destructive") return "red"
-      if (variant === "secondary") return "gray"
-      return colorScheme
-    }
+      if (variant === "destructive") return "red";
+      if (variant === "secondary") return "gray";
+      return colorScheme;
+    };
 
     return (
       <ChakraButton
@@ -53,34 +53,10 @@ const CustomButton = React.forwardRef(
       >
         {children}
       </ChakraButton>
-    )
-  },
-)
+    );
+  }
+);
 
-CustomButton.displayName = "CustomButton"
+CustomButton.displayName = "CustomButton";
 
-export { CustomButton }
-
-
-/*import { Button } from "@chakra-ui/react"
-
-const ButtonForm = ({
-  children,
-  width,
-  type = "submit",
-  onClick = () => {},
-  invert,
-}) => {
-  return (
-    <Button marginTop={'15px'} size="md" variant="outline" rounded="lg"
-      onClick={onClick}
-      className={`main_button ${invert ? "invert" : ""}`}
-      style={{ width: width }}
-      type={type}
-    >
-      {children}
-    </Button>
-  );
-};
-
-export default ButtonForm;*/
+export default CustomButton;

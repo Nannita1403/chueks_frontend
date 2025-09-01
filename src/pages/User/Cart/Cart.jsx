@@ -7,7 +7,7 @@ import {
 import { CloseIcon, AddIcon, MinusIcon } from "@chakra-ui/icons";
 
 import ApiService from "../../../reducers/api/Api.jsx";
-import { CustomButton } from "../../../components/Button/Button.jsx";
+import CustomButton from  "../../../components/Button/Button.jsx";
 import {
   CustomCard as Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription,
 } from "../../../components/Card/Card.jsx";

@@ -4,7 +4,7 @@ import axios from "axios";
 import { Box, Image, Heading, Text, Flex, Button } from "@chakra-ui/react";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
-import { CustomButton } from "../../../components/Button/Button.jsx";
+import CustomButton from "../../../components/Button/Button.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
 
 const ProductDetail = () => {

@@ -1,5 +1,5 @@
-import { Box, Image, Text, Flex, Button } from "@chakra-ui/react"; 
-import { CustomButton } from "../Button/Button.jsx";
+import { Box, Image, Text, Flex } from "@chakra-ui/react"; 
+import CustomButton from  "../../components/Button/Button.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 
 const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
@@ -27,9 +27,9 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
           {isLiked ? "❤️" : "🤍"} {product.likes?.length || 0}
         </CustomButton>
 
-        <Button size="sm" colorScheme="teal" onClick={onViewDetail}>
+        <CustomButton size="sm" colorScheme="teal" onClick={onViewDetail}>
           Ver detalle
-        </Button>
+        </CustomButton>
       </Flex>
     </Box>
   );

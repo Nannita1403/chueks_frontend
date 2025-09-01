@@ -1,7 +1,9 @@
 // reducers/api/Api.jsx
 const DEFAULT_BASE = "http://localhost:3000/api/v1";
 const API_BASE_URL =
-  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL) ||
+  (typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_API_BASE_URL) ||
   (typeof window !== "undefined" && window.__API_BASE_URL__) ||
   DEFAULT_BASE;
 
@@ -25,24 +27,28 @@ class ApiService {
 
   getHeaders(isFormData = false) {
     const headers = {};
-    if (!isFormData) headers["Content-Type"] = "application/json";
-    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    }
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
     return headers;
   }
 
   async request(endpoint, options = {}, isFormData = false) {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
-    method: options.method || "GET",
-    headers: this.getHeaders(isFormData),
-    body: options.body ?? undefined,
+      method: options.method || "GET",
+      headers: this.getHeaders(isFormData),
+      body: options.body ?? undefined,
     };
 
     console.log("📡 Petición:", {
       url,
-      method: config.method || "GET",
+      method: config.method,
       headers: config.headers,
-      body: options?.body || undefined,
+      body: isFormData ? "[FormData]" : options.body,
     });
 
     try {
@@ -53,40 +59,75 @@ class ApiService {
       clearTimeout(timeoutId);
 
       const ct = response.headers.get("content-type") || "";
-      const data = ct.includes("application/json") ? await response.json() : await response.text();
+      const data = ct.includes("application/json")
+        ? await response.json()
+        : await response.text();
 
       if (!response.ok) {
-        const message = typeof data === "object" && data?.message ? data.message : data;
+        const message =
+          typeof data === "object" && data?.message ? data.message : data;
         throw new Error(message || "Error en la petición");
       }
 
       console.log("✅ Petición exitosa:", data);
 
-      // Normalizaciones comunes
+      // 🔄 Normalización
       if (data?.data) return data.data;
       if (data?.products) return data.products;
       if (Array.isArray(data)) return data;
       return data;
     } catch (error) {
-      if (error.name === "AbortError") throw new Error("⏰ La petición tardó demasiado");
+      if (error.name === "AbortError")
+        throw new Error("⏰ La petición tardó demasiado");
       if (error.name === "TypeError") {
-        // Esto pasa cuando el host:puerto NO responde → connection refused
         throw new Error(`❌ No se puede conectar al servidor en ${this.baseURL}`);
       }
       throw error;
     }
   }
 
-  // Métodos HTTP
-  get(endpoint)   { return this.request(endpoint, { method: "GET" }); }
-  post(endpoint, data) { return this.request(endpoint, { method: "POST", body: JSON.stringify(data) }); }
-  put(endpoint, data)  { return this.request(endpoint, { method: "PUT",  body: JSON.stringify(data) }); }
-  patch(endpoint, data){ return this.request(endpoint, { method: "PATCH",body: JSON.stringify(data) }); }
-  delete(endpoint)     { return this.request(endpoint, { method: "DELETE" }); }
+  // Métodos HTTP estándar
+  get(endpoint) {
+    return this.request(endpoint, { method: "GET" });
+  }
 
-  // FormData
-  postFormData(endpoint, formData) { return this.request(endpoint, { method: "POST", body: formData }, true); }
-  putFormData(endpoint, formData)  { return this.request(endpoint, { method: "PUT",  body: formData }, true); }
+  post(endpoint, data) {
+    return this.request(endpoint, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  put(endpoint, data) {
+    return this.request(endpoint, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  patch(endpoint, data) {
+    return this.request(endpoint, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  delete(endpoint) {
+    return this.request(endpoint, { method: "DELETE" });
+  }
+
+  // 🚨 Métodos especiales para multipart/form-data
+  postFormData(endpoint, formData) {
+    return this.request(endpoint, { method: "POST", body: formData }, true);
+  }
+
+  putFormData(endpoint, formData) {
+    return this.request(endpoint, { method: "PUT", body: formData }, true);
+  }
+
+  deleteFormData(endpoint, formData) {
+    return this.request(endpoint, { method: "DELETE", body: formData }, true);
+  }
 }
 
 export default new ApiService();

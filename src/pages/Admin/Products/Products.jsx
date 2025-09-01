@@ -7,19 +7,25 @@ import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import axios from "axios";
 
 import { useProducts } from "../../../context/Products/products.context.jsx";
-import ProductsActions from "../../../reducers/products/products.actions.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
 import CreateProductModal from "../../../components/CreateProductModal/CreateProductModal.jsx";
 import EditProductModal from "../../../components/EditProductModal/EditProductModal.jsx";
 
 const AdminProducts = () => {
-  const { products: productsState, dispatch: productsDispatch } = useProducts();
+  const {
+    products,
+    getProducts,
+    deleteProduct,
+    updateProduct
+  } = useProducts();
+
   const [isLoading, setIsLoading] = useState(true);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
     likes: [], elements: [], category: [], material: [], colors: [],
-    height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: ""
+    height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
+    status: "activo" // ✅ nuevo campo estado
   });
 
   const [productOptions, setProductOptions] = useState({
@@ -37,23 +43,27 @@ const AdminProducts = () => {
   const toast = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // Cargar productos
+  // ✅ cargar productos al montar
   useEffect(() => {
-    const loadProducts = async () => {
+    const load = async () => {
       setIsLoading(true);
       try {
-        const products = await ProductsActions.getProducts();
-        productsDispatch({ type: "GET_PRODUCTS", payload: products });
+        await getProducts();
       } catch (error) {
-        toast({ title: "Error", description: "No se pudieron cargar los productos", status: "error", duration: 3000 });
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los productos",
+          status: "error",
+          duration: 3000
+        });
       } finally {
         setIsLoading(false);
       }
     };
-    loadProducts();
-  }, [productsDispatch, toast]);
+    load();
+  }, [getProducts, toast]);
 
-  // Cargar opciones dinámicas desde backend
+  // ✅ cargar opciones dinámicas
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -78,24 +88,46 @@ const AdminProducts = () => {
 
   const handleDelete = async (id) => {
     try {
-      await ProductsActions.deleteProduct(id);
-      productsDispatch({ type: "DELETE_PRODUCT_SUCCESS", payload: id });
+      await deleteProduct(id); // ✅ ya actualiza el estado en el provider
       toast({ title: "Producto eliminado", status: "success", duration: 3000 });
     } catch (error) {
+      console.error(error);
       toast({ title: "Error al eliminar", status: "error", duration: 3000 });
+    }
+  };
+
+  const handleUpdate = async (updatedProduct) => {
+    try {
+      await updateProduct(updatedProduct._id, updatedProduct); // ✅ ya actualiza el estado en el provider
+      toast({ title: "Producto actualizado", status: "success", duration: 3000 });
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error al actualizar", status: "error", duration: 3000 });
+    }
+  };
+
+  // ✅ actualizar estado desde el select
+  const handleChangeStatus = async (id, newStatus) => {
+    try {
+      await updateProduct(id, { status: newStatus });
+      toast({ title: "Estado actualizado", status: "success", duration: 3000 });
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error al cambiar estado", status: "error", duration: 3000 });
     }
   };
 
   if (isLoading) return <Loading />;
 
-  // Filtrado
-  let products = productsState.products || [];
-  if (filterCategory) products = products.filter(p => p.category?.includes(filterCategory));
-  if (filterStatus) products = products.filter(p => filterStatus === "activo" ? p.imgPrimary : !p.imgPrimary);
+  // ✅ Filtrado
+  let filteredProducts = products || [];
+  if (filterCategory) filteredProducts = filteredProducts.filter(p => p.category?.includes(filterCategory));
+  if (filterStatus) filteredProducts = filteredProducts.filter(p => p.status === filterStatus);
 
-  // Ordenamiento
+  // ✅ Ordenamiento
   if (sortField) {
-    products = products.sort((a, b) => {
+    filteredProducts = [...filteredProducts].sort((a, b) => {
       const valA = a[sortField] || "";
       const valB = b[sortField] || "";
       if (typeof valA === "string") return sortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -139,17 +171,25 @@ const AdminProducts = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {products.length > 0 ? (
-                products.map(p => {
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map(p => {
                   const stock = p.colors?.reduce((acc, c) => acc + (c.stock || 0), 0) || 0;
-                  const estado = p.imgPrimary ? "Activo" : "Inactivo";
                   return (
                     <Tr key={p._id}>
                       <Td>{p.name}</Td>
                       <Td>{Array.isArray(p.category) ? p.category.join(", ") : p.category}</Td>
                       <Td>${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}</Td>
                       <Td>{stock}</Td>
-                      <Td>{estado}</Td>
+                      <Td>
+                        <Select
+                          size="sm"
+                          value={p.status || "activo"}
+                          onChange={(e) => handleChangeStatus(p._id, e.target.value)}
+                        >
+                          <option value="activo">Activo</option>
+                          <option value="inactivo">Inactivo</option>
+                        </Select>
+                      </Td>
                       <Td>
                         <IconButton icon={<FiEdit />} mr={2} onClick={() => handleOpenEdit(p)} />
                         <IconButton icon={<FiCopy />} mr={2} onClick={() => handleDuplicate(p)} />
@@ -167,15 +207,20 @@ const AdminProducts = () => {
       </Container>
 
       <CreateProductModal
-        isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)}
-        newProduct={newProduct} setNewProduct={setNewProduct}
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        newProduct={newProduct}
+        setNewProduct={setNewProduct}
         productOptions={productOptions}
       />
 
       <EditProductModal
-        isOpen={isEditOpen} onClose={() => setIsEditOpen(false)}
-        currentProduct={currentProduct} setCurrentProduct={setCurrentProduct}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        currentProduct={currentProduct}
+        setCurrentProduct={setCurrentProduct}
         productOptions={productOptions}
+        onSave={handleUpdate}
       />
     </Box>
   );

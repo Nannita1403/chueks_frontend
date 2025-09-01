@@ -8,6 +8,7 @@ import ProductsProvider from './providers/ProductsProviders';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { themeSystem } from './theme/theme';
 import { AuthProvider } from '../src/context/Auth/auth.context.jsx';
+import CategoriesProvider from './providers/CategoriesProvider';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 <React.StrictMode>
@@ -17,9 +18,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                <AuthProvider> 
                   <UsersProvider>            
                     <ElementsProvider>
+                        <CategoriesProvider>
                         <ProductsProvider>
                             <App/>  
                         </ProductsProvider>
+                        </CategoriesProvider>
                     </ElementsProvider>
                   </UsersProvider>    
                 </AuthProvider>
