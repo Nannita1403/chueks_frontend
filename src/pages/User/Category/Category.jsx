@@ -137,7 +137,7 @@ export default function CategoryPage() {
         setLoading(false);
       }
     })();
-  }, [enumCategory, filters, sortBy, toast]);
+  }, [enumCategory, filters, sortBy]);
 
   // Likes
   const handleToggleLike = async (productId, addLike) => {

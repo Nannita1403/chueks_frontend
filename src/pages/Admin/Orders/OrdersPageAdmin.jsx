@@ -79,7 +79,7 @@ const OrderStatusBadge = ({ status }) => {
   )
 }
 
-export default function OrdersPage() {
+export default function OrdersPageAdmin() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("")
   const [selectedOrders, setSelectedOrders] = useState([])

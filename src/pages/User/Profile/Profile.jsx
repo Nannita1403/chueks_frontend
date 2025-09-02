@@ -1,178 +1,127 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import {
   Box,
-  Input,
   Heading,
   Text,
   VStack,
-  FormControl,
-  FormLabel,
   Divider,
-  List,
-  ListItem,
-  ListIcon,
+  Spinner,
+  SimpleGrid,
+  useColorModeValue,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { CheckCircleIcon } from "@chakra-ui/icons";
+import axios from "axios";
+import { useAuth } from "../../../context/Auth/auth.context.jsx";
+import { useToast } from "../../../Hooks/useToast.jsx";
+import OrderCard from "../../../components/Order/OrderCard.jsx";
+import OrderModal from "../../../components/Order/OrderModal.jsx";
+import UserLayout from "../UserLayout.jsx";
 
-import Header from "../../../components/Header/AppHeader.jsx";
-import CustomButton from  "../../../components/Button/Button.jsx";
-import {useToast} from "../../../Hooks/useToast.jsx";
-import {useIsMobile} from "../../../Hooks/useMobile.jsx";
+// ✅ Managers como modals
+import AddressModal from "../../../components/Profile/AdressesModal.jsx";
+import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
-  const [form, setForm] = useState({ name: "", telephone: "", address: "" });
-  const [orders, setOrders] = useState([]);
-  const [passwords, setPasswords] = useState({ oldPassword: "", newPassword: "" });
+  const { user, token } = useAuth();
+  const { toast } = useToast();
 
-  const token = localStorage.getItem("token");
-  const toast = useToast();
-  const isMobile = useIsMobile();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // 👉 control de modals
+  const {
+    isOpen: isAddressesOpen,
+    onOpen: onOpenAddresses,
+    onClose: onCloseAddresses,
+  } = useDisclosure();
+
+  const {
+    isOpen: isPhonesOpen,
+    onOpen: onOpenPhones,
+    onClose: onClosePhones,
+  } = useDisclosure();
+
+  const muted = useColorModeValue("gray.600", "gray.400");
 
   useEffect(() => {
-    // Obtener datos del usuario
-    axios
-      .get("/api/users/check-session", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setUser(res.data.user);
-        setForm({
-          name: res.data.user.name,
-          telephone: res.data.user.telephone || "",
-          address: res.data.user.address || "",
+    const fetchOrders = async () => {
+      try {
+        const res = await axios.get("/api/orders/my-orders", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-      });
 
-    // Obtener pedidos
-    axios
-      .get("/api/orders/my-orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setOrders(res.data))
-      .catch(() => setOrders([]));
-  }, [token]);
+        const list = Array.isArray(res.data)
+          ? res.data
+          : res.data?.orders || [];
 
-  const handleUpdate = async () => {
-    try {
-      await axios.patch("/api/users/update", form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast("Perfil actualizado correctamente ✅", "success");
-    } catch {
-      toast("Error al actualizar el perfil ❌", "error");
-    }
-  };
+        setOrders(list);
+      } catch (err) {
+        console.error("❌ Error cargando pedidos:", err);
+        toast({ title: "Error al cargar pedidos", status: "error" });
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handlePassword = async () => {
-    try {
-      await axios.patch("/api/users/password", passwords, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast("Contraseña cambiada ✅", "success");
-      setPasswords({ oldPassword: "", newPassword: "" });
-    } catch {
-      toast("Error al cambiar contraseña ❌", "error");
-    }
-  };
+    if (token) fetchOrders();
+  }, [token, toast]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  };
+  if (loading) {
+    return (
+      <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
+        <Spinner />
+        <Text mt={2} color={muted}>
+          Cargando perfil...
+        </Text>
+      </Box>
+    );
+  }
 
   return (
-    <Box maxW={isMobile ? "100%" : "600px"} mx="auto" py={8} px={4}>
-      <Header title="Mi Perfil" />
+    <UserLayout
+      onOpenAddresses={onOpenAddresses}
+      onOpenPhones={onOpenPhones}
+    >
+      <Box maxW="container.xl" mx="auto" py={8}>
+        <Heading mb={8}>Perfil de {user?.name || "Usuario"}</Heading>
 
-      {/* Datos */}
-      <Box borderWidth="1px" borderRadius="lg" p={6} mb={6}>
-        <Heading size="md" mb={4}>
-          Datos personales
-        </Heading>
-        <VStack spacing={4}>
-          <FormControl>
-            <FormLabel>Nombre</FormLabel>
-            <Input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Teléfono</FormLabel>
-            <Input
-              value={form.telephone}
-              onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Dirección</FormLabel>
-            <Input
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-            />
-          </FormControl>
-          <CustomButton onClick={handleUpdate}>Guardar cambios</CustomButton>
+        <VStack align="stretch" spacing={10}>
+          {/* 👇 Pedidos en la página principal */}
+          <Box>
+            <Heading size="md" mb={3}>
+              Mis pedidos
+            </Heading>
+            <Divider mb={4} />
+
+            {orders.length > 0 ? (
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+                {orders.map((order) => (
+                  <OrderCard
+                    key={order._id}
+                    order={order}
+                    onClick={() => setSelectedOrder(order)}
+                  />
+                ))}
+              </SimpleGrid>
+            ) : (
+              <Text color={muted}>No tienes pedidos todavía.</Text>
+            )}
+          </Box>
         </VStack>
-      </Box>
 
-      {/* Cambiar contraseña */}
-      <Box borderWidth="1px" borderRadius="lg" p={6} mb={6}>
-        <Heading size="md" mb={4}>
-          Cambiar contraseña
-        </Heading>
-        <VStack spacing={4}>
-          <FormControl>
-            <FormLabel>Contraseña actual</FormLabel>
-            <Input
-              type="password"
-              value={passwords.oldPassword}
-              onChange={(e) =>
-                setPasswords({ ...passwords, oldPassword: e.target.value })
-              }
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Nueva contraseña</FormLabel>
-            <Input
-              type="password"
-              value={passwords.newPassword}
-              onChange={(e) =>
-                setPasswords({ ...passwords, newPassword: e.target.value })
-              }
-            />
-          </FormControl>
-          <CustomButton colorScheme="green" onClick={handlePassword}>
-            Cambiar contraseña
-          </CustomButton>
-        </VStack>
-      </Box>
+        {/* Modal detalle pedido */}
+        <OrderModal
+          isOpen={!!selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          order={selectedOrder}
+        />
 
-      {/* Historial */}
-      <Box borderWidth="1px" borderRadius="lg" p={6} mb={6}>
-        <Heading size="md" mb={4}>
-          Mis pedidos
-        </Heading>
-        {orders.length === 0 ? (
-          <Text>No tienes pedidos todavía.</Text>
-        ) : (
-          <List spacing={3}>
-            {orders.map((o) => (
-              <ListItem key={o._id}>
-                <ListIcon as={CheckCircleIcon} color="green.500" />
-                Pedido {o._id} - {o.total}€ - {o.status}
-              </ListItem>
-            ))}
-          </List>
-        )}
+        {/* ✅ Modals para direcciones y teléfonos */}
+        <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} />
+        <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} />
       </Box>
-
-      {/* Logout */}
-      <Divider my={6} />
-      <CustomButton colorScheme="red" onClick={handleLogout}>
-        Cerrar sesión
-      </CustomButton>
-    </Box>
+    </UserLayout>
   );
 }

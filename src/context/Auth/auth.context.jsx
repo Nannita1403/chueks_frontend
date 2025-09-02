@@ -57,15 +57,17 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Chequeo inicial de sesión
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = authService.getCurrentUser();
-    if (token && user) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
-    } else {
-      dispatch({ type: "LOGOUT" });
-    }
-  }, []);
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      const user = authService.getCurrentUser();
+      if (token && user) {
+        dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+        ApiService.setToken(token);
+      } else {
+        dispatch({ type: "LOGOUT" });
+      }
+    }, []);
+
 
   // Refresca carrito desde el backend (siempre unidades)
   const refreshCart = useCallback(async () => {
@@ -96,18 +98,24 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("cart:updated", onCartUpdated);
   }, [refreshCart]);
 
-  const login = async (credentials) => {
-    dispatch({ type: "LOGIN_START" });
-    try {
-      const response = await authService.login(credentials);
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user: response.user, token: response.token } });
-      await refreshCart(); // actualiza contador tras login
-      return response;
-    } catch (error) {
-      dispatch({ type: "LOGIN_FAILURE", payload: error.message });
-      throw error;
-    }
-  };
+ const login = async (credentials) => {
+  dispatch({ type: "LOGIN_START" });
+  try {
+    const response = await authService.login(credentials);
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: { user: response.user, token: response.token },
+    });
+    ApiService.setToken(response.token);
+    localStorage.setItem("token", response.token);
+
+    await refreshCart();
+    return response;
+  } catch (error) {
+    dispatch({ type: "LOGIN_FAILURE", payload: error.message });
+    throw error;
+  }
+};
 
   const logout = () => {
     authService.logout();

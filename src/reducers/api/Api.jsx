@@ -10,7 +10,7 @@ const API_BASE_URL =
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
-    this.token = localStorage.getItem("token");
+    const token = this.token || localStorage.getItem("token");
     console.log("🔧 ApiService inicializado con URL:", this.baseURL);
   }
 
@@ -26,15 +26,16 @@ class ApiService {
   }
 
   getHeaders(isFormData = false) {
-    const headers = {};
-    if (!isFormData) {
-      headers["Content-Type"] = "application/json";
-    }
-    if (this.token) {
-      headers["Authorization"] = `Bearer ${this.token}`;
-    }
-    return headers;
+  const headers = {};
+  const token = localStorage.getItem("token"); 
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
   }
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
   async request(endpoint, options = {}, isFormData = false) {
     const url = `${this.baseURL}${endpoint}`;

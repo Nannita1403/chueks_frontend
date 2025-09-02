@@ -56,7 +56,7 @@ export default function Home() {
         setLoading(false);
       }
     })();
-  }, [toast]);
+  }, []);
 
   const featuredCodes = ["RI002", "BOL002", "BOL008A", "MO004", "NEC002", "TAR002"];
   const featuredProducts = useMemo(() => {
