@@ -1,7 +1,8 @@
+// src/pages/Admin/AdminProducts.jsx
 import { useState, useEffect } from "react";
 import {
-  Box, Flex, VStack, Heading, Button, Table, Thead, Tbody, Tr, Th, Td,
-  IconButton, useToast, useColorModeValue, Container, Select
+  Box, Flex, VStack, Heading, Button, IconButton, useToast,
+  useColorModeValue, Container, Select, SimpleGrid, Card, Badge
 } from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import axios from "axios";
@@ -10,6 +11,10 @@ import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
 import CreateProductModal from "../../../components/CreateProductModal/CreateProductModal.jsx";
 import EditProductModal from "../../../components/EditProductModal/EditProductModal.jsx";
+
+import {
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter
+} from "@chakra-ui/react";
 
 const AdminProducts = () => {
   const {
@@ -21,11 +26,13 @@ const AdminProducts = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [currentProduct, setCurrentProduct] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+
   const [newProduct, setNewProduct] = useState({
     code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
     likes: [], elements: [], category: [], material: [], colors: [],
     height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
-    status: "activo" // ✅ nuevo campo estado
+    status: "activo"
   });
 
   const [productOptions, setProductOptions] = useState({
@@ -34,16 +41,15 @@ const AdminProducts = () => {
 
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const toast = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // ✅ cargar productos al montar
+  // cargar productos al montar
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
@@ -63,7 +69,7 @@ const AdminProducts = () => {
     load();
   }, [getProducts, toast]);
 
-  // ✅ cargar opciones dinámicas
+  // cargar opciones dinámicas
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -86,10 +92,13 @@ const AdminProducts = () => {
     setIsCreateOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     try {
-      await deleteProduct(id); // ✅ ya actualiza el estado en el provider
+      await deleteProduct(deleteId);
       toast({ title: "Producto eliminado", status: "success", duration: 3000 });
+      setIsDeleteOpen(false);
+      setDeleteId(null);
+      setCurrentProduct(null);
     } catch (error) {
       console.error(error);
       toast({ title: "Error al eliminar", status: "error", duration: 3000 });
@@ -98,7 +107,7 @@ const AdminProducts = () => {
 
   const handleUpdate = async (updatedProduct) => {
     try {
-      await updateProduct(updatedProduct._id, updatedProduct); // ✅ ya actualiza el estado en el provider
+      await updateProduct(updatedProduct._id, updatedProduct);
       toast({ title: "Producto actualizado", status: "success", duration: 3000 });
       setIsEditOpen(false);
     } catch (error) {
@@ -107,7 +116,6 @@ const AdminProducts = () => {
     }
   };
 
-  // ✅ actualizar estado desde el select
   const handleChangeStatus = async (id, newStatus) => {
     try {
       await updateProduct(id, { status: newStatus });
@@ -120,25 +128,10 @@ const AdminProducts = () => {
 
   if (isLoading) return <Loading />;
 
-  // ✅ Filtrado
+  // Filtrado
   let filteredProducts = products || [];
   if (filterCategory) filteredProducts = filteredProducts.filter(p => p.category?.includes(filterCategory));
   if (filterStatus) filteredProducts = filteredProducts.filter(p => p.status === filterStatus);
-
-  // ✅ Ordenamiento
-  if (sortField) {
-    filteredProducts = [...filteredProducts].sort((a, b) => {
-      const valA = a[sortField] || "";
-      const valB = b[sortField] || "";
-      if (typeof valA === "string") return sortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
-      return sortOrder === "asc" ? valA - valB : valB - valA;
-    });
-  }
-
-  const handleSort = (field) => {
-    if (sortField === field) setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    else { setSortField(field); setSortOrder("asc"); }
-  };
 
   return (
     <Box minH="100vh" bg="gray.50" py={8}>
@@ -159,53 +152,80 @@ const AdminProducts = () => {
             </Select>
           </Flex>
 
-          <Table variant="striped" colorScheme="gray" bg={bgColor}>
-            <Thead>
-              <Tr>
-                <Th onClick={() => handleSort("name")}>Nombre</Th>
-                <Th onClick={() => handleSort("category")}>Categoría</Th>
-                <Th onClick={() => handleSort("priceMin")}>Precio</Th>
-                <Th>Stock</Th>
-                <Th>Estado</Th>
-                <Th>Acciones</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map(p => {
-                  const stock = p.colors?.reduce((acc, c) => acc + (c.stock || 0), 0) || 0;
-                  return (
-                    <Tr key={p._id}>
-                      <Td>{p.name}</Td>
-                      <Td>{Array.isArray(p.category) ? p.category.join(", ") : p.category}</Td>
-                      <Td>${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}</Td>
-                      <Td>{stock}</Td>
-                      <Td>
-                        <Select
-                          size="sm"
-                          value={p.status || "activo"}
-                          onChange={(e) => handleChangeStatus(p._id, e.target.value)}
-                        >
-                          <option value="activo">Activo</option>
-                          <option value="inactivo">Inactivo</option>
-                        </Select>
-                      </Td>
-                      <Td>
-                        <IconButton icon={<FiEdit />} mr={2} onClick={() => handleOpenEdit(p)} />
-                        <IconButton icon={<FiCopy />} mr={2} onClick={() => handleDuplicate(p)} />
-                        <IconButton icon={<FiTrash2 />} colorScheme="red" onClick={() => handleDelete(p._id)} />
-                      </Td>
-                    </Tr>
-                  );
-                })
-              ) : (
-                <Tr><Td colSpan={6} textAlign="center">No hay productos</Td></Tr>
-              )}
-            </Tbody>
-          </Table>
+          {/* Tarjetas de productos */}
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map(p => (
+                <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
+                  <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h="200px" objectFit="cover" />
+
+                  <Box p={4}>
+                    <Heading size="md" mb={2}>{p.name}</Heading>
+                    <Box fontSize="sm" color="gray.600" mb={1}>
+                      <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}
+                    </Box>
+                    <Box fontSize="sm" color="gray.600" mb={1}>
+                      <b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}
+                    </Box>
+
+                    <Box fontSize="sm" color="gray.600" mb={1}>
+                      <b>Stock:</b>
+                      <Flex wrap="wrap" gap={2} mt={1}>
+                        {p.colors && p.colors.length > 0 ? (
+                          p.colors.map((c, idx) => (
+                            <Badge
+                              key={idx}
+                              colorScheme="purple"
+                              borderRadius="md"
+                              px={2}
+                              py={1}
+                            >
+                              {c.name}: {c.stock}
+                            </Badge>
+                          ))
+                        ) : (
+                          <Badge colorScheme="red">Sin stock</Badge>
+                        )}
+                      </Flex>
+                    </Box>
+
+                    <Box fontSize="sm" color="gray.600" mb={3}>
+                      <b>Estado:</b>{" "}
+                      <Select
+                        size="sm"
+                        value={p.status || "activo"}
+                        onChange={(e) => handleChangeStatus(p._id, e.target.value)}
+                        w="auto"
+                        display="inline-block"
+                      >
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                      </Select>
+                    </Box>
+
+                    <Flex justify="flex-end" gap={2}>
+                      <IconButton icon={<FiEdit />} aria-label="Editar" onClick={() => handleOpenEdit(p)} />
+                      <IconButton icon={<FiCopy />} aria-label="Duplicar" onClick={() => handleDuplicate(p)} />
+                      <IconButton
+                        icon={<FiTrash2 />}
+                        aria-label="Eliminar"
+                        colorScheme="red"
+                        onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }}
+                      />
+                    </Flex>
+                  </Box>
+                </Card>
+              ))
+            ) : (
+              <Box textAlign="center" py={10} color="gray.500">
+                No hay productos
+              </Box>
+            )}
+          </SimpleGrid>
         </VStack>
       </Container>
 
+      {/* Modal de creación */}
       <CreateProductModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -214,6 +234,7 @@ const AdminProducts = () => {
         productOptions={productOptions}
       />
 
+      {/* Modal de edición */}
       <EditProductModal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
@@ -222,6 +243,38 @@ const AdminProducts = () => {
         productOptions={productOptions}
         onSave={handleUpdate}
       />
+
+      {/* Modal de eliminación */}
+      <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirmar eliminación</ModalHeader>
+          <ModalBody>
+            {currentProduct && (
+              <Card shadow="lg" borderRadius="lg" overflow="hidden">
+                <Box as="img"
+                  src={currentProduct.imgPrimary}
+                  alt={currentProduct.name}
+                  w="100%"
+                  h="200px"
+                  objectFit="cover"
+                />
+                <Box p={4}>
+                  <Heading size="md" mb={2}>{currentProduct.name}</Heading>
+                  <Box color="gray.600">
+                    Este producto se eliminará permanentemente.  
+                    ¿Estás seguro de continuar?
+                  </Box>
+                </Box>
+              </Card>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button mr={3} onClick={() => setIsDeleteOpen(false)}>Cancelar</Button>
+            <Button colorScheme="red" onClick={handleDelete}>Eliminar</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
