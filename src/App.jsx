@@ -5,10 +5,10 @@ import Home from "./pages/User/Home/Home.jsx";
 import ProductDetail from "./pages/User/Product/Product.jsx";
 import CategoryPage from "./pages/User/Category/Category.jsx";
 import WishlistPage from "./pages/User/Wishlist/Wishlist.jsx";
-import AdminDashboard from "./pages/admin/DashboardAdmin/DashboardAdmin.jsx";
-import AdminProducts from "./pages/admin/Products/Products.jsx";
-import AdminCategories from "./pages/admin/Categories/Categories.jsx";
-import AnalyticsPage from "./pages/admin/Analytics/Analytics.jsx";
+import AdminDashboard from "./pages/Admin/DashboardAdmin/DashboardAdmin.jsx";
+import AdminProducts from "./pages/Admin/Products/Products.jsx";
+import AdminCategories from "./pages/Admin/Categories/Categories.jsx";
+import AnalyticsPage from "./pages/Admin/Analytics/Analytics.jsx";
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx";
 import AdminLayout from "./pages/Admin/Layout/AdminLayout.jsx";
 import Cart from "./pages/User/Cart/Cart.jsx";
@@ -85,7 +85,7 @@ const App = () => {
             <ProtectedRoute>
               <AdminLayout>
                 <Routes>
-                  <Route path="" element={<AdminDashboard />} />
+                  <Route path="" element={<AdminDashboard/>} />
                   <Route path="products" element={<AdminProducts />} />
                   <Route path="categories" element={<AdminCategories />} />
                   <Route path="analytics" element={<AnalyticsPage />} />

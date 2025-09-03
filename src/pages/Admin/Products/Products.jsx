@@ -67,7 +67,7 @@ const AdminProducts = () => {
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3000/api/v1/meta/products/options");
+        const { data } = await axios.get("https://chueks-backend.vercel.app/api/v1/meta/products/options");
         setProductOptions(data);
       } catch (err) {
         console.error("Error cargando opciones de productos:", err);

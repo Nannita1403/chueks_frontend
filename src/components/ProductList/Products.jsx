@@ -14,7 +14,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/v1/products", {
+        const response = await axios.get("https://chueks-backend.vercel.app/api/v1/products", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         setProducts(response.data.data || response.data);
@@ -32,7 +32,7 @@ const Products = () => {
     try {
       const isLiked = product.likes?.includes(user.id);
       const res = await axios.put(
-        `http://localhost:3000/api/v1/products/toggleLike/${product._id}/${!isLiked}`,
+        `https://chueks-backend.vercel.app/api/v1/products/toggleLike/${product._id}/${!isLiked}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

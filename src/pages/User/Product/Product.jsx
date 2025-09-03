@@ -30,7 +30,7 @@ const ProductDetail = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `http://localhost:3000/api/v1/products/${id}`,
+          `https://chueks-backend.vercel.app/api/v1/products/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -50,7 +50,7 @@ const ProductDetail = () => {
     try {
       setLikeLoading(true);
       const res = await axios.put(
-        `http://localhost:3000/api/v1/products/toggleLike/${product._id}/${!isLiked}`,
+        `https://chueks-backend.vercel.app/api/v1/products/toggleLike/${product._id}/${!isLiked}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

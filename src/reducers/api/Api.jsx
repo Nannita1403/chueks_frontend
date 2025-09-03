@@ -1,5 +1,7 @@
-// reducers/api/Api.jsx
-const DEFAULT_BASE = "http://localhost:3000/api/v1";
+const localUrl = 'http://localhost:3000/api/v1';
+const vercelUrl = 'https://chueks-backend.vercel.app/api/v1'; // Cambia a tu URL de producción
+
+export const DEFAULT_BASE = vercelUrl;
 const API_BASE_URL =
   (typeof import.meta !== "undefined" &&
     import.meta.env &&

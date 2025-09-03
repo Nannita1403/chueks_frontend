@@ -80,7 +80,7 @@ class ProductsActions {
   async toggleLike(productId, addLike) {
     try {
       const res = await axios.put(
-        `http://localhost:3000/api/v1/products/toggleLike/${productId}/${addLike}`,
+        `https://chueks-backend.vercel.app/api/v1/products/toggleLike/${productId}/${addLike}`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
