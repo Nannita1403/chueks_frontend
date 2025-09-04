@@ -1,15 +1,38 @@
-import LogoutButton from "@/components/LogoutButton/LogoutButton";
-import { Box, Flex, VStack, Divider, Image, Spacer } from "@chakra-ui/react";
-import { NavLink } from "react-router-dom";
+"use client"
+
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import LogoutButton from "@/components/LogoutButton/LogoutButton"
+import { Box, Flex, VStack, Divider, Image } from "@chakra-ui/react"
+import { NavLink } from "react-router-dom"
+import Loading from "@/components/Loading/Loading"
 
 const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
+
   const menuItems = [
     { label: "Dashboard", path: "/admin", color: "purple.400" },
     { label: "Productos", path: "/admin/products", color: "cyan.400" },
     { label: "Categorías", path: "/admin/categories", color: "pink.400" },
     { label: "Analytics", path: "/admin/analytics", color: "yellow.400" },
     { label: "Pedidos", path: "/admin/orders", color: "green.400" },
-  ];
+  ]
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken")
+    const role = localStorage.getItem("userRole")
+
+    if (!token || role !== "admin") {
+      navigate("/auth", { replace: true })
+    } else {
+      setLoading(false)
+    }
+  }, [navigate])
+
+  if (loading) {
+    return <Loading />
+  }
 
   return (
     <Flex minH="100vh">
@@ -29,7 +52,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
           <Image src={logoSrc2} alt="Logo" mx="auto" />
         </Box>
 
-        {/* Menú de navegación centrado */}
+        {/* Menú centrado verticalmente */}
         <VStack spacing={4} flex="1" justify="center" align="stretch">
           {menuItems.map((item) => (
             <NavLink
@@ -59,7 +82,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
           ))}
         </VStack>
 
-        {/* Botón de salir, separado del menú */}
+        {/* Botón de salir */}
         <Box mt={8}>
           <Divider mb={4} />
           <LogoutButton w="full">Salir del Admin</LogoutButton>
@@ -71,7 +94,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
         {children}
       </Box>
     </Flex>
-  );
-};
+  )
+}
 
-export default AdminLayout;
+export default AdminLayout
