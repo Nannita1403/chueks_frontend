@@ -133,6 +133,10 @@ export default function Home() {
 
       {/* Contenido */}
       <Container maxW="container.xl" py={8}>
+
+        {/* Categorías (6) */}
+        <CategoriesGrid categories={categories} />
+        
         {/* Carrusel de Nueva Temporada */}
         <Box mb={12}>
           <InfiniteCarousel
@@ -149,9 +153,6 @@ export default function Home() {
             )}
           />
         </Box>
-
-        {/* Categorías (6) */}
-        <CategoriesGrid categories={categories} />
       </Container>
 
       {/* Modal ver detalle */}
