@@ -2,6 +2,7 @@
 import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
 import authService from "../../reducers/users/users.actions.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
@@ -12,7 +13,7 @@ const initialState = {
   loading: true,
   error: null,
   cartItems: [],       // <- items del carrito (para contar unidades)
-  wishlistItems: [],   // opcional
+  wishlistItems: [],   // <- opcional
 };
 
 const authReducer = (state, action) => {
@@ -55,19 +56,19 @@ const authReducer = (state, action) => {
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const navigate = useNavigate(); 
 
   // Chequeo inicial de sesión
-    useEffect(() => {
-      const token = localStorage.getItem("token");
-      const user = authService.getCurrentUser();
-      if (token && user) {
-        dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
-        ApiService.setToken(token);
-      } else {
-        dispatch({ type: "LOGOUT" });
-      }
-    }, []);
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = authService.getCurrentUser();
+    if (token && user) {
+      dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+      ApiService.setToken(token);
+    } else {
+      dispatch({ type: "LOGOUT" });
+    }
+  }, []);
 
   // Refresca carrito desde el backend (siempre unidades)
   const refreshCart = useCallback(async () => {
@@ -76,7 +77,6 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: "SET_CART_ITEMS", payload: data?.items || [] });
       return data;
     } catch {
-      // si falla, limpiamos para que el header no quede desfasado
       dispatch({ type: "SET_CART_ITEMS", payload: [] });
       return null;
     }
@@ -98,29 +98,55 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("cart:updated", onCartUpdated);
   }, [refreshCart]);
 
- const login = async (credentials) => {
-  dispatch({ type: "LOGIN_START" });
-  try {
-    const response = await authService.login(credentials);
-    dispatch({
-      type: "LOGIN_SUCCESS",
-      payload: { user: response.user, token: response.token },
-    });
-    ApiService.setToken(response.token);
-    localStorage.setItem("token", response.token);
+  // --- Login ---
+  const login = async (credentials) => {
+    dispatch({ type: "LOGIN_START" });
+    try {
+      const response = await authService.login(credentials);
+      dispatch({
+        type: "LOGIN_SUCCESS",
+        payload: { user: response.user, token: response.token },
+      });
+      ApiService.setToken(response.token);
+      localStorage.setItem("token", response.token);
 
-    await refreshCart();
-    return response;
-  } catch (error) {
-    dispatch({ type: "LOGIN_FAILURE", payload: error.message });
-    throw error;
-  }
-};
+      await refreshCart();
+      return response;
+    } catch (error) {
+      dispatch({ type: "LOGIN_FAILURE", payload: error.message });
+      throw error;
+    }
+  };
+
+  // --- Register ---
+  const registerUser = async (userData) => {
+    dispatch({ type: "LOGIN_START" });
+    try {
+      const response = await authService.register(userData);
+
+      // si el backend devuelve user + token al registrarse, hacemos login automático
+      if (response.token && response.user) {
+        dispatch({
+          type: "LOGIN_SUCCESS",
+          payload: { user: response.user, token: response.token },
+        });
+        ApiService.setToken(response.token);
+        localStorage.setItem("token", response.token);
+
+        await refreshCart();
+      }
+      return response;
+    } catch (error) {
+      dispatch({ type: "LOGIN_FAILURE", payload: error.message });
+      throw error;
+    }
+  };
 
   const logout = () => {
     authService.logout();
     dispatch({ type: "LOGOUT" });
     dispatch({ type: "SET_CART_ITEMS", payload: [] });
+    navigate("/auth", { replace: true });
   };
 
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
@@ -132,11 +158,12 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         ...state,
-        cartCount,        // <- para el badge del header
+        cartCount,        
         login,
+        registerUser,   
         logout,
         clearError,
-        refreshCart,      // <- llamalo después de /cart/add, /cart/:id, etc.
+        refreshCart,    
         isAdmin: () => state.user?.rol === "admin",
       }}
     >

@@ -1,6 +1,7 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import logoRedondo from "/logoRedondo.png"
+// src/pages/Auth/AuthPage.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import logoRedondo from "/logoRedondo.png";
 import {
   Box,
   Container,
@@ -27,221 +28,211 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-} from "@chakra-ui/react"
-import Loading from "../../components/Loading/Loading.jsx"
-import { useAuth } from "../../context/Auth/auth.context.jsx"
+} from "@chakra-ui/react";
+import Loading from "../../components/Loading/Loading.jsx";
+import { useAuth } from "../../context/Auth/auth.context.jsx";
 
 export default function AuthPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [loginData, setLoginData] = useState({ email: "", password: "" })
-  const [registerData, setRegisterData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    telephone: "",
-  })
-  const [verificationError, setVerificationError] = useState(null)
-  const navigate = useNavigate()
-  const toast = useToast()
-  const { login, register } = useAuth()
+  const [isLoading, setIsLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
 
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { login, registerUser } = useAuth();
+
+  // --- LOGIN ---
   const handleLogin = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setVerificationError(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setVerificationError(null);
 
-    const formData = new FormData(e.target)
-    const email = formData.get("email") || loginData.email
-    const password = formData.get("password") || loginData.password
-
-    const credentials = { email, password }
+    const formData = new FormData(e.target);
+    const credentials = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
 
     try {
-      console.log("🔐 Intentando login con:", {
-        email: credentials.email,
-        password: credentials.password,
-        passwordLength: credentials.password.length,
-      })
-      console.log("📤 Datos exactos enviados:", JSON.stringify(credentials))
+      console.log("🔐 Intentando login:", credentials);
 
-      const result = await login(credentials)
-      console.log("✅ Login exitoso:", result)
+      const result = await login(credentials);
+      console.log("✅ Login exitoso:", result);
 
       toast({
         title: "Inicio de sesión exitoso",
         status: "success",
         duration: 2000,
-      })
+      });
 
       setTimeout(() => {
-        if (result.user && result.user.rol === "admin") {
-          console.log("🔄 Redirecting admin to /admin")
-          navigate("/admin", { replace: true })
+        if (result.user?.rol === "admin") {
+          navigate("/admin", { replace: true });
         } else {
-          console.log("🔄 Redirecting user to /home")
-          navigate("/home", { replace: true })
+          navigate("/home", { replace: true });
         }
-      }, 100)
+      }, 100);
     } catch (error) {
-      console.error("❌ Error en login:", error)
-      
+      console.error("❌ Error en login:", error);
+
       if (error.isVerificationError) {
         setVerificationError({
           email: credentials.email,
           message: error.message,
-        })
+        });
         toast({
           title: "Verificación requerida",
           description: error.message,
           status: "warning",
           duration: 5000,
-        })
+        });
       } else {
-      toast({
-        title: "Error al iniciar sesión",
-        description: error.message || "Credenciales incorrectas",
-        status: "error",
-        duration: 3000,
-      })
+        toast({
+          title: "Error al iniciar sesión",
+          description: error.message || "Credenciales incorrectas",
+          status: "error",
+          duration: 3000,
+        });
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
+  // --- REGISTER ---
   const handleRegister = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
-    const formData = new FormData(e.target)
-    const name = formData.get("name") || registerData.name
-    const email = formData.get("email") || registerData.email
-    const password = formData.get("password") || registerData.password
-    const telephone = formData.get("telephone") || registerData.telephone
-
-    const registrationData = { name, email, password, telephone }
+    const formData = new FormData(e.target);
+    const registrationData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      telephone: formData.get("telephone"),
+    };
 
     try {
-      console.log("📝 Intentando registro con:", registrationData)
-      console.log("📤 Datos exactos enviados:", JSON.stringify(registrationData))
+      console.log("📝 Intentando registro:", registrationData);
 
-      const result = await register(registrationData)
-      console.log("✅ Registro exitoso:", result)
+      const result = await registerUser(registrationData);
+      console.log("✅ Registro exitoso:", result);
 
       toast({
         title: "Registro exitoso",
         description: "Por favor verifica tu email",
         status: "success",
         duration: 3000,
-      })
+      });
 
-      navigate("/home")
+      navigate("/home");
     } catch (error) {
-      console.error("❌ Error en registro:", error)
+      console.error("❌ Error en registro:", error);
       toast({
         title: "Error al registrarse",
         description: error.message || "Error en el registro",
         status: "error",
         duration: 3000,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
-    return <Loading />
+    return <Loading />;
   }
-  const bgColor = useColorModeValue("white", "gray.800")
+
+  const bgColor = useColorModeValue("white", "gray.800");
 
   return (
-        <Flex minH="100vh" bg={bgColor}>
+    <Flex minH="100vh" bg={bgColor}>
       {/* Form Section */}
       <Flex w={{ base: "100%", md: "50%" }} align="center" justify="center" p={8}>
-      <Container maxW="md">
-        <VStack spacing={8}>
-          <VStack spacing={4}>
-            <Image src={logoRedondo} alt="Logo de la marca"h="60px" />
-            <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-              Bienvenido a Chueks
-            </Text>
-          </VStack>
-          
-          {verificationError && (
-            <Alert status="warning" borderRadius="md">
-              <AlertIcon />
-              <Box>
-                <AlertTitle>¡Verificación requerida!</AlertTitle>
-                <AlertDescription>
-                  {verificationError.message}
-                  <br />
-                  <Text fontSize="sm" mt={2}>
-                    Revisa tu email <strong>{verificationError.email}</strong> y haz clic en el enlace de verificación.
-                  </Text>
-                </AlertDescription>
-              </Box>
-            </Alert>
-          )}
+        <Container maxW="md">
+          <VStack spacing={8}>
+            <VStack spacing={4}>
+              <Image src={logoRedondo} alt="Logo de la marca" h="60px" />
+              <Text fontSize="2xl" fontWeight="bold" color="gray.800">
+                Bienvenido a Chueks
+              </Text>
+            </VStack>
 
-          <Card w="full">
-            <CardBody>
-              <Tabs isFitted variant="enclosed">
-                <TabList mb="1em">
-                  <Tab color={"pink.500"}>Iniciar Sesión</Tab>
-                  <Tab color={"cyan.500"}>Registrarse</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <form onSubmit={handleLogin}>
-                      <VStack spacing={4}>
-                        <FormControl>
-                          <FormLabel>Email</FormLabel>
-                          <Input name="email" type="email" required />
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel>Contraseña</FormLabel>
-                          <Input name="password" type="password" required />
-                        </FormControl>
-                        <Button type="submit" colorScheme="primary" size="lg" w="full">
-                          Iniciar Sesión
-                        </Button>
-                      </VStack>
-                    </form>
-                  </TabPanel>
-                  <TabPanel>
-                    <form onSubmit={handleRegister}>
-                      <VStack spacing={4}>
-                        <FormControl>
-                          <FormLabel>Nombre</FormLabel>
-                          <Input name="name" type="text" required />
-                        </FormControl>
-                         <FormControl>
-                          <FormLabel>Telefono</FormLabel>
-                          <Input name="telephone" type="telephone" required />
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel>Email</FormLabel>
-                          <Input name="email" type="email" required />
-                        </FormControl>
-                        <FormControl>
-                          <FormLabel>Contraseña</FormLabel>
-                          <Input name="password" type="password" required />
-                        </FormControl>
-                        <Button type="submit" colorScheme="primary" size="lg" w="full">
-                          Registrarse
-                        </Button>
-                      </VStack>
-                    </form>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </CardBody>
-          </Card>
-        </VStack>
-      </Container>
-    </Flex>
-    {/* Description Section */}
-    <Flex w={{ base: "100%", md: "50%" }} bg="black" color="white" p={8} align="center" justify="center">
+            {verificationError && (
+              <Alert status="warning" borderRadius="md">
+                <AlertIcon />
+                <Box>
+                  <AlertTitle>¡Verificación requerida!</AlertTitle>
+                  <AlertDescription>
+                    {verificationError.message}
+                    <br />
+                    <Text fontSize="sm" mt={2}>
+                      Revisa tu email <strong>{verificationError.email}</strong> y haz clic en el enlace de verificación.
+                    </Text>
+                  </AlertDescription>
+                </Box>
+              </Alert>
+            )}
+
+            <Card w="full">
+              <CardBody>
+                <Tabs isFitted variant="enclosed">
+                  <TabList mb="1em">
+                    <Tab color={"pink.500"}>Iniciar Sesión</Tab>
+                    <Tab color={"cyan.500"}>Registrarse</Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      <form onSubmit={handleLogin}>
+                        <VStack spacing={4}>
+                          <FormControl>
+                            <FormLabel>Email</FormLabel>
+                            <Input name="email" type="email" required />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Contraseña</FormLabel>
+                            <Input name="password" type="password" required />
+                          </FormControl>
+                          <Button type="submit" colorScheme="primary" size="lg" w="full">
+                            Iniciar Sesión
+                          </Button>
+                        </VStack>
+                      </form>
+                    </TabPanel>
+                    <TabPanel>
+                      <form onSubmit={handleRegister}>
+                        <VStack spacing={4}>
+                          <FormControl>
+                            <FormLabel>Nombre</FormLabel>
+                            <Input name="name" type="text" required />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Telefono</FormLabel>
+                            <Input name="telephone" type="tel" required />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Email</FormLabel>
+                            <Input name="email" type="email" required />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Contraseña</FormLabel>
+                            <Input name="password" type="password" required />
+                          </FormControl>
+                          <Button type="submit" colorScheme="primary" size="lg" w="full">
+                            Registrarse
+                          </Button>
+                        </VStack>
+                      </form>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </CardBody>
+            </Card>
+          </VStack>
+        </Container>
+      </Flex>
+
+      {/* Description Section */}
+      <Flex w={{ base: "100%", md: "50%" }} bg="black" color="white" p={8} align="center" justify="center">
         <Box maxW="md">
           <VStack spacing={6} align="start">
             <Heading size="lg" color="white">
@@ -299,7 +290,5 @@ export default function AuthPage() {
         </Box>
       </Flex>
     </Flex>
-
-
-  )
+  );
 }
