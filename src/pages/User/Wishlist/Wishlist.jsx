@@ -5,6 +5,7 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 import ApiService from "../../../reducers/api/Api.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import { toggleFavorite } from "@/components/ToggleFavorite/ToggleFavorite.jsx";
 
 const Favorites = () => {
   const { user, favorites, refreshFavorites } = useAuth();
@@ -25,24 +26,6 @@ const Favorites = () => {
     };
     fetchFavorites();
   }, [user]);
-
-  const handleToggleFavorite = async (productId, add) => {
-    try {
-      if (add) {
-        await ApiService.post(`/users/favorites/${productId}`);
-      } else {
-        await ApiService.delete(`/users/favorites/${productId}`);
-      }
-      await refreshFavorites();
-      toast({
-        title: add ? "Producto agregado a favoritos" : "Producto eliminado de favoritos",
-        status: "success",
-      });
-    } catch (err) {
-      console.error("❌ Error actualizando favoritos:", err);
-      toast({ title: "Error al actualizar favoritos", status: "error" });
-    }
-  };
 
   if (!user) {
     return (
@@ -77,7 +60,7 @@ const Favorites = () => {
               product={product}
               isFavorite
               showAddToCart
-              onToggleLike={(add) => handleToggleFavorite(product._id, add)}
+              onToggleLike={() => toggleFavorite(product._id)}
             />
           ))}
         </SimpleGrid>

@@ -9,6 +9,7 @@ import InfiniteCarousel from "../../../components/Carousel/InfiniteCarousel.jsx"
 import CategoriesGrid from "../../../components/Category/CategoriesGrid.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import { toggleFavorite } from "@/components/ToggleFavorite/ToggleFavorite.jsx";
 
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -67,29 +68,6 @@ export default function Home() {
     return featured.length ? featured : arr.slice(0, 9);
   }, [products]);
 
-  // 📌 Manejo de favoritos
-  const handleToggleFavorite = async (productId, add) => {
-    if (!user) {
-      toast({ title: "Debes iniciar sesión para agregar a favoritos", status: "warning" });
-      return;
-    }
-    try {
-      if (add) {
-        await ApiService.post(`/users/favorites/${productId}`);
-      } else {
-        await ApiService.delete(`/users/favorites/${productId}`);
-      }
-      await refreshFavorites();
-      toast({
-        title: add ? "Producto agregado a favoritos" : "Producto eliminado de favoritos",
-        status: "success",
-      });
-    } catch (err) {
-      console.error("❌ Error al actualizar favoritos:", err);
-      toast({ title: "Error al actualizar favoritos", status: "error" });
-    }
-  };
-
   // 📌 Abrir detalle
   const openDetail = (p) => setSelectedProduct(p);
 
@@ -142,7 +120,7 @@ export default function Home() {
               <ProductComponent
                 product={product}
                 onViewDetail={() => openDetail(product)}
-                onToggleLike={(liked) => handleToggleFavorite(product._id, liked)}
+                onToggleLike={() => toggleFavorite(product._id)}
                 isFavorite={favorites.some((f) => f._id === product._id)}
               />
             )}

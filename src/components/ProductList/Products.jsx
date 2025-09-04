@@ -31,18 +31,21 @@ const Products = () => {
     if (!user) return;
     try {
       const res = await axios.put(
-        `https://chueks-backend.vercel.app/api/v1/products/toggleFavorite/${product._id}/${add}`,
+        `https://chueks-backend.vercel.app/api/v1/users/favorites/${product._id}/toggle`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
-      );
+        );
+          console.log("✅ Favoritos actualizados:", res.data);
 
-      setProducts((prev) =>
-        prev.map((p) => (p._id === product._id ? res.data.product : p))
-      );
-    } catch (err) {
-      console.error("Error al togglear favorito:", err);
-    }
-  };
+          setProducts((prev) =>
+            prev.map((p) =>
+              p._id === product._id ? { ...p, isFavorite: !p.isFavorite } : p
+            )
+          );
+        } catch (err) {
+          console.error("❌ Error al togglear favorito:", err);
+        }
+      };
 
   const handleViewDetail = (product) => {
     navigate(`/products/${product._id}`);

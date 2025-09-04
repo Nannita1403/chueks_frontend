@@ -6,6 +6,7 @@ import {
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
+import { toggleFavorite } from "../ToggleFavorite/";
 
 function flattenColors(colors = []) {
   const out = [];
@@ -38,23 +39,11 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
   const handleToggleFavorite = async () => {
-    if (!user) return toast({ title: "Debes iniciar sesión", status: "warning" });
-    try {
-      const action = !isFavorite; // true = agregar, false = quitar
-      await ApiService.put(
-        `/products/toggleFavorite/${modalProduct._id}/${action}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setIsFavorite(action);
-      toast({
-        title: action ? "Agregado a favoritos" : "Quitado de favoritos",
-        status: "success",
-      });
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Error actualizando favoritos", status: "error" });
-    }
+  if (!user) {
+    return toast({ title: "Debes iniciar sesión", status: "warning" });
+  }
+  await toggleFavorite(modalProduct._id);
+  setIsFavorite(!isFavorite); // actualiza el estado local del corazón
   };
 
   const handleAddToCart = async () => {
