@@ -4,7 +4,6 @@ import AuthPage from "./pages/Auth/AuthPage.jsx";
 import Home from "./pages/User/Home/Home.jsx";
 import ProductDetail from "./pages/User/Product/Product.jsx";
 import CategoryPage from "./pages/User/Category/Category.jsx";
-import WishlistPage from "./pages/User/Wishlist/Wishlist.jsx";
 import AdminDashboard from "./pages/Admin/DashboardAdmin/DashboardAdmin.jsx";
 import AdminProducts from "./pages/Admin/Products/Products.jsx";
 import AdminCategories from "./pages/Admin/Categories/Categories.jsx";
@@ -16,6 +15,7 @@ import OrdersPageUser from "./pages/User/Order/OrdersPageUser.jsx";
 import OrdersPageAdmin from "./pages/Admin/Orders/OrdersPageAdmin.jsx";
 import UserLayout from "./pages/User/UserLayout.jsx";
 import ProfileDashboard from "./pages/User/Profile/ProfileDashboard.jsx";
+import Wishlist from "./pages/User/Wishlist/Wishlist.jsx";
 
 const App = () => {
   return (
@@ -53,7 +53,7 @@ const App = () => {
           path="/wishlist"
           element={
             <ProtectedRoute>
-              <WishlistPage />
+              <Wishlist/>
             </ProtectedRoute>
           }
         />
