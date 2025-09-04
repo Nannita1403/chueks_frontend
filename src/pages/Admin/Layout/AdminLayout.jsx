@@ -1,4 +1,4 @@
-import LogoutButton from "@/components/LogoutButton/LogoutButton";
+import LogoutButton from "../../../components/LogoutButton/LogoutButton.jsx";
 import { Box, Flex, VStack, Divider, Image } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 
