@@ -142,7 +142,7 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    navigate("/login");
+    navigate("/auth");
   };
 
   const handleClick = (item) => {
