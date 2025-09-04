@@ -1,3 +1,4 @@
+import LogoutButton from "@/components/LogoutButton/LogoutButton";
 import { Box, Flex, VStack, Button, Divider, Image } from "@chakra-ui/react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -14,7 +15,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    navigate("/login");
+    navigate("/auth");
   };
 
   return (
@@ -70,9 +71,9 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
         {/* Logout */}
         <Box mt={6}>
           <Divider mb={4} />
-          <Button colorScheme="red" w="full" onClick={handleLogout}>
+          <LogoutButton w="full" onClick={handleLogout}>
             Salir del Admin
-          </Button>
+          </LogoutButton>
         </Box>
       </Box>
 

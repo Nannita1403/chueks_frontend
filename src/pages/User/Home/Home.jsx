@@ -143,7 +143,7 @@ export default function Home() {
             title="NUEVA TEMPORADA"
             items={featuredProducts}
             gap={16}
-            autoPlay={false}
+            autoPlay={true}
             renderItem={(product) => (
               <ProductComponent
                 product={product}

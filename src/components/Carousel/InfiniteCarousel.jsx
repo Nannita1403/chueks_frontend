@@ -61,7 +61,6 @@ export default function InfiniteCarousel({
 
   return (
     <Box position="relative">
-      {/* Header opcional con flechas */}
       {title ? (
         <HStack justify="space-between" mb={3}>
           <Box as="h3" fontWeight="bold" fontSize="xl">{title}</Box>

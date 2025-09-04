@@ -143,11 +143,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    authService.logout();
-    dispatch({ type: "LOGOUT" });
-    dispatch({ type: "SET_CART_ITEMS", payload: [] });
-    navigate("/auth", { replace: true });
-  };
+  try {
+    authService.logout?.();
+  } catch (e) {
+    console.warn("⚠️ authService.logout no definido o falló:", e);
+  }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("cart");
+  localStorage.removeItem("wishlist");
+  localStorage.clear(); // borra todo (si quieres dejar limpio del todo)
+
+  dispatch({ type: "LOGOUT" });
+  dispatch({ type: "SET_CART_ITEMS", payload: [] });
+  dispatch({ type: "SET_WISHLIST_ITEMS", payload: [] });
+h
+  navigate("/auth", { replace: true });
+};
 
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
 
