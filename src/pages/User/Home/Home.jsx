@@ -136,9 +136,9 @@ export default function Home() {
 
         {/* Categorías (6) */}
         <CategoriesGrid categories={categories} />
-        
+
         {/* Carrusel de Nueva Temporada */}
-        <Box mb={12}>
+        <Box mt={12} mb={8}>
           <InfiniteCarousel
             title="NUEVA TEMPORADA"
             items={featuredProducts}
