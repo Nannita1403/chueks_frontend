@@ -1,7 +1,7 @@
+// src/pages/User/Home/Home.jsx
 import { useEffect, useMemo, useState } from "react";
-import { Box, Container, Heading, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Container, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import ApiService from "../../../reducers/api/Api.jsx";
-import { toggleLike } from "../../../reducers/products/toggleLike.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
@@ -16,11 +16,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   const { toast } = useToast();
-  const { user, token, cartItems, wishlistItems } = useAuth();
-  const { refreshCart } = useAuth();
+  const { user, cartItems, favorites, refreshCart, refreshFavorites } = useAuth();
   const muted = useColorModeValue("gray.600", "gray.400");
 
-  // 6 categorías (ajusta IDs a tus rutas reales)
+  // 📌 Categorías
   const categories = useMemo(
     () => [
       { id: "mochilas", name: "Mochilas", color: "pink.400" },
@@ -33,6 +32,7 @@ export default function Home() {
     []
   );
 
+  // 📌 Normalización de productos
   const normalize = (p) => ({
     ...p,
     imgPrimary:
@@ -43,6 +43,7 @@ export default function Home() {
     priceMin: p?.priceMin ?? p?.price ?? 0,
   });
 
+  // 📌 Cargar productos
   useEffect(() => {
     (async () => {
       try {
@@ -58,6 +59,7 @@ export default function Home() {
     })();
   }, []);
 
+  // 📌 Selección de destacados
   const featuredCodes = ["RI002", "BOL002", "BOL008A", "MO004", "NEC002", "TAR002"];
   const featuredProducts = useMemo(() => {
     const arr = Array.isArray(products) ? products : [];
@@ -65,53 +67,49 @@ export default function Home() {
     return featured.length ? featured : arr.slice(0, 9);
   }, [products]);
 
-  const handleToggleLike = async (productId, addLike) => {
+  // 📌 Manejo de favoritos
+  const handleToggleFavorite = async (productId, add) => {
     if (!user) {
-      toast({ title: "Debes iniciar sesión para dar like", status: "warning" });
+      toast({ title: "Debes iniciar sesión para agregar a favoritos", status: "warning" });
       return;
     }
     try {
-      await toggleLike(productId, addLike, products, setProducts);
-      if (selectedProduct && selectedProduct._id === productId) {
-        const liked = addLike;
-        setSelectedProduct((prev) =>
-          !prev
-            ? prev
-            : {
-                ...prev,
-                likes: liked
-                  ? [...(prev.likes || []), user.id]
-                  : (prev.likes || []).filter((id) => id !== user.id),
-              }
-        );
+      if (add) {
+        await ApiService.post(`/users/favorites/${productId}`);
+      } else {
+        await ApiService.delete(`/users/favorites/${productId}`);
       }
+      await refreshFavorites();
       toast({
-        title: addLike ? "Producto marcado como favorito" : "Producto removido de favoritos",
+        title: add ? "Producto agregado a favoritos" : "Producto eliminado de favoritos",
         status: "success",
       });
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      toast({ title: "Error al actualizar like", status: "error" });
+    } catch (err) {
+      console.error("❌ Error al actualizar favoritos:", err);
+      toast({ title: "Error al actualizar favoritos", status: "error" });
     }
   };
 
+  // 📌 Abrir detalle
   const openDetail = (p) => setSelectedProduct(p);
 
+  // 📌 Agregar al carrito
   const addToCartHandler = async (product, qty, color) => {
-  try {
-    await ApiService.post("/cart/add", {
-      productId: product._id,
-      quantity: qty,
-      color: color?.name,
-    });
-    await refreshCart?.(); // 🔁 actualiza badge del header
-    toast({ title: `${qty} ${product.name} agregados al carrito`, status: "success" });
-  } catch (e) {
-    console.error(e);
-    toast({ title: "No se pudo agregar al carrito", status: "error" });
-  }
-};
+    try {
+      await ApiService.post("/cart/add", {
+        productId: product._id,
+        quantity: qty,
+        color: color?.name,
+      });
+      await refreshCart();
+      toast({ title: `${qty} ${product.name} agregados al carrito`, status: "success" });
+    } catch (e) {
+      console.error("❌ Error al agregar al carrito:", e);
+      toast({ title: "No se pudo agregar al carrito", status: "error" });
+    }
+  };
 
+  // 📌 Loader
   if (loading) {
     return (
       <Box maxW="container.xl" mx="auto" px={4} py={8}>
@@ -123,21 +121,17 @@ export default function Home() {
     );
   }
 
+  // 📌 Render principal
   return (
     <Box minH="100vh">
-      {/* Menú superior */}
       <AppHeader
-        wishlistCount={wishlistItems?.length || 0}
+        wishlistCount={favorites?.length || 0}
         cartCount={cartItems?.length || 0}
       />
 
-      {/* Contenido */}
       <Container maxW="container.xl" py={8}>
-
-        {/* Categorías (6) */}
         <CategoriesGrid categories={categories} />
 
-        {/* Carrusel de Nueva Temporada */}
         <Box mt={12} mb={8}>
           <InfiniteCarousel
             title="NUEVA TEMPORADA"
@@ -148,14 +142,14 @@ export default function Home() {
               <ProductComponent
                 product={product}
                 onViewDetail={() => openDetail(product)}
-                onToggleLike={(liked) => handleToggleLike(product._id, liked)}
+                onToggleLike={(liked) => handleToggleFavorite(product._id, liked)}
+                isFavorite={favorites.some((f) => f._id === product._id)}
               />
             )}
           />
         </Box>
       </Container>
 
-      {/* Modal ver detalle */}
       <ProductModal
         isOpen={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}

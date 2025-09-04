@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-  ModalBody, ModalFooter, Button, Image, Text, Flex, Select, useToast
+  ModalBody, ModalFooter, Button, Image, Text, Flex, Select, useToast, IconButton
 } from "@chakra-ui/react";
-import { toggleLike } from "../../reducers/products/toggleLike.jsx";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 
@@ -16,82 +16,73 @@ function flattenColors(colors = []) {
   return out;
 }
 
-const ProductModal = ({ isOpen, onClose, product, products, setProducts, addToCartHandler }) => {
-  const { user, refreshCart } = useAuth(); // 👈 usaremos refreshCart si está disponible
+const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
+  const { user, refreshCart, token } = useAuth();
   const toast = useToast();
 
   const [modalProduct, setModalProduct] = useState(product);
   const colorItems = useMemo(() => flattenColors(product?.colors), [product]);
   const [selectedColor, setSelectedColor] = useState(colorItems?.[0] || null);
   const [quantity, setQuantity] = useState(1);
-  const [liked, setLiked] = useState(false);
-  const [inWishlist, setInWishlist] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     if (!product) return;
     setModalProduct(product);
     setSelectedColor(colorItems?.[0] || null);
     setQuantity(1);
-    setLiked(Boolean(user && product.likes?.includes(user.id)));
-    setInWishlist(Boolean(user && user.wishlist?.includes?.(product._id)));
+    setIsFavorite(Boolean(user?.favorites?.some?.(f => f._id === product._id)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product?._id, user]);
 
   const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
-  const handleToggleLike = async () => {
+  const handleToggleFavorite = async () => {
     if (!user) return toast({ title: "Debes iniciar sesión", status: "warning" });
     try {
-      await toggleLike(modalProduct._id, !liked, products, setProducts);
-      setLiked((prev) => !prev);
-      const updated = products.find((p) => p._id === modalProduct._id);
-      if (updated) setModalProduct(updated);
-      toast({ title: liked ? "Quitado de favoritos" : "Agregado a favoritos", status: "success" });
+      const action = !isFavorite; // true = agregar, false = quitar
+      await ApiService.put(
+        `/products/toggleFavorite/${modalProduct._id}/${action}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIsFavorite(action);
+      toast({
+        title: action ? "Agregado a favoritos" : "Quitado de favoritos",
+        status: "success",
+      });
     } catch (err) {
       console.error(err);
-      toast({ title: "Error actualizando like", status: "error" });
+      toast({ title: "Error actualizando favoritos", status: "error" });
     }
   };
 
-const handleAddToCart = async () => {
-  if (!selectedColor) return toast({ title: "Selecciona un color", status: "warning" });
-  if (!user) return toast({ title: "Debes iniciar sesión para agregar al carrito", status: "warning" });
+  const handleAddToCart = async () => {
+    if (!selectedColor) return toast({ title: "Selecciona un color", status: "warning" });
+    if (!user) return toast({ title: "Debes iniciar sesión para agregar al carrito", status: "warning" });
 
-  const qty = Math.min(quantity, maxQty);
+    const qty = Math.min(quantity, maxQty);
 
-  try {
-    if (typeof addToCartHandler === "function") {
-      await addToCartHandler(modalProduct, qty, { name: selectedColor.name });
-    } else {
-      await ApiService.post("/cart/add", {
-        productId: modalProduct._id,
-        quantity: qty,
-        color: (color?.name || "").trim(),
-      });
+    try {
+      if (typeof addToCartHandler === "function") {
+        await addToCartHandler(modalProduct, qty, { name: selectedColor.name });
+      } else {
+        await ApiService.post("/cart/add", {
+          productId: modalProduct._id,
+          quantity: qty,
+          color: (selectedColor?.name || "").trim(),
+        });
+      }
+
+      if (typeof refreshCart === "function") await refreshCart();
+      window.dispatchEvent(new CustomEvent("cart:updated"));
+
+      toast({ title: `${qty} ${modalProduct.name} agregados al carrito`, status: "success" });
+      setQuantity(1);
+    } catch (e) {
+      console.error(e);
+      toast({ title: "No se pudo agregar al carrito", status: "error" });
     }
-
-    // 🔁 refresca el contador del header
-    if (typeof refreshCart === "function") await refreshCart();
-    window.dispatchEvent(new CustomEvent("cart:updated"));
-
-    toast({ title: `${qty} ${modalProduct.name} agregados al carrito`, status: "success" });
-    setQuantity(1);
-    // onClose(); // si quieres cerrar el modal al agregar
-  } catch (e) {
-    console.error(e);
-    toast({ title: "No se pudo agregar al carrito", status: "error" });
-  }
-};
-
-  const handleToggleWishlist = () => {
-    setInWishlist((prev) => !prev);
-    toast({
-      title: `${modalProduct?.name} ${inWishlist ? "eliminado de" : "agregado a"} wishlist`,
-      status: "success",
-    });
-    // TODO: llamar a tu endpoint real de wishlist si lo tienes
   };
 
   return (
@@ -146,20 +137,15 @@ const handleAddToCart = async () => {
             <Button onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}>+</Button>
           </Flex>
 
-          <Flex mt={4} gap={2} wrap="wrap">
+          <Flex mt={4} gap={3} wrap="wrap">
             <Button colorScheme="teal" onClick={handleAddToCart} isDisabled={selectedColor?.stock === 0}>
               Agregar al carrito
             </Button>
-            <Button onClick={handleToggleLike}>{liked ? "❤️" : "🤍"}</Button>
-            <Button
-              onClick={handleToggleWishlist}
-              bg={inWishlist ? "black" : "white"}
-              color={inWishlist ? "white" : "black"}
-              border="1px solid black"
-              _hover={{ bg: inWishlist ? "gray.800" : "gray.100" }}
-            >
-              💖 Wishlist
-            </Button>
+            <IconButton
+              aria-label="Favorito"
+              icon={isFavorite ? <FaHeart color="red" /> : <FaRegHeart />}
+              onClick={handleToggleFavorite}
+            />
           </Flex>
         </ModalBody>
 

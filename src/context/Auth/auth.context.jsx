@@ -12,8 +12,8 @@ const initialState = {
   isAuthenticated: false,
   loading: true,
   error: null,
-  cartItems: [],       // <- items del carrito (para contar unidades)
-  wishlistItems: [],   // <- opcional
+  cartItems: [],
+  favorites: [],
 };
 
 const authReducer = (state, action) => {
@@ -32,7 +32,14 @@ const authReducer = (state, action) => {
       };
 
     case "LOGIN_FAILURE":
-      return { ...state, loading: false, isAuthenticated: false, user: null, token: null, error: action.payload };
+      return {
+        ...state,
+        loading: false,
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        error: action.payload,
+      };
 
     case "LOGOUT":
       return { ...initialState, loading: false };
@@ -46,8 +53,8 @@ const authReducer = (state, action) => {
     case "SET_CART_ITEMS":
       return { ...state, cartItems: Array.isArray(action.payload) ? action.payload : [] };
 
-    case "SET_WISHLIST_ITEMS":
-      return { ...state, wishlistItems: Array.isArray(action.payload) ? action.payload : [] };
+    case "SET_FAVORITES":
+      return { ...state, favorites: Array.isArray(action.payload) ? action.payload : [] };
 
     default:
       return state;
@@ -56,9 +63,9 @@ const authReducer = (state, action) => {
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  // Chequeo inicial de sesión
+  // 🔁 cargar sesión inicial
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = authService.getCurrentUser();
@@ -70,35 +77,44 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Refresca carrito desde el backend (siempre unidades)
+  // --- refrescar carrito ---
   const refreshCart = useCallback(async () => {
     try {
-      const data = await ApiService.get("/cart"); // { items, itemCount, ... }
+      const data = await ApiService.get("/cart");
       dispatch({ type: "SET_CART_ITEMS", payload: data?.items || [] });
       return data;
-    } catch {
+    } catch (err) {
+      if (err?.response?.status === 401) logout();
       dispatch({ type: "SET_CART_ITEMS", payload: [] });
       return null;
     }
   }, []);
 
-  // Cuando cambia la auth, actualizamos carrito
+  // --- refrescar favoritos ---
+  const refreshFavorites = useCallback(async () => {
+    try {
+      const data = await ApiService.get("/users/favorites");
+      dispatch({ type: "SET_FAVORITES", payload: data?.favorites || [] });
+      return data;
+    } catch (err) {
+      if (err?.response?.status === 401) logout();
+      dispatch({ type: "SET_FAVORITES", payload: [] });
+      return null;
+    }
+  }, []);
+
+  // sincronizar carrito + favoritos cuando el usuario cambia
   useEffect(() => {
     if (state.isAuthenticated) {
       refreshCart();
+      refreshFavorites();
     } else {
       dispatch({ type: "SET_CART_ITEMS", payload: [] });
+      dispatch({ type: "SET_FAVORITES", payload: [] });
     }
-  }, [state.isAuthenticated, refreshCart]);
+  }, [state.isAuthenticated, refreshCart, refreshFavorites]);
 
-  // Listener opcional para eventos globales
-  useEffect(() => {
-    const onCartUpdated = () => refreshCart();
-    window.addEventListener("cart:updated", onCartUpdated);
-    return () => window.removeEventListener("cart:updated", onCartUpdated);
-  }, [refreshCart]);
-
-  // --- Login ---
+  // --- LOGIN ---
   const login = async (credentials) => {
     dispatch({ type: "LOGIN_START" });
     try {
@@ -110,7 +126,7 @@ export const AuthProvider = ({ children }) => {
       ApiService.setToken(response.token);
       localStorage.setItem("token", response.token);
 
-      await refreshCart();
+      await Promise.all([refreshCart(), refreshFavorites()]);
       return response;
     } catch (error) {
       dispatch({ type: "LOGIN_FAILURE", payload: error.message });
@@ -118,13 +134,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- Register ---
+  // --- REGISTER ---
   const registerUser = async (userData) => {
     dispatch({ type: "LOGIN_START" });
     try {
       const response = await authService.register(userData);
-
-      // si el backend devuelve user + token al registrarse, hacemos login automático
       if (response.token && response.user) {
         dispatch({
           type: "LOGIN_SUCCESS",
@@ -133,7 +147,7 @@ export const AuthProvider = ({ children }) => {
         ApiService.setToken(response.token);
         localStorage.setItem("token", response.token);
 
-        await refreshCart();
+        await Promise.all([refreshCart(), refreshFavorites()]);
       }
       return response;
     } catch (error) {
@@ -142,41 +156,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-  try {
-    authService.logout?.();
-  } catch (e) {
-    console.warn("⚠️ authService.logout no definido o falló:", e);
-  }
-
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  localStorage.removeItem("cart");
-  localStorage.removeItem("wishlist");
-  localStorage.clear(); // borra todo (si quieres dejar limpio del todo)
-
-  dispatch({ type: "LOGOUT" });
-  dispatch({ type: "SET_CART_ITEMS", payload: [] });
-  dispatch({ type: "SET_WISHLIST_ITEMS", payload: [] });
-h
-  navigate("/auth", { replace: true });
-};
+  // --- LOGOUT ---
+  const logout = useCallback(() => {
+    try {
+      authService.logout?.();
+    } catch (e) {
+      console.warn("⚠️ authService.logout no definido:", e);
+    }
+    localStorage.removeItem("token");
+    dispatch({ type: "LOGOUT" });
+    navigate("/auth", { replace: true });
+  }, [navigate]);
 
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
 
-  // Conteo de unidades (unificado para Home, Header y Carrito)
+  // contador de carrito
   const cartCount = state.cartItems.reduce((acc, it) => acc + (Number(it?.quantity) || 0), 0);
 
   return (
     <AuthContext.Provider
       value={{
         ...state,
-        cartCount,        
+        cartCount,
         login,
-        registerUser,   
+        registerUser,
         logout,
         clearError,
-        refreshCart,    
+        refreshCart,
+        refreshFavorites,
         isAdmin: () => state.user?.rol === "admin",
       }}
     >

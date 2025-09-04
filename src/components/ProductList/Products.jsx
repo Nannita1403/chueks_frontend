@@ -27,12 +27,11 @@ const Products = () => {
     fetchProducts();
   }, [token]);
 
-  const handleToggleLike = async (product) => {
+  const handleToggleFavorite = async (product, add) => {
     if (!user) return;
     try {
-      const isLiked = product.likes?.includes(user.id);
       const res = await axios.put(
-        `https://chueks-backend.vercel.app/api/v1/products/toggleLike/${product._id}/${!isLiked}`,
+        `https://chueks-backend.vercel.app/api/v1/products/toggleFavorite/${product._id}/${add}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -41,7 +40,7 @@ const Products = () => {
         prev.map((p) => (p._id === product._id ? res.data.product : p))
       );
     } catch (err) {
-      console.error("Error al togglear like:", err);
+      console.error("Error al togglear favorito:", err);
     }
   };
 
@@ -54,14 +53,18 @@ const Products = () => {
 
   return (
     <SimpleGrid columns={[1, 2, 3]} spacing={6} p={4}>
-      {products.map((product) => (
-        <ProductComponent
-          key={product._id}
-          product={product}
-          onToggleLike={() => handleToggleLike(product)}
-          onViewDetail={() => handleViewDetail(product)}
-        />
-      ))}
+      {products.map((product) => {
+        const isFavorite = user?.favorites?.some((fav) => fav._id === product._id);
+        return (
+          <ProductComponent
+            key={product._id}
+            product={product}
+            isFavorite={isFavorite}
+            onToggleLike={(add) => handleToggleFavorite(product, add)}
+            onViewDetail={() => handleViewDetail(product)}
+          />
+        );
+      })}
     </SimpleGrid>
   );
 };
