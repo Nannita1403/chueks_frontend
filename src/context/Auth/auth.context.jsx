@@ -119,6 +119,14 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: "LOGIN_START" });
     try {
       const response = await authService.login(credentials);
+
+      // si el backend responde con 403 (usuario no verificado)
+      if (response.status === 403 || response.message?.includes("verifica")) {
+        dispatch({ type: "LOGIN_FAILURE", payload: "Debes verificar tu correo antes de ingresar." });
+        alert("⚠️ Debes verificar tu correo antes de ingresar.");
+        return;
+      }
+
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: { user: response.user, token: response.token },
@@ -127,6 +135,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", response.token);
 
       await Promise.all([refreshCart(), refreshFavorites()]);
+      navigate("/home");
       return response;
     } catch (error) {
       dispatch({ type: "LOGIN_FAILURE", payload: error.message });
@@ -135,26 +144,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   // --- REGISTER ---
-  const registerUser = async (userData) => {
-    dispatch({ type: "LOGIN_START" });
-    try {
-      const response = await authService.register(userData);
-      if (response.token && response.user) {
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: { user: response.user, token: response.token },
-        });
-        ApiService.setToken(response.token);
-        localStorage.setItem("token", response.token);
+const registerUser = async (userData) => {
+  dispatch({ type: "LOGIN_START" });
+  try {
+    const response = await authService.register(userData);
 
-        await Promise.all([refreshCart(), refreshFavorites()]);
-      }
-      return response;
-    } catch (error) {
-      dispatch({ type: "LOGIN_FAILURE", payload: error.message });
-      throw error;
-    }
-  };
+    // ⚠️ El backend ya NO devuelve token ni user
+    // Solo devolvemos mensaje de éxito
+    dispatch({ type: "LOGOUT" }); // limpiar estado
+    navigate("/auth", { replace: true });
+
+    // opcional: alerta
+    alert(response.message || "Cuenta creada. Verifica tu correo antes de iniciar sesión.");
+
+    return response;
+  } catch (error) {
+    dispatch({ type: "LOGIN_FAILURE", payload: error.message });
+    throw error;
+  }
+};
 
   // --- LOGOUT ---
   const logout = useCallback(() => {
