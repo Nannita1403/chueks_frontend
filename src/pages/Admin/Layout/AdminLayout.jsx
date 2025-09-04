@@ -1,10 +1,8 @@
 import LogoutButton from "@/components/LogoutButton/LogoutButton";
-import { Box, Flex, VStack, Button, Divider, Image } from "@chakra-ui/react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Box, Flex, VStack, Divider, Image, Spacer } from "@chakra-ui/react";
+import { NavLink } from "react-router-dom";
 
 const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
-  const navigate = useNavigate();
-
   const menuItems = [
     { label: "Dashboard", path: "/admin", color: "purple.400" },
     { label: "Productos", path: "/admin/products", color: "cyan.400" },
@@ -12,11 +10,6 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
     { label: "Analytics", path: "/admin/analytics", color: "yellow.400" },
     { label: "Pedidos", path: "/admin/orders", color: "green.400" },
   ];
-
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/auth");
-  };
 
   return (
     <Flex minH="100vh">
@@ -27,53 +20,49 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
         color="white"
         display="flex"
         flexDirection="column"
-        justifyContent="space-between"
+        alignItems="stretch"
         py={6}
         px={4}
       >
-        <VStack spacing={6} align="stretch">
-          {/* Logo */}
-          <Box textAlign="center" bgColor={"white"} borderRadius="md" p={2}>
-            <Image src={logoSrc2} alt="Logo" mx="auto" mb={4} />
-          </Box>
+        {/* Logo */}
+        <Box textAlign="center" bgColor="white" borderRadius="md" p={2} mb={6}>
+          <Image src={logoSrc2} alt="Logo" mx="auto" />
+        </Box>
 
-          {/* Menú de navegación */}
-          <Box>
-           {menuItems.map((item) => (
-  <NavLink 
-    key={item.path} 
-    to={item.path} 
-    end={item.path === "/admin"} // 👈 Solo Dashboard usa end
-    style={{ textDecoration: "none" }}
-  >
-    {({ isActive }) => (
-      <Box
-        px={4}
-        py={2}
-        borderRadius="md"
-        fontWeight={isActive ? "bold" : "normal"}
-        bg={isActive ? item.color : "transparent"}
-        color={isActive ? "white" : "gray.200"}
-        _hover={{
-          bg: isActive ? item.color : `${item.color}`,
-          color: "white",
-        }}
-        transition="all 0.2s"
-      >
-        {item.label}
-      </Box>
-    )}
-  </NavLink>
-))}
-          </Box>
+        {/* Menú de navegación centrado */}
+        <VStack spacing={4} flex="1" justify="center" align="stretch">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/admin"}
+              style={{ textDecoration: "none" }}
+            >
+              {({ isActive }) => (
+                <Box
+                  px={4}
+                  py={2}
+                  borderRadius="md"
+                  fontWeight={isActive ? "bold" : "normal"}
+                  bg={isActive ? item.color : "transparent"}
+                  color={isActive ? "white" : "gray.200"}
+                  _hover={{
+                    bg: isActive ? item.color : `${item.color}`,
+                    color: "white",
+                  }}
+                  transition="all 0.2s"
+                >
+                  {item.label}
+                </Box>
+              )}
+            </NavLink>
+          ))}
         </VStack>
 
-        {/* Logout */}
-        <Box mt={6}>
+        {/* Botón de salir, separado del menú */}
+        <Box mt={8}>
           <Divider mb={4} />
-          <LogoutButton w="full" onClick={handleLogout}>
-            Salir del Admin
-          </LogoutButton>
+          <LogoutButton w="full">Salir del Admin</LogoutButton>
         </Box>
       </Box>
 
