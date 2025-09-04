@@ -80,21 +80,19 @@ const App = () => {
 
         {/* Protected admin routes */}
         <Route
-          path="/admin/*"
+          path="/admin"
           element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Routes>
-                  <Route path="" element={<AdminDashboard/>} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="categories" element={<AdminCategories />} />
-                  <Route path="analytics" element={<AnalyticsPage />} />
-                  <Route path="orders" element={<OrdersPageAdmin/>} />
-                </Routes>
-              </AdminLayout>
+            <ProtectedRoute adminOnly>
+              <AdminLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="orders" element={<OrdersPageAdmin />} />
+        </Route>
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/home" replace />} />

@@ -1,58 +1,34 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import LogoutButton from "@/components/LogoutButton/LogoutButton"
-import { Box, Flex, VStack, Divider, Image } from "@chakra-ui/react"
-import { NavLink } from "react-router-dom"
-import Loading from "@/components/Loading/Loading"
+import LogoutButton from "@/components/LogoutButton/LogoutButton";
+import { Box, Flex, VStack, Divider, Image } from "@chakra-ui/react";
+import { NavLink } from "react-router-dom";
 
 const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-
   const menuItems = [
     { label: "Dashboard", path: "/admin", color: "purple.400" },
     { label: "Productos", path: "/admin/products", color: "cyan.400" },
     { label: "Categorías", path: "/admin/categories", color: "pink.400" },
     { label: "Analytics", path: "/admin/analytics", color: "yellow.400" },
     { label: "Pedidos", path: "/admin/orders", color: "green.400" },
-  ]
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken")
-    const role = localStorage.getItem("userRole")
-
-    if (!token || role !== "admin") {
-      navigate("/auth", { replace: true })
-    } else {
-      setLoading(false)
-    }
-  }, [navigate])
-
-  if (loading) {
-    return <Loading />
-  }
+  ];
 
   return (
-    <Flex minH="100vh">
+    <Flex minH="100vh" bg="gray.50">
       {/* Sidebar */}
       <Box
-        w="250px"
+        w="280px"
         bg="gray.900"
         color="white"
         display="flex"
         flexDirection="column"
-        alignItems="stretch"
         py={6}
         px={4}
       >
         {/* Logo */}
-        <Box textAlign="center" bgColor="white" borderRadius="md" p={2} mb={6}>
+        <Box textAlign="center" bgColor="white" borderRadius="md" p={2} mb={8}>
           <Image src={logoSrc2} alt="Logo" mx="auto" />
         </Box>
 
-        {/* Menú centrado verticalmente */}
+        {/* Menú */}
         <VStack spacing={4} flex="1" justify="center" align="stretch">
           {menuItems.map((item) => (
             <NavLink
@@ -64,9 +40,10 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
               {({ isActive }) => (
                 <Box
                   px={4}
-                  py={2}
+                  py={3}
                   borderRadius="md"
-                  fontWeight={isActive ? "bold" : "normal"}
+                  fontSize="md"
+                  fontWeight={isActive ? "bold" : "medium"}
                   bg={isActive ? item.color : "transparent"}
                   color={isActive ? "white" : "gray.200"}
                   _hover={{
@@ -85,16 +62,16 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
         {/* Botón de salir */}
         <Box mt={8}>
           <Divider mb={4} />
-          <LogoutButton w="full">Salir del Admin</LogoutButton>
+          <LogoutButton w="full">Salir</LogoutButton>
         </Box>
       </Box>
 
-      {/* Main content */}
-      <Box flex="1" bg="gray.50" p={6}>
+      {/* Contenido */}
+      <Box flex="1" p={8} maxW="1200px" mx="auto">
         {children}
       </Box>
     </Flex>
-  )
-}
+  );
+};
 
-export default AdminLayout
+export default AdminLayout;

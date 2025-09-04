@@ -9,11 +9,9 @@ import {
   AlertDialogOverlay,
   useToast,
 } from "@chakra-ui/react";
-import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { useNavigate } from "react-router-dom";
 
-export default function LogoutButton({ variant = "solid", size = "md" }) {
-  const { logout } = useAuth();
+export default function LogoutButton({ variant = "solid", size = "md", children }) {
   const [isOpen, setIsOpen] = useState(false);
   const cancelRef = useRef();
   const navigate = useNavigate();
@@ -22,7 +20,10 @@ export default function LogoutButton({ variant = "solid", size = "md" }) {
   const onClose = () => setIsOpen(false);
 
   const handleLogout = () => {
-    logout(); // usa el logout que limpia localStorage y redirige
+    // 🔴 Borra TODO lo que haya en localStorage
+    localStorage.clear();
+
+    // Notificación
     toast({
       title: "Sesión cerrada",
       description: "Has cerrado sesión correctamente.",
@@ -30,8 +31,11 @@ export default function LogoutButton({ variant = "solid", size = "md" }) {
       duration: 3000,
       isClosable: true,
     });
+
     onClose();
-    navigate("/auth", { replace: true }); // seguridad extra
+
+    // 🔴 Redirige siempre al login correcto
+    navigate("/auth", { replace: true });
   };
 
   return (
@@ -41,8 +45,9 @@ export default function LogoutButton({ variant = "solid", size = "md" }) {
         variant={variant}
         size={size}
         onClick={() => setIsOpen(true)}
+        w="full"
       >
-        Salir
+        {children || "Salir"}
       </Button>
 
       <AlertDialog
