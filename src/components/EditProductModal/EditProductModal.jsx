@@ -2,13 +2,14 @@ import React from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton,
   Button, VStack, HStack, FormControl, FormLabel, Input, NumberInput, NumberInputField,
-  Select, IconButton, useToast
+  Select, IconButton
 } from "@chakra-ui/react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import ProductsActions from "../../reducers/products/products.actions.jsx";
+import { useToast } from "../../Hooks/useToast.jsx";
 
 const EditProductModal = ({ isOpen, onClose, currentProduct, setCurrentProduct, productOptions }) => {
-  const toast = useToast();
+const { toast } = useToast();
 
   if (!currentProduct) return null;
 

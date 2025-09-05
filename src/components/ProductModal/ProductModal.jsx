@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-  ModalBody, ModalFooter, Button, Image, Text, Flex, Select, useToast, IconButton
+  ModalBody, ModalFooter, Button, Image, Text, Flex, Select, IconButton
 } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 import { toggleFavorite } from "../ToggleFavorite/ToggleFavorite.jsx";
+import { useToast } from "../../Hooks/useToast.jsx";
 
 function flattenColors(colors = []) {
   const out = [];
@@ -19,7 +20,7 @@ function flattenColors(colors = []) {
 
 const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   const { user, refreshCart, token } = useAuth();
-  const toast = useToast();
+const { toast } = useToast();
 
   const [modalProduct, setModalProduct] = useState(product);
   const colorItems = useMemo(() => flattenColors(product?.colors), [product]);

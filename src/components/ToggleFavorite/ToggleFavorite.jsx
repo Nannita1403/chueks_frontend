@@ -1,3 +1,7 @@
+import ApiService from "../../reducers/api/Api.jsx";
+import { useToast } from "../../Hooks/useToast.jsx";
+
+const { toast } = useToast();
 export const toggleFavorite = async (productId) => {
   try {
     await ApiService.put(`/users/favorites/${productId}/toggle`);

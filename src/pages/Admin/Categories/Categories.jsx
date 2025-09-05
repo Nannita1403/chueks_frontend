@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   Box, Flex, VStack, Heading, Button, Table, Thead, Tbody, Tr, Th, Td,
-  IconButton, Input, useToast, useColorModeValue, Container
+  IconButton, Input, useColorModeValue, Container
 } from "@chakra-ui/react";
 import { FiPlus, FiTrash2, FiEdit } from "react-icons/fi";
 import api from "../../../reducers/api/Api"; // Ajusta la ruta según tu estructura
+import { useToast } from "../../../Hooks/useToast.jsx";
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -13,7 +14,7 @@ const AdminCategories = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [editValue, setEditValue] = useState("");
 
-  const toast = useToast();
+ const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
   // 🔹 Cargar categorías desde el back

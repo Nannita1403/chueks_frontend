@@ -1,12 +1,12 @@
 // src/pages/Admin/AdminProducts.jsx
 import { useState, useEffect } from "react";
 import {
-  Box, Flex, VStack, Heading, Button, IconButton, useToast,
+  Box, Flex, VStack, Heading, Button, IconButton,
   useColorModeValue, Container, Select, SimpleGrid, Card, Badge
 } from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import axios from "axios";
-
+import { useToast } from "../../../Hooks/useToast.jsx";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
 import CreateProductModal from "../../../components/CreateProductModal/CreateProductModal.jsx";
@@ -46,7 +46,7 @@ const AdminProducts = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const toast = useToast();
+const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
   // cargar productos al montar

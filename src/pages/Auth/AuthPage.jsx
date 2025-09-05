@@ -10,7 +10,6 @@ import {
   Input,
   Button,
   Image,
-  useToast,
   FormControl,
   FormLabel,
   Tabs,
@@ -31,6 +30,7 @@ import {
 } from "@chakra-ui/react";
 import Loading from "../../components/Loading/Loading.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
+import { useToast } from "../../Hooks/useToast.jsx";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const toast = useToast();
+const { toast } = useToast();
   const { login, registerUser } = useAuth();
 
   // --- LOGIN ---

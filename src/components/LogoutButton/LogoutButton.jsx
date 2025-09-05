@@ -6,16 +6,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogContent,
-  AlertDialogOverlay,
-  useToast,
+  AlertDialogOverlay
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../Hooks/useToast.jsx";
 
 export default function LogoutButton({ variant = "solid", size = "md", children }) {
   const [isOpen, setIsOpen] = useState(false);
   const cancelRef = useRef();
   const navigate = useNavigate();
-  const toast = useToast();
+const { toast } = useToast();
 
   const onClose = () => setIsOpen(false);
 

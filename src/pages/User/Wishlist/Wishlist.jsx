@@ -9,7 +9,7 @@ import { toggleFavorite } from "../../../components/ToggleFavorite/ToggleFavorit
 const Favorites = () => {
   const { user, favorites, refreshFavorites } = useAuth();
   const [loading, setLoading] = useState(true);
-  const toast = useToast();
+const { toast } = useToast();
 
   useEffect(() => {
     if (!user) return;

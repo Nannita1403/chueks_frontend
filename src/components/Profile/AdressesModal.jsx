@@ -14,11 +14,11 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
-  useToast,
+  Select
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useToast } from "../../Hooks/useToast.jsx";
 
 export default function AddressModal({ isOpen, onClose }) {
   const [addresses, setAddresses] = useState([]);
@@ -30,7 +30,7 @@ export default function AddressModal({ isOpen, onClose }) {
   });
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const toast = useToast();
+const { toast } = useToast();
 
   // Simulación fetch inicial
   useEffect(() => {

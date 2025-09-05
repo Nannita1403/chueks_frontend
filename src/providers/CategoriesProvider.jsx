@@ -12,7 +12,6 @@ const CategoriesProvider = ({ children }) => {
   const fetchCategories = async () => {
     try {
       const res = await api.get("/products/categories");
-      // 👈 ApiService devuelve { categories: [...] }
       setCategories(res.categories || []);
     } catch (err) {
       setError("Error cargando categorías");
