@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { Box, Heading, SimpleGrid, Text, Spinner } from "@chakra-ui/react";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
-import ApiService from "../../../reducers/api/Api.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
-import { toggleFavorite } from "@/components/ToggleFavorite/ToggleFavorite.jsx";
+import { toggleFavorite } from "../../../components/ToggleFavorite/ToggleFavorite.jsx";
 
 const Favorites = () => {
   const { user, favorites, refreshFavorites } = useAuth();
