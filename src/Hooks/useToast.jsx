@@ -1,9 +1,11 @@
-// Hooks/useToast.jsx
+// src/Hooks/useToast.jsx
 import { useToast as useChakraToast } from "@chakra-ui/react";
 
 /**
  * Hook personalizado que envuelve el toast de Chakra.
- * Mantiene la misma API que tu versión previa: useToast() → { toast, dismiss }
+ * Uso:
+ *   const { toast, dismiss } = useToast();
+ *   toast({ title: "Guardado", status: "success" });
  */
 function useToast() {
   const chakraToast = useChakraToast();
@@ -20,7 +22,7 @@ function useToast() {
       ...props,
     });
 
-    // Retorna handlers compatibles con tu API anterior
+    // Retorna handlers opcionales
     return {
       id,
       dismiss: () => chakraToast.close(id),
@@ -34,25 +36,13 @@ function useToast() {
     };
   };
 
-  // Dismiss manual
+  // Cerrar un toast o todos
   const dismiss = (toastId) => {
-    if (toastId) {
-      chakraToast.close(toastId);
-    } else {
-      chakraToast.closeAll();
-    }
+    if (toastId) chakraToast.close(toastId);
+    else chakraToast.closeAll();
   };
 
-  return {
-    toast,
-    dismiss,
-  };
+  return { toast, dismiss };
 }
 
-// También exportamos la función toast directamente
-const toast = (options) => {
-  const { toast } = useToast();
-  return toast(options);
-};
-
-export { useToast, toast };
+export { useToast };
