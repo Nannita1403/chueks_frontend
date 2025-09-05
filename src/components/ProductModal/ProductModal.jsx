@@ -6,7 +6,7 @@ import {
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
-import { toggleFavorite } from "../ToggleFavorite/";
+import { toggleFavorite } from "../ToggleFavorite/ToggleFavorite.jsx";
 
 function flattenColors(colors = []) {
   const out = [];
