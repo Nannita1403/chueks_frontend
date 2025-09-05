@@ -12,7 +12,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
   ];
 
   return (
-    <Flex minH="100vh" bg="gray.50">
+    <Flex h="100vh" bg="gray.50">
       {/* Sidebar */}
       <Box
         w="280px"
@@ -67,7 +67,12 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
       </Box>
 
       {/* Contenido */}
-      <Box flex="1" p={8} maxW="1200px" mx="auto">
+      <Box 
+        flex="1"
+        p={8}
+        maxW="1200px"
+        mx="auto"
+        overflowY="auto">
         <Outlet/>
       </Box>
     </Flex>
