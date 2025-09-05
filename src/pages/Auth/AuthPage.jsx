@@ -1,6 +1,6 @@
 // src/pages/Auth/AuthPage.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import logoRedondo from "/logoRedondo.png";
 import {
   Box,
@@ -37,6 +37,7 @@ export default function AuthPage() {
   const [verificationError, setVerificationError] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
   const { login, registerUser } = useAuth();
 
@@ -53,10 +54,7 @@ export default function AuthPage() {
     };
 
     try {
-      console.log("🔐 Intentando login:", credentials);
-
       const result = await login(credentials);
-      console.log("✅ Login exitoso:", result);
 
       toast({
         title: "Inicio de sesión exitoso",
@@ -72,8 +70,6 @@ export default function AuthPage() {
         }
       }, 100);
     } catch (error) {
-      console.error("❌ Error en login:", error);
-
       if (error.isVerificationError) {
         setVerificationError({
           email: credentials.email,
@@ -112,21 +108,18 @@ export default function AuthPage() {
     };
 
     try {
-      console.log("📝 Intentando registro:", registrationData);
-
-      const result = await registerUser(registrationData);
-      console.log("✅ Registro exitoso:", result);
+      await registerUser(registrationData);
 
       toast({
         title: "Registro exitoso",
-        description: "Por favor verifica tu email",
+        description: "Revisa tu correo para verificar tu cuenta antes de iniciar sesión.",
         status: "success",
-        duration: 3000,
+        duration: 5000,
       });
 
-      navigate("/home");
+      // 🔄 siempre lo mandamos a /auth (login)
+      navigate("/auth", { replace: true });
     } catch (error) {
-      console.error("❌ Error en registro:", error);
       toast({
         title: "Error al registrarse",
         description: error.message || "Error en el registro",
@@ -137,6 +130,26 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
+
+  // --- VERIFICACIÓN desde backend ---
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const verified = params.get("verified");
+
+    if (verified === "1") {
+      toast({
+        title: "✅ Cuenta verificada",
+        description: "Gracias por verificar tu correo. Ya puedes iniciar sesión.",
+        status: "success",
+      });
+    } else if (verified === "0") {
+      toast({
+        title: "❌ Error en la verificación",
+        description: "Hubo un problema al verificar tu cuenta. Intenta nuevamente.",
+        status: "error",
+      });
+    }
+  }, [location, toast]);
 
   if (isLoading) {
     return <Loading />;

@@ -9,7 +9,7 @@ import InfiniteCarousel from "../../../components/Carousel/InfiniteCarousel.jsx"
 import CategoriesGrid from "../../../components/Category/CategoriesGrid.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
-import { toggleFavorite } from "@/components/ToggleFavorite/ToggleFavorite.jsx";
+import { toggleFavorite } from "../../../components/ToggleFavorite/ToggleFavorite.jsx";
 
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
