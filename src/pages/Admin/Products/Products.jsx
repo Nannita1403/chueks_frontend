@@ -67,7 +67,7 @@ const { toast } = useToast();
       }
     };
     load();
-  }, [getProducts, toast]);
+  }, []);
 
   // cargar opciones dinámicas
   useEffect(() => {
