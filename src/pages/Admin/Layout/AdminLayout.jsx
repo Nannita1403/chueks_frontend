@@ -1,6 +1,6 @@
 import LogoutButton from "../../../components/LogoutButton/LogoutButton.jsx";
 import { Box, Flex, VStack, Divider, Image } from "@chakra-ui/react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 
 const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
   const menuItems = [
@@ -68,7 +68,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png", children }) => {
 
       {/* Contenido */}
       <Box flex="1" p={8} maxW="1200px" mx="auto">
-        {children}
+        <Outlet/>
       </Box>
     </Flex>
   );
