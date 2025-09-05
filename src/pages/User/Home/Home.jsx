@@ -120,7 +120,7 @@ export default function Home() {
               <ProductComponent
                 product={product}
                 onViewDetail={() => openDetail(product)}
-                onToggleLike={() => toggleFavorite(product._id)}
+                onToggleLike={() => toggleFavorite(product._id, toast, refreshFavorites)}
                 isFavorite={favorites.some((f) => f._id === product._id)}
               />
             )}

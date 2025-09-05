@@ -59,7 +59,7 @@ const { toast } = useToast();
               product={product}
               isFavorite
               showAddToCart
-              onToggleLike={() => toggleFavorite(product._id)}
+              onToggleLike={() => toggleFavorite(product._id, toast, refreshFavorites)}
             />
           ))}
         </SimpleGrid>

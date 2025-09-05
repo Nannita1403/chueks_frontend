@@ -1,3 +1,4 @@
+// src/components/LogoutButton.jsx
 import { useRef, useState } from "react";
 import {
   Button,
@@ -6,16 +7,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogContent,
-  AlertDialogOverlay
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../Hooks/useToast.jsx";
 
-export default function LogoutButton({ variant = "solid", size = "md", children }) {
+export default function LogoutButton({
+  variant = "solid",
+  size = "md",
+  children,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const cancelRef = useRef();
   const navigate = useNavigate();
-const { toast } = useToast();
+  const { toast } = useToast(); // ✅ usar siempre el hook
 
   const onClose = () => setIsOpen(false);
 
@@ -23,13 +28,11 @@ const { toast } = useToast();
     // 🔴 Borra TODO lo que haya en localStorage
     localStorage.clear();
 
-    // Notificación
+    // ✅ Notificación con nuestro hook
     toast({
       title: "Sesión cerrada",
       description: "Has cerrado sesión correctamente.",
       status: "info",
-      duration: 3000,
-      isClosable: true,
     });
 
     onClose();

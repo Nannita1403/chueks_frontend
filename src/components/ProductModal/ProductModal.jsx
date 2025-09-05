@@ -1,7 +1,19 @@
+// src/components/ProductModal.jsx
 import { useState, useEffect, useMemo } from "react";
 import {
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-  ModalBody, ModalFooter, Button, Image, Text, Flex, Select, IconButton
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Image,
+  Text,
+  Flex,
+  Select,
+  IconButton,
 } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
@@ -12,19 +24,30 @@ import { useToast } from "../../Hooks/useToast.jsx";
 function flattenColors(colors = []) {
   const out = [];
   colors.forEach((c) => {
-    const names = Array.isArray(c?.name) ? c.name : (c?.name ? [c.name] : []);
-    names.forEach((n) => out.push({ name: n, stock: Number(c?.stock) || 0 }));
+    const names = Array.isArray(c?.name)
+      ? c.name
+      : c?.name
+      ? [c.name]
+      : [];
+    names.forEach((n) =>
+      out.push({ name: n, stock: Number(c?.stock) || 0 })
+    );
   });
   return out;
 }
 
 const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
-  const { user, refreshCart, token } = useAuth();
-const { toast } = useToast();
+  const { user, refreshCart } = useAuth();
+  const { toast } = useToast(); // ✅ nuestro hook
 
   const [modalProduct, setModalProduct] = useState(product);
-  const colorItems = useMemo(() => flattenColors(product?.colors), [product]);
-  const [selectedColor, setSelectedColor] = useState(colorItems?.[0] || null);
+  const colorItems = useMemo(
+    () => flattenColors(product?.colors),
+    [product]
+  );
+  const [selectedColor, setSelectedColor] = useState(
+    colorItems?.[0] || null
+  );
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -33,29 +56,48 @@ const { toast } = useToast();
     setModalProduct(product);
     setSelectedColor(colorItems?.[0] || null);
     setQuantity(1);
-    setIsFavorite(Boolean(user?.favorites?.some?.(f => f._id === product._id)));
+    setIsFavorite(
+      Boolean(user?.favorites?.some?.((f) => f._id === product._id))
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product?._id, user]);
 
   const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
+  // ❤️ Toggle favoritos
   const handleToggleFavorite = async () => {
-  if (!user) {
-    return toast({ title: "Debes iniciar sesión", status: "warning" });
-  }
-  await toggleFavorite(modalProduct._id);
-  setIsFavorite(!isFavorite); // actualiza el estado local del corazón
+    if (!user) {
+      return toast({
+        title: "Debes iniciar sesión",
+        status: "warning",
+      });
+    }
+      await toggleFavorite(modalProduct._id, toast, refreshFavorites);
+      setIsFavorite(!isFavorite);
   };
 
+  // 🛒 Agregar al carrito
   const handleAddToCart = async () => {
-    if (!selectedColor) return toast({ title: "Selecciona un color", status: "warning" });
-    if (!user) return toast({ title: "Debes iniciar sesión para agregar al carrito", status: "warning" });
+    if (!selectedColor) {
+      return toast({
+        title: "Selecciona un color",
+        status: "warning",
+      });
+    }
+    if (!user) {
+      return toast({
+        title: "Debes iniciar sesión para agregar al carrito",
+        status: "warning",
+      });
+    }
 
     const qty = Math.min(quantity, maxQty);
 
     try {
       if (typeof addToCartHandler === "function") {
-        await addToCartHandler(modalProduct, qty, { name: selectedColor.name });
+        await addToCartHandler(modalProduct, qty, {
+          name: selectedColor.name,
+        });
       } else {
         await ApiService.post("/cart/add", {
           productId: modalProduct._id,
@@ -67,11 +109,17 @@ const { toast } = useToast();
       if (typeof refreshCart === "function") await refreshCart();
       window.dispatchEvent(new CustomEvent("cart:updated"));
 
-      toast({ title: `${qty} ${modalProduct.name} agregados al carrito`, status: "success" });
+      toast({
+        title: `${qty} ${modalProduct.name} agregados al carrito`,
+        status: "success",
+      });
       setQuantity(1);
     } catch (e) {
       console.error(e);
-      toast({ title: "No se pudo agregar al carrito", status: "error" });
+      toast({
+        title: "No se pudo agregar al carrito",
+        status: "error",
+      });
     }
   };
 
@@ -91,25 +139,38 @@ const { toast } = useToast();
             w="100%"
             maxH="320px"
           />
-          {modalProduct?.description && <Text mb={2}>{modalProduct.description}</Text>}
+          {modalProduct?.description && (
+            <Text mb={2}>{modalProduct.description}</Text>
+          )}
 
-          <Text><strong>Precio Unitario:</strong> ${modalProduct?.priceMin}</Text>
+          <Text>
+            <strong>Precio Unitario:</strong> ${modalProduct?.priceMin}
+          </Text>
           {typeof modalProduct?.priceMay === "number" && (
-            <Text><strong>Precio Mayorista:</strong> ${modalProduct.priceMay}</Text>
+            <Text>
+              <strong>Precio Mayorista:</strong> $
+              {modalProduct.priceMay}
+            </Text>
           )}
 
           {selectedColor && (
-            <Text mt={1}><strong>Stock color:</strong> {selectedColor.stock}</Text>
+            <Text mt={1}>
+              <strong>Stock color:</strong> {selectedColor.stock}
+            </Text>
           )}
           {selectedColor?.stock > 0 && selectedColor.stock < 5 && (
-            <Text color="red.500">¡Solo quedan {selectedColor.stock} unidades de este color!</Text>
+            <Text color="red.500">
+              ¡Solo quedan {selectedColor.stock} unidades de este color!
+            </Text>
           )}
 
           <Select
             mt={3}
             value={selectedColor?.name || ""}
             onChange={(e) => {
-              const color = colorItems.find((c) => c.name === e.target.value);
+              const color = colorItems.find(
+                (c) => c.name === e.target.value
+              );
               setSelectedColor(color || null);
               setQuantity(1);
             }}
@@ -122,18 +183,40 @@ const { toast } = useToast();
           </Select>
 
           <Flex mt={3} align="center" gap={2}>
-            <Button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>-</Button>
+            <Button
+              onClick={() =>
+                setQuantity((q) => Math.max(1, q - 1))
+              }
+            >
+              -
+            </Button>
             <Text>{quantity}</Text>
-            <Button onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}>+</Button>
+            <Button
+              onClick={() =>
+                setQuantity((q) => Math.min(maxQty, q + 1))
+              }
+            >
+              +
+            </Button>
           </Flex>
 
           <Flex mt={4} gap={3} wrap="wrap">
-            <Button colorScheme="teal" onClick={handleAddToCart} isDisabled={selectedColor?.stock === 0}>
+            <Button
+              colorScheme="teal"
+              onClick={handleAddToCart}
+              isDisabled={selectedColor?.stock === 0}
+            >
               Agregar al carrito
             </Button>
             <IconButton
               aria-label="Favorito"
-              icon={isFavorite ? <FaHeart color="red" /> : <FaRegHeart />}
+              icon={
+                isFavorite ? (
+                  <FaHeart color="red" />
+                ) : (
+                  <FaRegHeart />
+                )
+              }
               onClick={handleToggleFavorite}
             />
           </Flex>

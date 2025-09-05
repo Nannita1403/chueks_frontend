@@ -4,22 +4,27 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProductComponent from "./ProductComponent.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
+import { useToast } from "../../Hooks/useToast.jsx";
+import { toggleFavorite } from "../ToggleFavorite/ToggleFavorite.jsx";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user, token } = useAuth();
+  const { user, token, refreshFavorites } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://chueks-backend.vercel.app/api/v1/products", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const response = await axios.get(
+          "https://chueks-backend.vercel.app/api/v1/products",
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        );
         setProducts(response.data.data || response.data);
       } catch (error) {
         console.error("Error cargando productos:", error);
+        toast({ title: "Error cargando productos", status: "error" });
       } finally {
         setLoading(false);
       }
@@ -27,25 +32,24 @@ const Products = () => {
     fetchProducts();
   }, [token]);
 
-  const handleToggleFavorite = async (product, add) => {
-    if (!user) return;
-    try {
-      const res = await axios.put(
-        `https://chueks-backend.vercel.app/api/v1/users/favorites/${product._id}/toggle`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-        );
-          console.log("✅ Favoritos actualizados:", res.data);
+  const handleToggleFavorite = async (product) => {
+    if (!user) {
+      return toast({ title: "Debes iniciar sesión", status: "warning" });
+    }
 
-          setProducts((prev) =>
-            prev.map((p) =>
-              p._id === product._id ? { ...p, isFavorite: !p.isFavorite } : p
-            )
-          );
-        } catch (err) {
-          console.error("❌ Error al togglear favorito:", err);
-        }
-      };
+    try {
+      await toggleFavorite(product._id, toast, refreshFavorites);
+
+      // 🔄 actualizar local state para que el corazón cambie al instante
+      setProducts((prev) =>
+        prev.map((p) =>
+          p._id === product._id ? { ...p, isFavorite: !p.isFavorite } : p
+        )
+      );
+    } catch (err) {
+      console.error("❌ Error al togglear favorito:", err);
+    }
+  };
 
   const handleViewDetail = (product) => {
     navigate(`/products/${product._id}`);
@@ -57,13 +61,15 @@ const Products = () => {
   return (
     <SimpleGrid columns={[1, 2, 3]} spacing={6} p={4}>
       {products.map((product) => {
-        const isFavorite = user?.favorites?.some((fav) => fav._id === product._id);
+        const isFavorite = user?.favorites?.some(
+          (fav) => fav._id === product._id
+        );
         return (
           <ProductComponent
             key={product._id}
             product={product}
             isFavorite={isFavorite}
-            onToggleLike={(add) => handleToggleFavorite(product, add)}
+            onToggleLike={() => handleToggleFavorite(product)}
             onViewDetail={() => handleViewDetail(product)}
           />
         );

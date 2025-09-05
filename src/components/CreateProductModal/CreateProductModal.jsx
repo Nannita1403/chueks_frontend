@@ -1,4 +1,4 @@
-// components/CreateProductModal.jsx
+// src/components/CreateProductModal.jsx
 import React from "react";
 import {
   Modal,
@@ -23,7 +23,13 @@ import { FiPlus, FiTrash2 } from "react-icons/fi";
 import ProductsActions from "../../reducers/products/products.actions.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
 
-const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, productOptions }) => {
+const CreateProductModal = ({
+  isOpen,
+  onClose,
+  newProduct,
+  setNewProduct,
+  productOptions,
+}) => {
   const { toast } = useToast();
 
   const handleChange = (e) =>
@@ -53,12 +59,16 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
   const handleCreate = async () => {
     try {
       await ProductsActions.createProduct(newProduct);
+
       toast({
         title: "Producto creado",
         description: "Se agregó correctamente a la base de datos.",
         status: "success",
       });
+
       onClose();
+
+      // Resetear formulario
       setNewProduct({
         code: "",
         name: "",
@@ -77,7 +87,8 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
         imgPrimary: "",
         imgSecondary: "",
       });
-    } catch {
+    } catch (error) {
+      console.error("❌ Error al crear producto:", error);
       toast({
         title: "Error al crear producto",
         description: "Revisa los datos e inténtalo de nuevo.",
@@ -96,12 +107,20 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
           <VStack spacing={4} align="stretch">
             <FormControl>
               <FormLabel>Código</FormLabel>
-              <Input name="code" value={newProduct.code} onChange={handleChange} />
+              <Input
+                name="code"
+                value={newProduct.code}
+                onChange={handleChange}
+              />
             </FormControl>
 
             <FormControl>
               <FormLabel>Nombre</FormLabel>
-              <Input name="name" value={newProduct.name} onChange={handleChange} />
+              <Input
+                name="name"
+                value={newProduct.name}
+                onChange={handleChange}
+              />
             </FormControl>
 
             <FormControl>
@@ -119,18 +138,23 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
                 <NumberInput
                   value={newProduct.priceMin}
                   onChange={(v) =>
-                    handleChange({ target: { name: "priceMin", value: Number(v) } })
+                    handleChange({
+                      target: { name: "priceMin", value: Number(v) },
+                    })
                   }
                 >
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
+
               <FormControl>
                 <FormLabel>Precio Máximo</FormLabel>
                 <NumberInput
                   value={newProduct.priceMay}
                   onChange={(v) =>
-                    handleChange({ target: { name: "priceMay", value: Number(v) } })
+                    handleChange({
+                      target: { name: "priceMay", value: Number(v) },
+                    })
                   }
                 >
                   <NumberInputField />
@@ -219,6 +243,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
                         </option>
                       ))}
                     </Select>
+
                     <NumberInput
                       value={c.stock || 0}
                       onChange={(v) => {
@@ -229,12 +254,14 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
                     >
                       <NumberInputField />
                     </NumberInput>
+
                     <IconButton
                       icon={<FiTrash2 />}
                       onClick={() => handleRemoveColor(idx)}
                     />
                   </HStack>
                 ))}
+
                 <Button leftIcon={<FiPlus />} onClick={handleAddColor}>
                   Agregar Color
                 </Button>
@@ -247,29 +274,37 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
                 <NumberInput
                   value={newProduct.height}
                   onChange={(v) =>
-                    handleChange({ target: { name: "height", value: Number(v) } })
+                    handleChange({
+                      target: { name: "height", value: Number(v) },
+                    })
                   }
                 >
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
+
               <FormControl>
                 <FormLabel>Ancho</FormLabel>
                 <NumberInput
                   value={newProduct.width}
                   onChange={(v) =>
-                    handleChange({ target: { name: "width", value: Number(v) } })
+                    handleChange({
+                      target: { name: "width", value: Number(v) },
+                    })
                   }
                 >
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
+
               <FormControl>
                 <FormLabel>Profundidad</FormLabel>
                 <NumberInput
                   value={newProduct.depth}
                   onChange={(v) =>
-                    handleChange({ target: { name: "depth", value: Number(v) } })
+                    handleChange({
+                      target: { name: "depth", value: Number(v) },
+                    })
                   }
                 >
                   <NumberInputField />
@@ -285,6 +320,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
                 onChange={handleChange}
               />
             </FormControl>
+
             <FormControl>
               <FormLabel>Imagen Secundaria (URL)</FormLabel>
               <Input

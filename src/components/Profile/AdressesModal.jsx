@@ -1,10 +1,10 @@
+// src/components/AddressesModal.jsx
 import {
   Box,
   Button,
   Text,
   VStack,
   HStack,
-  useDisclosure,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -14,7 +14,7 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select
+  Select,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -30,13 +30,14 @@ export default function AddressModal({ isOpen, onClose }) {
   });
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
-const { toast } = useToast();
+  const { toast } = useToast(); // ✅ nuestro hook
 
   // Simulación fetch inicial
   useEffect(() => {
-    setAddresses([]); // aquí deberías hacer fetch a /api/users/addresses
+    setAddresses([]); // aquí deberías hacer fetch real a /api/users/addresses
   }, []);
 
+  // Validación de código postal
   const validatePostalCode = async () => {
     if (!form.zip) return false;
     setLoading(true);
@@ -45,9 +46,7 @@ const { toast } = useToast();
         const res = await axios.get(
           `https://api.zippopotam.us/${form.country}/${form.zip}`
         );
-        if (res.status === 200) {
-          return true;
-        }
+        return res.status === 200;
       }
       return false;
     } catch {
@@ -57,6 +56,7 @@ const { toast } = useToast();
     }
   };
 
+  // Guardar o actualizar dirección
   const handleSave = async () => {
     if (!form.street || !form.city || !form.zip) {
       toast({ title: "Completa todos los campos", status: "warning" });
@@ -66,8 +66,8 @@ const { toast } = useToast();
     const isValid = await validatePostalCode();
     if (!isValid) {
       toast({
-        title: "Error",
-        description: "Código postal inválido para el país seleccionado",
+        title: "Código postal inválido",
+        description: "El CP no coincide con el país seleccionado",
         status: "error",
       });
       return;
@@ -75,60 +75,66 @@ const { toast } = useToast();
 
     if (editId) {
       // Update
-      setAddresses(
-        addresses.map((a) => (a.id === editId ? { ...form, id: editId } : a))
+      setAddresses((prev) =>
+        prev.map((a) => (a.id === editId ? { ...form, id: editId } : a))
       );
       toast({ title: "Dirección actualizada", status: "success" });
     } else {
       // Create
-      setAddresses([...addresses, { ...form, id: Date.now() }]);
+      setAddresses((prev) => [...prev, { ...form, id: Date.now() }]);
       toast({ title: "Dirección guardada", status: "success" });
     }
 
+    // Reset form
     setForm({ street: "", city: "", zip: "", country: "ES" });
     setEditId(null);
     onClose();
-  };
-
-  const handleEdit = (addr) => {
-    setForm(addr);
-    setEditId(addr.id);
-    onClose(); // cerramos modal principal y luego se abre para editar
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{editId ? "Editar Dirección" : "Nueva Dirección"}</ModalHeader>
+        <ModalHeader>
+          {editId ? "Editar Dirección" : "Nueva Dirección"}
+        </ModalHeader>
         <ModalBody>
+          {/* Formulario */}
           <VStack spacing={3} align="stretch">
             <FormControl>
               <FormLabel>Calle</FormLabel>
               <Input
                 value={form.street}
-                onChange={(e) => setForm({ ...form, street: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, street: e.target.value })
+                }
               />
             </FormControl>
             <FormControl>
               <FormLabel>Ciudad</FormLabel>
               <Input
                 value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, city: e.target.value })
+                }
               />
             </FormControl>
             <FormControl>
               <FormLabel>Código Postal</FormLabel>
               <Input
                 value={form.zip}
-                onChange={(e) => setForm({ ...form, zip: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, zip: e.target.value })
+                }
               />
             </FormControl>
             <FormControl>
               <FormLabel>País</FormLabel>
               <Select
                 value={form.country}
-                onChange={(e) => setForm({ ...form, country: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, country: e.target.value })
+                }
               >
                 <option value="ES">España</option>
                 <option value="AR">Argentina</option>
@@ -136,7 +142,7 @@ const { toast } = useToast();
             </FormControl>
           </VStack>
 
-          {/* Listado de direcciones guardadas */}
+          {/* Listado de direcciones */}
           {addresses.length > 0 && (
             <VStack mt={6} spacing={3} align="stretch">
               <Text fontWeight="bold">Mis Direcciones</Text>
@@ -165,7 +171,9 @@ const { toast } = useToast();
                       size="sm"
                       colorScheme="red"
                       onClick={() =>
-                        setAddresses(addresses.filter((a) => a.id !== addr.id))
+                        setAddresses((prev) =>
+                          prev.filter((a) => a.id !== addr.id)
+                        )
                       }
                     >
                       Eliminar
@@ -176,6 +184,7 @@ const { toast } = useToast();
             </VStack>
           )}
         </ModalBody>
+
         <ModalFooter>
           <Button mr={3} onClick={onClose}>
             Cancelar
