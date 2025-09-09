@@ -17,6 +17,8 @@ import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
+import { useNavigate } from "react-router-dom";
+const navigate = useNavigate();
 
 const MIN_ITEMS = 10;
 const money = (n) =>
@@ -73,9 +75,6 @@ const apiRemoveByLine = useCallback((lineId) =>
   ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`)
 , []);
 
-
-  const apiCheckout = useCallback(() => ApiService.post("/cart/checkout", {}), []);
-
   // ---- load cart ----
   useEffect(() => {
     let mounted = true;
@@ -121,14 +120,23 @@ const apiRemoveByLine = useCallback((lineId) =>
   };
 
   const onCheckout = async () => {
-    try {
-      const res = await apiCheckout();
-      await refreshCart?.();
-      if (res?.redirectUrl) window.location.href = res.redirectUrl;
-    } catch (e) {
-      toast({ title: "Checkout bloqueado", description: e.message, status: "warning" });
-    }
-  };
+  try {
+    const res = await ApiService.post("/orders/checkout"); // 🔹 nuevo endpoint
+    console.log("Pedido creado:", res.order);
+
+    await refreshCart(); // Vacía el carrito en estado global
+
+    // Redirige a la página de confirmación
+    navigate(`/order/confirm?orderId=${res.order._id}`);
+  } catch (err) {
+    console.error("Error al crear pedido:", err);
+    toast({ 
+      title: "Error al procesar el pedido", 
+      description: err?.response?.data?.message || err.message || "Intenta nuevamente", 
+      status: "error" 
+    });
+  }
+};
 
   const openProductDetail = async (productId) => {
     try {
