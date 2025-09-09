@@ -178,12 +178,11 @@ const toggleFavorite = useCallback(async (productId) => {
 
   // --- LOGOUT ---
   const logout = useCallback(() => {
-    try {
-      authService.logout?.();
-    } catch (e) {
+    try { authService.logout?.(); } catch (e) {
       console.warn("⚠️ authService.logout no definido:", e);
     }
     localStorage.removeItem("token");
+    ApiService.setToken(null);
     dispatch({ type: "LOGOUT" });
     navigate("/auth", { replace: true });
   }, [navigate]);
