@@ -16,6 +16,7 @@ import OrdersPageAdmin from "./pages/Admin/Orders/OrdersPageAdmin.jsx";
 import UserLayout from "./pages/User/UserLayout.jsx";
 import ProfileDashboard from "./pages/User/Profile/ProfileDashboard.jsx";
 import Wishlist from "./pages/User/Wishlist/Wishlist.jsx";
+import OrderConfirm from "./pages/User/Order/OrderConfirm.jsx";
 
 const App = () => {
   return (
@@ -77,6 +78,15 @@ const App = () => {
         <Route index element={<ProfileDashboard />} />
         <Route path="orders" element={<OrdersPageUser />} />
       </Route>
+
+      <Route
+        path="/order/confirm"
+        element={
+          <ProtectedRoute>
+            <OrderConfirm/>
+          </ProtectedRoute>
+        }
+      />
 
         {/* Protected admin routes */}
         <Route
