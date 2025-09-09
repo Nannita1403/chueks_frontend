@@ -1,52 +1,41 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
-  Box, Heading, SimpleGrid, Text, Spinner, HStack, VStack, Image, IconButton, Container, Tooltip, Divider, Grid, GridItem
+  Box, Container, Heading, Text, SimpleGrid, VStack, HStack, Divider, Spinner
 } from "@chakra-ui/react";
-import { CloseIcon } from "@chakra-ui/icons";
-
-import { useAuth } from "../../../context/Auth/auth.context.jsx";
-import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
-import CustomButton from "../../../components/Button/Button.jsx";
-import ApiService from "../../../reducers/api/Api.jsx";
+import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
+import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
+import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
+import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import ApiService from "../../../reducers/api/Api.jsx";
 import { toggleFavorite } from "../../../components/ToggleFavorite/ToggleFavorite.jsx";
-
-const money = (n) =>
-  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
 export default function Favorites() {
   const { user, favorites, refreshFavorites } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const pageBg = useColorModeValue("gray.50", "gray.900");
-  const panelBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
-  const muted = useColorModeValue("gray.600", "gray.400");
-  const headerBg = useColorModeValue("pink.500", "pink.400");
-
-  // --- Cargar favoritos ---
   useEffect(() => {
     if (!user) return;
-
     const fetchFavorites = async () => {
       try {
         await refreshFavorites();
       } catch (err) {
-        console.error("❌ Error cargando favoritos:", err);
         toast({ title: "Error cargando favoritos", status: "error" });
       } finally {
         setLoading(false);
       }
     };
-
     fetchFavorites();
   }, [user]);
 
-  // --- Mover favorito al carrito ---
+  const subtotal = useMemo(() => {
+    return (favorites || []).reduce((acc, p) => acc + (p.priceMin || 0), 0);
+  }, [favorites]);
+
   const moveToCart = async (product) => {
     try {
       await ApiService.post("/cart/add", { productId: product._id, quantity: 1 });
@@ -57,37 +46,9 @@ export default function Favorites() {
     }
   };
 
-  // --- Mover todos los favoritos al carrito ---
-  const moveAllToCart = async () => {
-    try {
-      for (const product of favorites) {
-        await ApiService.post("/cart/add", { productId: product._id, quantity: 1 });
-        await toggleFavorite(product._id, toast, refreshFavorites);
-      }
-      toast({ title: `Todos los productos agregados al carrito`, status: "success" });
-    } catch (err) {
-      toast({ title: "Error al mover todos los favoritos", description: err.message, status: "error" });
-    }
-  };
-
-  // --- Modal producto ---
-  const openProductDetail = async (productId) => {
-    try {
-      const res = await ApiService.get(`/products/${productId}`);
-      setSelected(res?.product || res);
-    } catch {
-      toast({ title: "No se pudo abrir el producto", status: "error" });
-    }
-  };
-
-  // --- Calcular subtotal ---
-  const subtotal = useMemo(() => {
-    return favorites?.reduce((acc, p) => acc + (p.priceMin || 0), 0) || 0;
-  }, [favorites]);
-
   if (!user) {
     return (
-      <Box minH="100vh" bg={pageBg} p={6} textAlign="center">
+      <Box minH="100vh" p={6} textAlign="center">
         <AppHeader />
         <BackButton mb={4} />
         <Text>Debes iniciar sesión para ver tus favoritos.</Text>
@@ -97,133 +58,93 @@ export default function Favorites() {
 
   if (loading) {
     return (
-      <Box minH="100vh" bg={pageBg} p={6} textAlign="center">
+      <Box minH="100vh" p={6}>
         <AppHeader />
         <BackButton mb={4} />
-        <Spinner />
-        <Text mt={2}>Cargando tus favoritos…</Text>
+        <VStack spacing={6}>
+          <Spinner />
+          <Text>Cargando tus favoritos…</Text>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+            {[...Array(3)].map((_, i) => <ProductCardSkeleton key={i} />)}
+          </SimpleGrid>
+        </VStack>
       </Box>
     );
   }
 
   return (
-    <Box minH="100vh" bg={pageBg}>
+    <Box minH="100vh">
       <AppHeader />
-      <Box bg={headerBg} color="white" py={3}>
+      <Box bg="pink.500" color="white" py={3}>
         <Container maxW="container.xl">
-          <HStack justify="space-between">
-            <BackButton color="white" variant="link" />
-            <Text fontWeight="bold" fontSize="xl">Mis Favoritos ❤️</Text>
-            <Box w="88px" />
-          </HStack>
+          <BackButton color="white" variant="link" />
         </Container>
       </Box>
 
       <Container maxW="container.xl" py={6}>
-        {(!favorites || favorites.length === 0) ? (
-          <Box bg={panelBg} borderWidth={1} borderColor={borderColor} rounded="md" py={10} textAlign="center">
-            <Text color={muted}>No tienes productos en favoritos</Text>
-          </Box>
-        ) : (
-          <Grid templateColumns={{ base: "1fr", lg: "1fr 320px" }} gap={4}>
-            {/* LISTA FAVORITOS */}
-            <GridItem>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+        <HStack align="start" spacing={6} w="full">
+          {/* LISTA DE FAVORITOS */}
+          <Box flex={1}>
+            <Heading size="lg" mb={6}>Mis Favoritos ❤️</Heading>
+            {!favorites || favorites.length === 0 ? (
+              <Box
+                bg="white"
+                _dark={{ bg: "gray.800" }}
+                borderWidth={1}
+                borderColor="gray.200"
+                rounded="md"
+                py={10}
+                textAlign="center"
+              >
+                <Text color="gray.600" _dark={{ color: "gray.400" }}>No tienes productos en favoritos</Text>
+              </Box>
+            ) : (
+              <VStack spacing={4} align="stretch">
                 {favorites.map((product) => (
-                  <Box key={product._id} bg={panelBg} borderWidth={1} borderColor={borderColor} rounded="md" overflow="hidden">
-                    <VStack align="stretch" spacing={2}>
-                      <Box
-                        h="200px"
-                        bg={useColorModeValue("gray.100", "whiteAlpha.100")}
-                        overflow="hidden"
-                        cursor="pointer"
-                        onClick={() => openProductDetail(product._id)}
-                      >
-                        <Image
-                          src={product.imgPrimary}
-                          alt={product.name}
-                          w="100%"
-                          h="100%"
-                          objectFit="cover"
-                        />
-                      </Box>
+                  <Box key={product._id}>
+                    <ProductModal
+                      isOpen={!!selectedProduct && selectedProduct._id === product._id}
+                      onClose={() => setSelectedProduct(null)}
+                      product={selectedProduct}
+                      addToCartHandler={moveToCart}
+                    />
 
-                      <Box p={3}>
-                        <HStack justify="space-between">
-                          <Box>
-                            <Text fontWeight="semibold" noOfLines={1}>{product.name}</Text>
-                            {product.colors?.[0]?.name && (
-                              <Text fontSize="sm" color={muted}>Color: {product.colors[0].name[0]}</Text>
-                            )}
-                            <Text fontSize="sm" color={muted}>Precio: {money(product.priceMin)}</Text>
-                          </Box>
-
-                          <IconButton
-                            aria-label="Eliminar favorito"
-                            icon={<CloseIcon />}
-                            size="sm"
-                            variant="ghost"
-                            color={muted}
-                            onClick={() => toggleFavorite(product._id, toast, refreshFavorites)}
-                          />
-                        </HStack>
-
-                        <CustomButton
-                          mt={2}
-                          size="sm"
-                          w="full"
+                    <ProductComponent
+                      product={product}
+                      isFavorite
+                      onViewDetail={() => setSelectedProduct(product)}
+                      onToggleLike={() => toggleFavorite(product._id, toast, refreshFavorites)}
+                      showAddToCart
+                    >
+                      <HStack mt={2} spacing={2}>
+                        <Text fontSize="sm" fontWeight="semibold">${product.priceMin}</Text>
+                        <Box flex={1} />
+                        <Box
+                          as="button"
                           onClick={() => moveToCart(product)}
+                          style={{ color: "#319795", fontWeight: "bold" }}
                         >
                           Mover al carrito
-                        </CustomButton>
-                      </Box>
-                    </VStack>
+                        </Box>
+                      </HStack>
+                    </ProductComponent>
                   </Box>
                 ))}
-              </SimpleGrid>
-            </GridItem>
+              </VStack>
+            )}
+          </Box>
 
-            {/* RESUMEN LATERAL */}
-            <GridItem>
-              <Box bg={panelBg} borderWidth={1} borderColor={borderColor} rounded="md" p={4} position="sticky" top={4}>
-                <Heading size="md" mb={2}>Resumen</Heading>
-                <Divider mb={3} />
-                <HStack justify="space-between">
-                  <Text>Subtotal</Text>
-                  <Text fontWeight="semibold">{money(subtotal)}</Text>
-                </HStack>
-                <HStack justify="space-between">
-                  <Text>Envío</Text>
-                  <Text fontWeight="semibold">Gratis</Text>
-                </HStack>
-                <Divider my={3} />
-                <HStack justify="space-between">
-                  <Text>Total</Text>
-                  <Text fontWeight="bold">{money(subtotal)}</Text>
-                </HStack>
-
-                <CustomButton mt={4} w="full" onClick={moveAllToCart}>
-                  Mover todos al carrito
-                </CustomButton>
-              </Box>
-            </GridItem>
-          </Grid>
-        )}
+          {/* RESUMEN LATERAL */}
+          {favorites && favorites.length > 0 && (
+            <Box w="280px" p={4} bg="gray.50" _dark={{ bg: "gray.800" }} rounded="md" shadow="sm">
+              <Heading size="md" mb={2}>Resumen</Heading>
+              <Divider mb={2} />
+              <Text mb={1}>Productos: {favorites.length}</Text>
+              <Text mb={1}>Subtotal: ${subtotal}</Text>
+            </Box>
+          )}
+        </HStack>
       </Container>
-
-      {selected && (
-        <ProductModal
-          isOpen={!!selected}
-          onClose={() => setSelected(null)}
-          product={selected}
-          products={[]} setProducts={() => {}}
-          addToCartHandler={async (product, qty, color) => {
-            await ApiService.post("/cart/add", { productId: product._id, quantity: qty, color: color?.name });
-            toast({ title: `Agregado ${qty} al carrito`, status: "success" });
-            await refreshFavorites?.();
-          }}
-        />
-      )}
     </Box>
   );
 }
