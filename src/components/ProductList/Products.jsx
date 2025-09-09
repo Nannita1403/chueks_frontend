@@ -5,12 +5,11 @@ import axios from "axios";
 import ProductComponent from "./ProductComponent.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
-import { toggleFavorite } from "../ToggleFavorite/ToggleFavorite.jsx";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user, token, refreshFavorites } = useAuth();
+  const { user, token, toggleFavorite } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,23 +32,21 @@ const Products = () => {
   }, [token]);
 
   const handleToggleFavorite = async (product) => {
-    if (!user) {
-      return toast({ title: "Debes iniciar sesión", status: "warning" });
-    }
+  if (!user) return toast({ title: "Debes iniciar sesión", status: "warning" });
 
-    try {
-      await toggleFavorite(product._id, toast, refreshFavorites);
+  try {
+    await toggleFavorite(product._id);
 
-      // 🔄 actualizar local state para que el corazón cambie al instante
-      setProducts((prev) =>
-        prev.map((p) =>
-          p._id === product._id ? { ...p, isFavorite: !p.isFavorite } : p
-        )
-      );
-    } catch (err) {
-      console.error("❌ Error al togglear favorito:", err);
-    }
-  };
+    setProducts((prev) =>
+      prev.map((p) =>
+        p._id === product._id ? { ...p, isFavorite: !p.isFavorite } : p
+      )
+    );
+  } catch (err) {
+    console.error("❌ Error al togglear favorito:", err);
+    toast({ title: "Error actualizando favoritos", status: "error" });
+  }
+};
 
   const handleViewDetail = (product) => {
     navigate(`/products/${product._id}`);
@@ -68,9 +65,10 @@ const Products = () => {
           <ProductComponent
             key={product._id}
             product={product}
-            isFavorite={isFavorite}
+            isFavorite={user?.favorites?.some(fav => fav._id === product._id)}
             onToggleLike={() => handleToggleFavorite(product)}
             onViewDetail={() => handleViewDetail(product)}
+
           />
         );
       })}

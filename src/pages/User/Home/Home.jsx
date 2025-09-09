@@ -9,7 +9,6 @@ import InfiniteCarousel from "../../../components/Carousel/InfiniteCarousel.jsx"
 import CategoriesGrid from "../../../components/Category/CategoriesGrid.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
-import { toggleFavorite } from "../../../components/ToggleFavorite/ToggleFavorite.jsx";
 
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -17,7 +16,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   const { toast } = useToast();
-  const { user, cartItems, favorites, refreshCart, refreshFavorites } = useAuth();
+  const { user, cartItems, favorites, refreshCart, toggleFavorite } = useAuth();
   const muted = useColorModeValue("gray.600", "gray.400");
 
   // 📌 Categorías
@@ -118,11 +117,11 @@ export default function Home() {
             autoPlay={true}
             renderItem={(product) => (
               <ProductComponent
-                product={product}
-                onViewDetail={() => openDetail(product)}
-                onToggleLike={() => toggleFavorite(product._id, toast, refreshFavorites)}
-                isFavorite={favorites.some((f) => f._id === product._id)}
-              />
+              product={product}
+              onViewDetail={() => openDetail(product)}
+              onToggleLike={() => toggleFavorite(product._id)}
+              isFavorite={favorites.some((f) => f._id === product._id)}
+            />
             )}
           />
         </Box>

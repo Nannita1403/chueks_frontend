@@ -1,3 +1,4 @@
+// src/pages/User/Wishlist/Favorites.jsx
 import { useEffect, useState, useMemo } from "react";
 import {
   Box, Container, Heading, Text, SimpleGrid, VStack, HStack, Divider, Spinner
@@ -8,28 +9,19 @@ import ProductComponent from "../../../components/ProductComponent/ProductCompon
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
-import { useToast } from "../../../Hooks/useToast.jsx";
-import ApiService from "../../../reducers/api/Api.jsx";
-import { toggleFavorite } from "../../../components/ToggleFavorite/ToggleFavorite.jsx";
 
 export default function Favorites() {
-  const { user, favorites, refreshFavorites } = useAuth();
-  const { toast } = useToast();
+  const { user, favorites, toggleFavorite } = useAuth();
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  // Carga inicial de favoritos
   useEffect(() => {
-    if (!user) return;
-    const fetchFavorites = async () => {
-      try {
-        await refreshFavorites();
-      } catch (err) {
-        toast({ title: "Error cargando favoritos", status: "error" });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFavorites();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    setLoading(false); // favoritos ya están en contexto
   }, [user]);
 
   const subtotal = useMemo(() => {
@@ -38,11 +30,12 @@ export default function Favorites() {
 
   const moveToCart = async (product) => {
     try {
+      const ApiService = (await import("../../../reducers/api/Api.jsx")).default;
       await ApiService.post("/cart/add", { productId: product._id, quantity: 1 });
-      await toggleFavorite(product._id, toast, refreshFavorites);
-      toast({ title: `${product.name} agregado al carrito`, status: "success" });
+      // Eliminar de favoritos después de mover al carrito
+      await toggleFavorite(product._id);
     } catch (err) {
-      toast({ title: "Error", description: err.message, status: "error" });
+      console.error("Error al mover al carrito:", err);
     }
   };
 
@@ -96,7 +89,9 @@ export default function Favorites() {
                 py={10}
                 textAlign="center"
               >
-                <Text color="gray.600" _dark={{ color: "gray.400" }}>No tienes productos en favoritos</Text>
+                <Text color="gray.600" _dark={{ color: "gray.400" }}>
+                  No tienes productos en favoritos
+                </Text>
               </Box>
             ) : (
               <VStack spacing={4} align="stretch">
@@ -105,7 +100,7 @@ export default function Favorites() {
                     <ProductModal
                       isOpen={!!selectedProduct && selectedProduct._id === product._id}
                       onClose={() => setSelectedProduct(null)}
-                      product={selectedProduct}
+                      product={selectedProduct || product}
                       addToCartHandler={moveToCart}
                     />
 
@@ -113,7 +108,7 @@ export default function Favorites() {
                       product={product}
                       isFavorite
                       onViewDetail={() => setSelectedProduct(product)}
-                      onToggleLike={() => toggleFavorite(product._id, toast, refreshFavorites)}
+                      onToggleLike={() => toggleFavorite(product._id)}
                       showAddToCart
                     >
                       <HStack mt={2} spacing={2}>

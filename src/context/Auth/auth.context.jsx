@@ -164,6 +164,18 @@ const registerUser = async (userData) => {
   }
 };
 
+const toggleFavorite = useCallback(async (productId) => {
+  try {
+    const data = await ApiService.put(`/users/favorites/${productId}/toggle`);
+    // Actualiza el estado global de favoritos inmediatamente
+    dispatch({ type: "SET_FAVORITES", payload: data.favorites || [] });
+    return data;
+  } catch (err) {
+    console.error("Error toggling favorite:", err);
+    return null;
+  }
+}, []);
+
   // --- LOGOUT ---
   const logout = useCallback(() => {
     try {
@@ -192,6 +204,7 @@ const registerUser = async (userData) => {
         clearError,
         refreshCart,
         refreshFavorites,
+        toggleFavorite,
         isAdmin: () => state.user?.rol === "admin",
       }}
     >
