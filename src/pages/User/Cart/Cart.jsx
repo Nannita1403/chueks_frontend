@@ -36,8 +36,8 @@ function normalizeItem(it) {
 
   const color = it.color ? String(it.color).trim().toLowerCase() : undefined;
 
-return {
-    id: color ? `${it.productId}-${color}` : `${it.productId}`, // lineId exacto
+  return {
+    id: color ? `${it.productId}-${color}` : `${it.productId}`, 
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
     color,
