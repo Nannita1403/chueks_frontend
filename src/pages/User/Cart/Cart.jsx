@@ -37,7 +37,7 @@ function normalizeItem(it) {
     "";
 
   return {
-    lineId: it._id, // 🔹 Línea única para PATCH/DELETE
+    lineId: it._id?.toString() || it.id?.toString(),
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
     color: it.color?.toLowerCase(),
