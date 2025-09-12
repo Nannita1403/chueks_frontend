@@ -37,7 +37,7 @@ function normalizeItem(it) {
     "";
 
   return {
-    id: it._id || it.id, // ⚠️ usar _id del backend para PATCH/DELETE
+    id: it._id, 
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
     color: it.color?.toLowerCase(),
@@ -102,6 +102,8 @@ export default function Cart() {
 
   // ---- Handlers ----
   const onChangeQtyLine = async (lineId, delta) => {
+    console.log("PATCH lineId:", lineId, "delta:", delta); 
+
     try {
       const data = await apiPatchQtyByLine(lineId, delta);
       setCart(data);
@@ -112,6 +114,7 @@ export default function Cart() {
   };
 
   const onRemoveLine = async (lineId) => {
+    console.log("DELETE lineId:", lineId); 
     try {
       const data = await apiRemoveByLine(lineId);
       setCart(data);
