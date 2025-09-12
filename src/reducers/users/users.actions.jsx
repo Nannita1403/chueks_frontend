@@ -17,51 +17,45 @@ class authService {
   // Login user
 
   async login(credentials) {
-    try {
-      console.log("📡 Enviando login a API:", credentials)
+  try {
+    console.log("📡 Enviando login a API:", credentials)
 
-      const response = await apiService.post("/users/login", credentials)
-      console.log("📡 Respuesta del login:", response)
-
-      if (response && typeof response === "object") {
-        console.log("🔍 Analizando respuesta del login:")
-        console.log("  - Tipo de respuesta:", typeof response)
-        console.log("  - Tiene token:", !!response.token)
-        console.log("  - Tiene user:", !!response.user)
-        console.log("  - Estructura completa:", JSON.stringify(response, null, 2))
-      }
-
-      if (response.token) {
-        console.log("🔑 Token recibido, guardando...")
-        apiService.setToken(response.token)
-        localStorage.setItem("token", response.token)
-        localStorage.setItem("user", JSON.stringify(response.user))
-        console.log("✅ Usuario y token guardados en localStorage")
-        console.log("👤 Usuario guardado:", response.user)
-      } else {
-        console.warn("⚠️ No se recibió token en la respuesta")
-        console.warn("⚠️ Respuesta completa:", response)
-      }
-
-      console.log("🎯 Login completado, retornando respuesta")
-      return response
-    } catch (error) {
-      console.error("❌ Error en login:", error)
-
-      if (error.response && error.response.data) {
-        const errorMessage = error.response.data
-        console.log("📝 Mensaje de error del backend:", errorMessage)
-
-        // Crear error personalizado con el mensaje exacto del backend
-        const customError = new Error(errorMessage)
-        customError.isVerificationError = errorMessage.includes("Verifica tu correo")
-        customError.originalError = error
-        throw customError
-      }
-
-      throw error
+    // Normalizar payload a lo que espera el backend
+    const payload = {
+      email: credentials.email || credentials.username, 
+      password: credentials.password,
     }
+    console.log("📡 Payload final que viaja a API:", payload)
+
+    const response = await apiService.post("/users/login", payload)
+    console.log("📡 Respuesta del login:", response)
+
+    if (response.token) {
+      console.log("🔑 Token recibido, guardando...")
+      apiService.setToken(response.token)
+      localStorage.setItem("token", response.token)
+      localStorage.setItem("user", JSON.stringify(response.user))
+      console.log("✅ Usuario y token guardados en localStorage")
+    } else {
+      console.warn("⚠️ No se recibió token en la respuesta:", response)
+    }
+
+    return response
+  } catch (error) {
+    console.error("❌ Error en login:", error)
+
+    if (error.response && error.response.data) {
+      const errorMessage = error.response.data.message || error.response.data
+      console.log("📝 Mensaje de error del backend:", errorMessage)
+
+      const customError = new Error(errorMessage)
+      customError.isVerificationError = errorMessage.includes("Verifica tu correo")
+      throw customError
+    }
+
+    throw error
   }
+}
 
   // Verify account
   async verifyAccount(id) {
