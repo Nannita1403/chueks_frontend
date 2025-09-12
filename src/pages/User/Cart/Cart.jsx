@@ -37,7 +37,7 @@ function normalizeItem(it) {
     "";
 
   return {
-    id: it._id, 
+    lineId: it._id, // 🔹 Línea única para PATCH/DELETE
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
     color: it.color?.toLowerCase(),
@@ -102,8 +102,6 @@ export default function Cart() {
 
   // ---- Handlers ----
   const onChangeQtyLine = async (lineId, delta) => {
-    console.log("PATCH lineId:", lineId, "delta:", delta); 
-
     try {
       const data = await apiPatchQtyByLine(lineId, delta);
       setCart(data);
@@ -114,7 +112,6 @@ export default function Cart() {
   };
 
   const onRemoveLine = async (lineId) => {
-    console.log("DELETE lineId:", lineId); 
     try {
       const data = await apiRemoveByLine(lineId);
       setCart(data);
@@ -215,7 +212,7 @@ export default function Cart() {
             ) : (
               <VStack spacing={3} align="stretch">
                 {items.map((it) => (
-                  <Card key={it.id} bg={panelBg} borderColor={borderColor}>
+                  <Card key={it.lineId} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns="72px 1fr 170px" gap={3} alignItems="center">
                         <Box w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg} cursor="pointer"
@@ -239,7 +236,7 @@ export default function Cart() {
                               size="sm"
                               variant="ghost"
                               color={muted}
-                              onClick={() => onRemoveLine(it.id)}
+                              onClick={() => onRemoveLine(it.lineId)}
                             />
                           </HStack>
                         </VStack>
@@ -247,11 +244,11 @@ export default function Cart() {
                         <VStack align="end" spacing={2}>
                           <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
                             <IconButton aria-label="Restar" icon={<MinusIcon boxSize={3} />}
-                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, -1)}
+                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.lineId, -1)}
                               isDisabled={it.quantity <= 1} />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
                             <IconButton aria-label="Sumar" icon={<AddIcon boxSize={3} />}
-                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, +1)} />
+                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.lineId, +1)} />
                           </HStack>
                           <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
                         </VStack>
