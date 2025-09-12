@@ -30,7 +30,6 @@ const titleCase = (s = "") => s.replace(/[-_]/g, " ").replace(/\b\w/g, (m) => m.
 const slugToEnum = {
   mochilas: "Mochila",
   carteras: "Cartera",
-  "riñoneras": "Riñonera",
   rinoneras: "Riñonera",
   bolsos: "Bolso",
   accesorios: "Accesorios",
