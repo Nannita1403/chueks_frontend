@@ -45,6 +45,19 @@ const categoryMatches = (product, target) => {
 // Paleta simple para los botones de categorías
 const categoryColors = ["pink.400", "teal.400", "blue.400", "orange.400", "purple.400", "green.400"];
 
+// Opciones de filtros
+const filterOptions = {
+  colors: ["lila", "verde", "animal print", "suela", "nude", "blanca","beige", "gris","negro tramado",
+            "rose gold", "negro", "glitter dorada", "dorada", "borgoña", "naranja", "amarillo",
+            "habano", "cobre", "peltre", "crema", "celeste", "plateada", "rosa", "rojo","burdeos",
+            "vison", "verde oliva", "cristal", "negro opaco", "negro croco", "negro con crudo", "turquesa"],
+  styles: ["Urbana", "Fiesta", "Noche", "Casual", "Diario", "Ejecutivo", "Trabajo", "Viaje", "Playa", "Deporte"],
+  material: ["cuero", "tela Andorra", "simil cuero","símil cuero","sublimado CHUEKS", "tela puffer","cinta sublimada",
+            "metálico", "resina", "plastico", "tela","iman","tafeta negra", "grabado laser", 
+            "simil cuero rigido", "neoprene", "nylon", "sublimda", "tela impermeable"]
+
+};
+
 export default function CategoryPage() {
   const { id } = useParams(); // slug
   const navigate = useNavigate();
@@ -130,7 +143,6 @@ export default function CategoryPage() {
     if (!user) return toast({ title: "Debes iniciar sesión para agregar favoritos", status: "warning" });
     try {
       await toggleFavorite(productId);
-      // opcional: refrescar local
       setProducts((prev) =>
         prev.map((p) => (p._id === productId ? { ...p, isFavorite: !p.isFavorite } : p))
       );
@@ -181,7 +193,7 @@ export default function CategoryPage() {
         </Container>
       </Box>
 
-      {/* 🔥 Botones de categorías */}
+      {/* Botones de categorías */}
       <Container maxW="container.xl" py={4}>
         <Wrap spacing={2} justify="center">
           <WrapItem>
