@@ -33,11 +33,14 @@ function normalizeItem(it) {
     p?.image ||
     (Array.isArray(p?.images) && p.images[0]) ||
     "";
-  return {
-    id: it.id, // ← lineId EXACTO del backend (p.ej. "pid:color" o "pid")
+
+  const color = it.color ? String(it.color).trim().toLowerCase() : undefined;
+
+return {
+    id: color ? `${it.productId}-${color}` : `${it.productId}`, // lineId exacto
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
-    color: it.color,
+    color,
     price: typeof it.price === "number" ? it.price : (p.priceMin || 0),
     quantity: Math.max(1, it.quantity || 1),
     image,
