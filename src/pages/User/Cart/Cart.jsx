@@ -34,13 +34,13 @@ function normalizeItem(it) {
     "";
 
   return {
-    id: it.id,          // <-- Siempre usa el id del backend
-    productId: String(p._id || it.productId || it.id),
-    name: p.name || it.name || "Producto",
+    id: it.id, // el id real que viene de la API
+    productId: String(it.product?._id || it.productId || it.id),
+    name: it.product?.name || it.name,
     color: it.color?.toLowerCase(),
-    price: typeof it.price === "number" ? it.price : (p.priceMin || 0),
+    price: it.price ?? it.product?.priceMin ?? 0,
     quantity: Math.max(1, it.quantity || 1),
-    image,
+    image: it.image || it.product?.imgPrimary?.url || it.product?.images?.[0] || "",
   };
 }
 
