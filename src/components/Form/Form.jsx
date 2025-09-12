@@ -1,6 +1,5 @@
 
-
-import React from "react"
+import { useContext } from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form"
 import {
   FormControl as ChakraFormControl,
@@ -22,8 +21,8 @@ const FormField = ({ ...props }) => {
 }
 
 const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext)
-  const itemContext = React.useContext(FormItemContext)
+  const fieldContext = useContext(FormFieldContext)
+  const itemContext = useContext(FormItemContext)
   const { getFieldState, formState } = useFormContext()
 
   const fieldState = getFieldState(fieldContext.name, formState)
