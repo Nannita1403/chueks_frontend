@@ -18,7 +18,6 @@ import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useNavigate } from "react-router-dom";
-const navigate = useNavigate();
 
 const MIN_ITEMS = 10;
 const money = (n) =>
@@ -51,9 +50,9 @@ export default function Cart() {
   const [cart, setCart] = useState({ items: [], shipping: 0 });
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
-
   const { toast } = useToast();
   const { refreshCart } = useAuth();
+  const navigate = useNavigate();
 
   // 🔧 tokens de color (orden estable)
   const pageBg     = useColorModeValue("gray.50", "gray.900");
