@@ -20,9 +20,12 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useNavigate } from "react-router-dom";
 
 const MIN_ITEMS = 10;
+
+// Formatea números como dinero
 const money = (n) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
+// Normaliza items para frontend y usa _id como lineId
 function normalizeItem(it) {
   const p = it.product || {};
   const image =
@@ -34,13 +37,13 @@ function normalizeItem(it) {
     "";
 
   return {
-    id: it.id, // el id real que viene de la API
-    productId: String(it.product?._id || it.productId || it.id),
-    name: it.product?.name || it.name,
+    id: it._id || it.id, // ⚠️ usar _id del backend para PATCH/DELETE
+    productId: String(p._id || it.productId || it.id),
+    name: p.name || it.name || "Producto",
     color: it.color?.toLowerCase(),
-    price: it.price ?? it.product?.priceMin ?? 0,
+    price: it.price ?? p?.priceMin ?? 0,
     quantity: Math.max(1, it.quantity || 1),
-    image: it.image || it.product?.imgPrimary?.url || it.product?.images?.[0] || "",
+    image,
   };
 }
 
@@ -53,7 +56,7 @@ export default function Cart() {
   const { refreshCart } = useAuth();
   const navigate = useNavigate();
 
-  // Colores y tokens de UI
+  // Tokens de color
   const pageBg      = useColorModeValue("gray.50", "gray.900");
   const headerBg    = useColorModeValue("pink.500", "pink.400");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
@@ -65,11 +68,13 @@ export default function Cart() {
 
   // ---- API helpers ----
   const apiFetchCart = useCallback(() => ApiService.get("/cart"), []);
-  const apiPatchQtyByLine = useCallback((lineId, delta) =>
-    ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta }), []
+  const apiPatchQtyByLine = useCallback(
+    (lineId, delta) => ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta }),
+    []
   );
-  const apiRemoveByLine = useCallback((lineId) =>
-    ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`), []
+  const apiRemoveByLine = useCallback(
+    (lineId) => ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`),
+    []
   );
 
   // ---- Load cart ----
@@ -187,8 +192,7 @@ export default function Cart() {
           <CardContent py={3}>
             {missing > 0 ? (
               <Text fontSize="sm">
-                Tu pedido tiene <b>{itemCount}</b> productos. La compra mínima es <b>{MIN_ITEMS}</b>.{" "}
-                Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"}.
+                Tu pedido tiene <b>{itemCount}</b> productos. La compra mínima es <b>{MIN_ITEMS}</b>. Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"}.
               </Text>
             ) : (
               <Text fontSize="sm">¡Perfecto! Cumples la compra mínima de {MIN_ITEMS} productos.</Text>
