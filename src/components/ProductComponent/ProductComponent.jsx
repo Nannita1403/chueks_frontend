@@ -2,8 +2,14 @@
 import { Box, Image, Text, Flex, IconButton } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CustomButton from "../../components/Button/Button.jsx";
+import { useAuth } from "../../context/Auth/auth.context.jsx";
 
-const ProductComponent = ({ product, onToggleLike, onViewDetail, isFavorite = false }) => {
+const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
+  const { favorites } = useAuth();
+
+  // Verifica si este producto está en la lista global de favoritos
+  const isFavorite = favorites?.some((fav) => fav._id === product._id || fav === product._id);
+
   return (
     <Box
       borderWidth="1px"
@@ -37,11 +43,11 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail, isFavorite = fa
       <Flex align="center" gap={3} mt={3}>
         {/* Botón de favoritos */}
         <IconButton
-          aria-label="Agregar a favoritos"
+          aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
           icon={isFavorite ? <FaHeart color="red" /> : <FaRegHeart />}
           size="sm"
           variant="ghost"
-          onClick={() => onToggleLike(!isFavorite)}
+          onClick={() => onToggleLike(product._id)}
         />
 
         {/* Botón detalle */}
