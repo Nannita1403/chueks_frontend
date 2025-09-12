@@ -21,23 +21,15 @@ import { useNavigate } from "react-router-dom";
 
 const MIN_ITEMS = 10;
 
-// Formatea números como dinero
 const money = (n) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-// Normaliza items para frontend y usa _id como lineId
+// Normaliza items y asegura lineId = _id
 function normalizeItem(it) {
   const p = it.product || {};
-  const image =
-    it.image ||
-    p?.imgPrimary?.url ||
-    p?.imgPrimary ||
-    p?.image ||
-    (Array.isArray(p?.images) && p.images[0]) ||
-    "";
-
+  const image = it.image || p?.imgPrimary?.url || p?.image || (Array.isArray(p?.images) && p.images[0]) || "";
   return {
-    lineId: it._id?.toString() || it.id?.toString(),
+    lineId: it._id, // ⚠️ usar _id real de Mongo
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
     color: it.color?.toLowerCase(),
@@ -56,7 +48,6 @@ export default function Cart() {
   const { refreshCart } = useAuth();
   const navigate = useNavigate();
 
-  // Tokens de color
   const pageBg      = useColorModeValue("gray.50", "gray.900");
   const headerBg    = useColorModeValue("pink.500", "pink.400");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
@@ -95,8 +86,8 @@ export default function Cart() {
 
   // ---- Derived state ----
   const items = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
-  const itemCount = useMemo(() => items.reduce((acc, it) => acc + (it.quantity || 0), 0), [items]);
-  const subtotal = useMemo(() => items.reduce((acc, it) => acc + (it.price || 0) * (it.quantity || 0), 0), [items]);
+  const itemCount = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items]);
+  const subtotal = useMemo(() => items.reduce((acc, it) => acc + it.price * it.quantity, 0), [items]);
   const missing = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
 
@@ -201,7 +192,6 @@ export default function Cart() {
         </Card>
 
         <Grid templateColumns={{ base: "1fr", lg: "1fr 320px" }} gap={4}>
-          {/* Lista de productos */}
           <GridItem>
             {items.length === 0 ? (
               <Card bg={panelBg} borderColor={borderColor}>
@@ -260,7 +250,6 @@ export default function Cart() {
             )}
           </GridItem>
 
-          {/* Resumen de pedido */}
           <GridItem>
             <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
@@ -297,7 +286,6 @@ export default function Cart() {
           </GridItem>
         </Grid>
 
-        {/* Modal de producto */}
         <ProductModal
           isOpen={!!selected}
           onClose={() => setSelected(null)}
