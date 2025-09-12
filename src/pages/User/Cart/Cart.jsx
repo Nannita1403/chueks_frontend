@@ -6,9 +6,9 @@ import {
 } from "@chakra-ui/react";
 import { CloseIcon, AddIcon, MinusIcon } from "@chakra-ui/icons";
 import ApiService from "../../../reducers/api/Api.jsx";
-import CustomButton from  "../../../components/Button/Button.jsx";
+import CustomButton from "../../../components/Button/Button.jsx";
 import {
-  CustomCard as Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription,
+  CustomCard as Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription
 } from "../../../components/Card/Card.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
@@ -20,12 +20,9 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useNavigate } from "react-router-dom";
 
 const MIN_ITEMS = 10;
-
-// Formatea números como dinero
 const money = (n) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-// Normaliza items para frontend y genera lineId consistente
 function normalizeItem(it) {
   const p = it.product || {};
   const image =
@@ -36,13 +33,11 @@ function normalizeItem(it) {
     (Array.isArray(p?.images) && p.images[0]) ||
     "";
 
-  const color = it.color ? String(it.color).trim().toLowerCase() : undefined;
-
   return {
-    id: color ? `${it.productId}-${color}` : `${it.productId}`, // lineId único
+    id: it.id,          // <-- Siempre usa el id del backend
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
-    color,
+    color: it.color?.toLowerCase(),
     price: typeof it.price === "number" ? it.price : (p.priceMin || 0),
     quantity: Math.max(1, it.quantity || 1),
     image,
@@ -58,24 +53,24 @@ export default function Cart() {
   const { refreshCart } = useAuth();
   const navigate = useNavigate();
 
-  // Tokens de color
-  const pageBg     = useColorModeValue("gray.50", "gray.900");
-  const headerBg   = useColorModeValue("pink.500", "pink.400");
-  const borderColor= useColorModeValue("gray.200", "whiteAlpha.300");
-  const muted      = useColorModeValue("gray.600", "gray.400");
-  const panelBg    = useColorModeValue("white", "gray.800");
-  const warnBg     = useColorModeValue("orange.50", "orange.900");
-  const warnBorder = useColorModeValue("orange.200", "orange.700");
-  const thumbBg    = useColorModeValue("gray.100", "whiteAlpha.100");
+  // Colores y tokens de UI
+  const pageBg      = useColorModeValue("gray.50", "gray.900");
+  const headerBg    = useColorModeValue("pink.500", "pink.400");
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
+  const muted       = useColorModeValue("gray.600", "gray.400");
+  const panelBg     = useColorModeValue("white", "gray.800");
+  const warnBg      = useColorModeValue("orange.50", "orange.900");
+  const warnBorder  = useColorModeValue("orange.200", "orange.700");
+  const thumbBg     = useColorModeValue("gray.100", "whiteAlpha.100");
 
   // ---- API helpers ----
   const apiFetchCart = useCallback(() => ApiService.get("/cart"), []);
   const apiPatchQtyByLine = useCallback((lineId, delta) =>
-    ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta })
-  , []);
+    ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta }), []
+  );
   const apiRemoveByLine = useCallback((lineId) =>
-    ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`)
-  , []);
+    ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`), []
+  );
 
   // ---- Load cart ----
   useEffect(() => {
@@ -94,13 +89,13 @@ export default function Cart() {
   }, [apiFetchCart]);
 
   // ---- Derived state ----
-  const items     = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
+  const items = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
   const itemCount = useMemo(() => items.reduce((acc, it) => acc + (it.quantity || 0), 0), [items]);
-  const subtotal  = useMemo(() => items.reduce((acc, it) => acc + (it.price || 0) * (it.quantity || 0), 0), [items]);
-  const missing   = Math.max(0, MIN_ITEMS - itemCount);
+  const subtotal = useMemo(() => items.reduce((acc, it) => acc + (it.price || 0) * (it.quantity || 0), 0), [items]);
+  const missing = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
 
-  // ---- Handlers por línea ----
+  // ---- Handlers ----
   const onChangeQtyLine = async (lineId, delta) => {
     try {
       const data = await apiPatchQtyByLine(lineId, delta);
@@ -122,24 +117,20 @@ export default function Cart() {
     }
   };
 
-  // ---- Checkout ----
   const onCheckout = async () => {
     try {
       const res = await ApiService.post("/orders/checkout");
-      console.log("Pedido creado:", res.order);
       await refreshCart();
       navigate(`/order/confirm?orderId=${res.order._id}`);
     } catch (err) {
-      console.error("Error al crear pedido:", err);
-      toast({ 
-        title: "Error al procesar el pedido", 
-        description: err?.response?.data?.message || err.message || "Intenta nuevamente", 
-        status: "error" 
+      toast({
+        title: "Error al procesar el pedido",
+        description: err?.response?.data?.message || err.message || "Intenta nuevamente",
+        status: "error"
       });
     }
   };
 
-  // ---- Abrir detalle de producto ----
   const openProductDetail = async (productId) => {
     try {
       const p = await ApiService.get(`/products/${productId}`);
@@ -150,32 +141,28 @@ export default function Cart() {
   };
 
   // ---- Loading / Error ----
-  if (loading) {
-    return (
-      <Box minH="100vh" bg={pageBg}>
-        <AppHeader />
-        <Container maxW="container.xl" py={6}>
-          <BackButton mb={4} />
-          <Loading />
-          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4} mt={6}>
-            {[...Array(3)].map((_, i) => (<ProductCardSkeleton key={i} />))}
-          </Grid>
-        </Container>
-      </Box>
-    );
-  }
+  if (loading) return (
+    <Box minH="100vh" bg={pageBg}>
+      <AppHeader />
+      <Container maxW="container.xl" py={6}>
+        <BackButton mb={4} />
+        <Loading />
+        <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4} mt={6}>
+          {[...Array(3)].map((_, i) => <ProductCardSkeleton key={i} />)}
+        </Grid>
+      </Container>
+    </Box>
+  );
 
-  if (error) {
-    return (
-      <Box minH="100vh" bg={pageBg}>
-        <AppHeader />
-        <Container maxW="container.xl" py={6}>
-          <BackButton mb={4} />
-          <Alert status="error" rounded="md"><AlertIcon />{error}</Alert>
-        </Container>
-      </Box>
-    );
-  }
+  if (error) return (
+    <Box minH="100vh" bg={pageBg}>
+      <AppHeader />
+      <Container maxW="container.xl" py={6}>
+        <BackButton mb={4} />
+        <Alert status="error" rounded="md"><AlertIcon />{error}</Alert>
+      </Container>
+    </Box>
+  );
 
   // ---- Render principal ----
   return (
@@ -196,13 +183,12 @@ export default function Cart() {
           {itemCount} {itemCount === 1 ? "producto" : "productos"} en tu carrito
         </Text>
 
-        {/* Notificación de mínimo de items */}
         <Card borderColor={warnBorder} bg={warnBg} mb={4}>
           <CardContent py={3}>
             {missing > 0 ? (
               <Text fontSize="sm">
-                Tu pedido actual tiene <b>{itemCount}</b> productos. La compra mínima es de <b>{MIN_ITEMS}</b>.{" "}
-                <b>Te faltan {missing}</b> {missing === 1 ? "producto" : "productos"} para completar el pedido.
+                Tu pedido tiene <b>{itemCount}</b> productos. La compra mínima es <b>{MIN_ITEMS}</b>.{" "}
+                Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"}.
               </Text>
             ) : (
               <Text fontSize="sm">¡Perfecto! Cumples la compra mínima de {MIN_ITEMS} productos.</Text>
@@ -225,14 +211,9 @@ export default function Cart() {
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns="72px 1fr 170px" gap={3} alignItems="center">
-                        <Box
-                          w="72px" h="72px" rounded="md" overflow="hidden"
-                          bg={thumbBg} cursor="pointer"
-                          onClick={() => openProductDetail(it.productId)}
-                        >
-                          {!!it.image && (
-                            <Image src={it.image} alt={it.name} w="100%" h="100%" objectFit="cover" />
-                          )}
+                        <Box w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg} cursor="pointer"
+                          onClick={() => openProductDetail(it.productId)}>
+                          {!!it.image && <Image src={it.image} alt={it.name} w="100%" h="100%" objectFit="cover" />}
                         </Box>
 
                         <VStack align="stretch" spacing={1}>
@@ -251,29 +232,19 @@ export default function Cart() {
                               size="sm"
                               variant="ghost"
                               color={muted}
-                              onClick={() => onRemoveLine(it.id)} // DELETE por línea
+                              onClick={() => onRemoveLine(it.id)}
                             />
                           </HStack>
                         </VStack>
 
                         <VStack align="end" spacing={2}>
                           <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
-                            <IconButton
-                              aria-label="Restar"
-                              icon={<MinusIcon boxSize={3} />}
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => onChangeQtyLine(it.id, -1)}
-                              isDisabled={it.quantity <= 1}
-                            />
+                            <IconButton aria-label="Restar" icon={<MinusIcon boxSize={3} />}
+                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, -1)}
+                              isDisabled={it.quantity <= 1} />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
-                            <IconButton
-                              aria-label="Sumar"
-                              icon={<AddIcon boxSize={3} />}
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => onChangeQtyLine(it.id, +1)}
-                            />
+                            <IconButton aria-label="Sumar" icon={<AddIcon boxSize={3} />}
+                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, +1)} />
                           </HStack>
                           <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
                         </VStack>
@@ -305,23 +276,17 @@ export default function Cart() {
                 </HStack>
               </CardContent>
               <CardFooter flexDir="column" alignItems="stretch">
-                <Tooltip
-                  isDisabled={canCheckout}
-                  hasArrow
-                  label={canCheckout ? "Continuar con el pago" : `Te faltan ${missing} ${missing === 1 ? "producto" : "productos"}`}
-                  placement="top"
-                >
-                  <CustomButton onClick={onCheckout} isDisabled={!canCheckout} size="lg">
-                    Completar la compra
-                  </CustomButton>
+                <Tooltip isDisabled={canCheckout} hasArrow
+                  label={canCheckout ? "Continuar con el pago" : `Faltan ${missing} ${missing === 1 ? "producto" : "productos"}`} placement="top">
+                  <CustomButton onClick={onCheckout} isDisabled={!canCheckout} size="lg">Completar la compra</CustomButton>
                 </Tooltip>
                 {!canCheckout && (
                   <Text mt={2} fontSize="sm" color={muted}>
-                    🔒 Para continuar te faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"}.
+                    🔒 Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"} para continuar.
                   </Text>
                 )}
                 <Text mt={3} fontSize="xs" color={muted}>
-                  Al finalizar la compra, se enviará una solicitud de pedido que será revisada por nuestro equipo.
+                  Al finalizar, se enviará la solicitud de pedido para revisión.
                 </Text>
               </CardFooter>
             </Card>
@@ -335,11 +300,7 @@ export default function Cart() {
           product={selected}
           products={[]} setProducts={() => {}}
           addToCartHandler={async (product, qty, color) => {
-            await ApiService.post("/cart/add", {
-              productId: product._id,
-              quantity: qty,
-              color: color?.name,
-            });
+            await ApiService.post("/cart/add", { productId: product._id, quantity: qty, color: color?.name });
             await refreshCart?.();
             toast({ title: `Agregado ${qty} al carrito`, status: "success" });
           }}
