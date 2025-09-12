@@ -20,10 +20,12 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useNavigate } from "react-router-dom";
 
 const MIN_ITEMS = 10;
+
+// Formatea números como dinero
 const money = (n) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-// Normaliza con id de línea que viene del backend
+// Normaliza items para frontend y genera lineId consistente
 function normalizeItem(it) {
   const p = it.product || {};
   const image =
@@ -37,7 +39,7 @@ function normalizeItem(it) {
   const color = it.color ? String(it.color).trim().toLowerCase() : undefined;
 
   return {
-    id: color ? `${it.productId}-${color}` : `${it.productId}`, 
+    id: color ? `${it.productId}-${color}` : `${it.productId}`, // lineId único
     productId: String(p._id || it.productId || it.id),
     name: p.name || it.name || "Producto",
     color,
@@ -48,7 +50,6 @@ function normalizeItem(it) {
 }
 
 export default function Cart() {
-  // ---- state / hooks de datos ----
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({ items: [], shipping: 0 });
   const [error, setError] = useState("");
@@ -57,7 +58,7 @@ export default function Cart() {
   const { refreshCart } = useAuth();
   const navigate = useNavigate();
 
-  // 🔧 tokens de color (orden estable)
+  // Tokens de color
   const pageBg     = useColorModeValue("gray.50", "gray.900");
   const headerBg   = useColorModeValue("pink.500", "pink.400");
   const borderColor= useColorModeValue("gray.200", "whiteAlpha.300");
@@ -70,14 +71,13 @@ export default function Cart() {
   // ---- API helpers ----
   const apiFetchCart = useCallback(() => ApiService.get("/cart"), []);
   const apiPatchQtyByLine = useCallback((lineId, delta) =>
-  ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta })
-, []);
+    ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta })
+  , []);
+  const apiRemoveByLine = useCallback((lineId) =>
+    ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`)
+  , []);
 
-const apiRemoveByLine = useCallback((lineId) =>
-  ApiService.delete(`/cart/line/${encodeURIComponent(lineId)}`)
-, []);
-
-  // ---- load cart ----
+  // ---- Load cart ----
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -93,13 +93,14 @@ const apiRemoveByLine = useCallback((lineId) =>
     return () => { mounted = false; };
   }, [apiFetchCart]);
 
+  // ---- Derived state ----
   const items     = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
   const itemCount = useMemo(() => items.reduce((acc, it) => acc + (it.quantity || 0), 0), [items]);
   const subtotal  = useMemo(() => items.reduce((acc, it) => acc + (it.price || 0) * (it.quantity || 0), 0), [items]);
   const missing   = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
 
-  // ---- handlers por línea (it.id) ----
+  // ---- Handlers por línea ----
   const onChangeQtyLine = async (lineId, delta) => {
     try {
       const data = await apiPatchQtyByLine(lineId, delta);
@@ -121,25 +122,24 @@ const apiRemoveByLine = useCallback((lineId) =>
     }
   };
 
+  // ---- Checkout ----
   const onCheckout = async () => {
-  try {
-    const res = await ApiService.post("/orders/checkout"); // 🔹 nuevo endpoint
-    console.log("Pedido creado:", res.order);
+    try {
+      const res = await ApiService.post("/orders/checkout");
+      console.log("Pedido creado:", res.order);
+      await refreshCart();
+      navigate(`/order/confirm?orderId=${res.order._id}`);
+    } catch (err) {
+      console.error("Error al crear pedido:", err);
+      toast({ 
+        title: "Error al procesar el pedido", 
+        description: err?.response?.data?.message || err.message || "Intenta nuevamente", 
+        status: "error" 
+      });
+    }
+  };
 
-    await refreshCart(); // Vacía el carrito en estado global
-
-    // Redirige a la página de confirmación
-    navigate(`/order/confirm?orderId=${res.order._id}`);
-  } catch (err) {
-    console.error("Error al crear pedido:", err);
-    toast({ 
-      title: "Error al procesar el pedido", 
-      description: err?.response?.data?.message || err.message || "Intenta nuevamente", 
-      status: "error" 
-    });
-  }
-};
-
+  // ---- Abrir detalle de producto ----
   const openProductDetail = async (productId) => {
     try {
       const p = await ApiService.get(`/products/${productId}`);
@@ -177,7 +177,7 @@ const apiRemoveByLine = useCallback((lineId) =>
     );
   }
 
-  // ---- Render ----
+  // ---- Render principal ----
   return (
     <Box minH="100vh" bg={pageBg}>
       <AppHeader />
@@ -196,6 +196,7 @@ const apiRemoveByLine = useCallback((lineId) =>
           {itemCount} {itemCount === 1 ? "producto" : "productos"} en tu carrito
         </Text>
 
+        {/* Notificación de mínimo de items */}
         <Card borderColor={warnBorder} bg={warnBg} mb={4}>
           <CardContent py={3}>
             {missing > 0 ? (
@@ -210,7 +211,7 @@ const apiRemoveByLine = useCallback((lineId) =>
         </Card>
 
         <Grid templateColumns={{ base: "1fr", lg: "1fr 320px" }} gap={4}>
-          {/* LISTA */}
+          {/* Lista de productos */}
           <GridItem>
             {items.length === 0 ? (
               <Card bg={panelBg} borderColor={borderColor}>
@@ -224,11 +225,9 @@ const apiRemoveByLine = useCallback((lineId) =>
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns="72px 1fr 170px" gap={3} alignItems="center">
-                        {/* Miniatura */}
                         <Box
                           w="72px" h="72px" rounded="md" overflow="hidden"
-                          bg={thumbBg}
-                          cursor="pointer"
+                          bg={thumbBg} cursor="pointer"
                           onClick={() => openProductDetail(it.productId)}
                         >
                           {!!it.image && (
@@ -236,16 +235,11 @@ const apiRemoveByLine = useCallback((lineId) =>
                           )}
                         </Box>
 
-                        {/* Info */}
                         <VStack align="stretch" spacing={1}>
                           <HStack justify="space-between" align="start">
                             <Box>
-                              <Text
-                                fontWeight="semibold"
-                                noOfLines={1}
-                                cursor="pointer"
-                                onClick={() => openProductDetail(it.productId)}
-                              >
+                              <Text fontWeight="semibold" noOfLines={1} cursor="pointer"
+                                onClick={() => openProductDetail(it.productId)}>
                                 {it.name}
                               </Text>
                               {!!it.color && <Text fontSize="xs" color={muted}>Color: {it.color}</Text>}
@@ -257,12 +251,11 @@ const apiRemoveByLine = useCallback((lineId) =>
                               size="sm"
                               variant="ghost"
                               color={muted}
-                              onClick={() => onRemoveLine(it.id)}   // ← DELETE por línea
+                              onClick={() => onRemoveLine(it.id)} // DELETE por línea
                             />
                           </HStack>
                         </VStack>
 
-                        {/* Controles + total línea */}
                         <VStack align="end" spacing={2}>
                           <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
                             <IconButton
@@ -270,7 +263,7 @@ const apiRemoveByLine = useCallback((lineId) =>
                               icon={<MinusIcon boxSize={3} />}
                               size="sm"
                               variant="ghost"
-                              onClick={() => onChangeQtyLine(it.id, -1)}  // ← PATCH por línea
+                              onClick={() => onChangeQtyLine(it.id, -1)}
                               isDisabled={it.quantity <= 1}
                             />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
@@ -279,7 +272,7 @@ const apiRemoveByLine = useCallback((lineId) =>
                               icon={<AddIcon boxSize={3} />}
                               size="sm"
                               variant="ghost"
-                              onClick={() => onChangeQtyLine(it.id, +1)}  // ← PATCH por línea
+                              onClick={() => onChangeQtyLine(it.id, +1)}
                             />
                           </HStack>
                           <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
@@ -292,7 +285,7 @@ const apiRemoveByLine = useCallback((lineId) =>
             )}
           </GridItem>
 
-          {/* RESUMEN */}
+          {/* Resumen de pedido */}
           <GridItem>
             <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
