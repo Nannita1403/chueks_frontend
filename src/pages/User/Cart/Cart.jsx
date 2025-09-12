@@ -28,12 +28,12 @@ const money = (n) =>
 function normalizeItem(it) {
   const p = it.product || {};
   const image = it.image || p?.imgPrimary?.url || p?.image || (Array.isArray(p?.images) && p.images[0]) || "";
-  return {
-    lineId: it._id, // ⚠️ usar _id real de Mongo
-    productId: String(p._id || it.productId || it.id),
-    name: p.name || it.name || "Producto",
+   return {
+    id: it.id,   // 🔹 Línea única
+    productId: it.productId,
+    name: it.name || "Producto",
     color: it.color?.toLowerCase(),
-    price: it.price ?? p?.priceMin ?? 0,
+    price: it.price ?? 0,
     quantity: Math.max(1, it.quantity || 1),
     image,
   };
@@ -226,7 +226,7 @@ export default function Cart() {
                               size="sm"
                               variant="ghost"
                               color={muted}
-                              onClick={() => onRemoveLine(it.lineId)}
+                              onClick={() => onRemoveLine(it.id)}
                             />
                           </HStack>
                         </VStack>
@@ -234,11 +234,11 @@ export default function Cart() {
                         <VStack align="end" spacing={2}>
                           <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
                             <IconButton aria-label="Restar" icon={<MinusIcon boxSize={3} />}
-                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.lineId, -1)}
+                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, -1)}
                               isDisabled={it.quantity <= 1} />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
                             <IconButton aria-label="Sumar" icon={<AddIcon boxSize={3} />}
-                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.lineId, +1)} />
+                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, +1)} />
                           </HStack>
                           <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
                         </VStack>
