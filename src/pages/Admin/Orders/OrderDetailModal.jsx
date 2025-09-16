@@ -1,7 +1,8 @@
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
   ModalBody, ModalFooter, Button, Grid, GridItem, Text, HStack, Checkbox,
-  Select, VStack, Image
+  Select, VStack, Image,
+  Box
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ApiService from "../../../reducers/api/Api.jsx";
