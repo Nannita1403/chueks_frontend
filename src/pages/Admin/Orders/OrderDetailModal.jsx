@@ -91,14 +91,7 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
               return (
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4}>
-                    {imageUrl && (
-                      <Image
-                        src={it.image}
-                        boxSize="100px"
-                        objectFit="cover"
-                        borderRadius="md"
-                      />
-                    )}
+                      <Image src={it.image} boxSize="100px" objectFit="cover" borderRadius="md" />
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
                       <Text fontWeight="bold" fontSize="lg">{it.code}</Text>
