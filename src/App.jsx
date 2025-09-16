@@ -12,11 +12,11 @@ import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx";
 import AdminLayout from "./pages/Admin/Layout/AdminLayout.jsx";
 import Cart from "./pages/User/Cart/Cart.jsx";
 import OrdersPageUser from "./pages/User/Order/OrdersPageUser.jsx";
-import OrdersPageAdmin from "./pages/Admin/Orders/OrdersPageAdmin.jsx";
 import UserLayout from "./pages/User/UserLayout.jsx";
 import ProfileDashboard from "./pages/User/Profile/ProfileDashboard.jsx";
 import Wishlist from "./pages/User/Wishlist/Wishlist.jsx";
 import OrderConfirm from "./pages/User/Order/OrderConfirm.jsx";
+import AdminOrders from "./pages/Admin/Orders/AdminOrders.jsx";
 
 const App = () => {
   return (
@@ -101,7 +101,7 @@ const App = () => {
           <Route path="products" element={<AdminProducts />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="orders" element={<OrdersPageAdmin />} />
+          <Route path="orders" element={<AdminOrders />} />
         </Route>
 
         {/* Default redirect */}
