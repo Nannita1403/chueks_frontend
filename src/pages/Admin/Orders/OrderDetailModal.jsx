@@ -1,7 +1,7 @@
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
   ModalBody, ModalFooter, Button, Grid, GridItem, Text, HStack, Checkbox, Select,
-  VStack
+  VStack, Image
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ApiService from "../../../reducers/api/Api.jsx";
@@ -10,7 +10,6 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
   const [order, setOrder] = useState(null);
   const [error, setError] = useState(null);
 
-  // 🔹 Cargar pedido
   const load = async () => {
     try {
       if (!orderId) return;
@@ -23,11 +22,8 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
     }
   };
 
-  useEffect(() => {
-    if (isOpen) load();
-  }, [isOpen, orderId]);
+  useEffect(() => { if (isOpen) load(); }, [isOpen, orderId]);
 
-  // 🔹 Actualizar estado del pedido
   const updateStatus = async (status) => {
     try {
       await ApiService.patch(`/orders/${orderId}/status`, { status });
@@ -39,7 +35,6 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
     }
   };
 
-  // 🔹 Marcar item como armado
   const togglePicked = async (idx, picked) => {
     try {
       await ApiService.patch(`/orders/${orderId}/items/${idx}/picked`, { picked });
@@ -51,7 +46,6 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
 
   if (!order) return null;
 
-  // 🔹 Función auxiliar para formatear números
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
   return (
@@ -85,23 +79,35 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
 
           <VStack align="stretch" mt={6} spacing={3}>
             <Text mt={4} fontWeight="bold">Ítems del pedido</Text>
-            {(order.items ?? []).map((item, idx) => (
-              <HStack key={idx} justify="space-between" py={2} borderBottom="1px solid #eee">
-                <VStack align="start" spacing={0}>
-                  <Text>{item.name} {item.color && `(${item.color})`}</Text>
-                  <Text fontSize="sm" color="gray.600">Cantidad: {item.quantity ?? 1}</Text>
-                </VStack>
-                <HStack>
-                  <Text fontWeight="bold">${formatNumber(item.totalPrice)}</Text>
-                  <Checkbox
-                    isChecked={item.picked ?? false}
-                    onChange={(e) => togglePicked(idx, e.target.checked)}
-                  >
-                    Armado
-                  </Checkbox>
+
+            {(order.items ?? []).map((item, idx) => {
+              const imageUrl = item.product?.imgPrimary?.url || item.product?.image || "";
+              const displayName = item.name ?? "Artículo";
+              const productId = item.productId ?? item.product?._id ?? "—";
+
+              return (
+                <HStack key={idx} justify="space-between" py={2} borderBottom="1px solid #eee">
+                  <HStack spacing={3}>
+                    {imageUrl && <Image src={imageUrl} boxSize="50px" objectFit="cover" borderRadius="md" />}
+                    <VStack align="start" spacing={0}>
+                      <Text fontWeight="bold">{displayName} {item.color && `(${item.color})`}</Text>
+                      <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
+                      <Text fontSize="sm" color="gray.600">Cantidad: {item.quantity ?? 1}</Text>
+                    </VStack>
+                  </HStack>
+
+                  <HStack>
+                    <Text fontWeight="bold">${formatNumber(item.totalPrice)}</Text>
+                    <Checkbox
+                      isChecked={item.picked ?? false}
+                      onChange={(e) => togglePicked(idx, e.target.checked)}
+                    >
+                      Armado
+                    </Checkbox>
+                  </HStack>
                 </HStack>
-              </HStack>
-            ))}
+              );
+            })}
           </VStack>
 
           <VStack mt={6} spacing={1} align="flex-end">
