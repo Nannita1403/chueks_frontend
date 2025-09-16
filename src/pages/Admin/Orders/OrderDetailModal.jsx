@@ -84,7 +84,7 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
 
           {/* Items */}
           <VStack mt={6} spacing={4} align="stretch">
-            {(order.items ?? []).map((item, idx) => {
+            {(order.items ?? []).map((item, idx, it) => {
               const imageUrl = item.product?.imgPrimary?.url || item.product?.image || "";
               const displayName = item.name ?? "Artículo";
               const productId = item.productId ?? item.product?._id ?? "—";
@@ -94,7 +94,7 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
                   <HStack align="start" spacing={4}>
                     {imageUrl && (
                       <Image
-                        src={imageUrl}
+                        src={it.image}
                         boxSize="100px"
                         objectFit="cover"
                         borderRadius="md"
@@ -102,18 +102,13 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
                     )}
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
+                      <Text fontWeight="bold" fontSize="lg">{it.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
-                      {item.product?.description && (
-                        <Text fontSize="sm" color="gray.600" noOfLines={3}>
-                          {item.product.description}
-                        </Text>
-                      )}
+                      <Text fontWeight="bold" fontSize="lg">{it.category}</Text>
                       <Text>Color: {item.color ?? "—"}</Text>
-                      <Text>Unitario: ${formatNumber(item.unitPrice)}</Text>
                       {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
                       <Text>Cantidad: {item.quantity}</Text>
                       <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
-                      <Text>Stock: {item.stock ?? 0}</Text>
                       <Checkbox
                         isChecked={item.picked ?? false}
                         onChange={(e) => togglePicked(idx, e.target.checked)}
