@@ -75,7 +75,7 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
 
           <VStack align="stretch" mt={6} spacing={3}>
           <Text mt={4} fontWeight="bold">Ítems del pedido</Text>
-          {order.items.map((it, idx) => (
+          {order.items.map((item, idx) => (
             <HStack key={idx} justify="space-between" py={2} borderBottom="1px solid #eee">
                <VStack align="start" spacing={0}>
                   <Text>{item.name} {item.color && `(${item.color})`}</Text>
