@@ -1,12 +1,12 @@
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-  ModalBody, ModalFooter, Button, Grid, GridItem, Text, HStack, Checkbox, Select,
-  VStack, Image
+  ModalBody, ModalFooter, Button, Grid, GridItem, Text, HStack, Checkbox,
+  Select, VStack, Image
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ApiService from "../../../reducers/api/Api.jsx";
 
-export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }) {
+export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpdated }) {
   const [order, setOrder] = useState(null);
   const [error, setError] = useState(null);
 
@@ -22,7 +22,9 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
     }
   };
 
-  useEffect(() => { if (isOpen) load(); }, [isOpen, orderId]);
+  useEffect(() => {
+    if (isOpen) load();
+  }, [isOpen, orderId]);
 
   const updateStatus = async (status) => {
     try {
@@ -49,26 +51,28 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
-          Detalles del Pedido: {order.code ?? order._id?.slice(-6).toUpperCase()}
-        </ModalHeader>
+        <ModalHeader>Pedido: {order.code ?? order._id?.slice(-6).toUpperCase()}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {error && <Text color="red.500">{error}</Text>}
 
-          <Grid templateColumns="1fr 1fr" gap={4}>
+          {/* Cliente y estado */}
+          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             <GridItem>
-              <Text fontWeight="bold" mb={1}>Información del Cliente</Text>
+              <Text fontWeight="bold">Información del Cliente</Text>
               <Text>Nombre: {order.user?.name ?? "—"}</Text>
               <Text>Email: {order.user?.email ?? "—"}</Text>
             </GridItem>
 
             <GridItem>
-              <Text fontWeight="bold" mb={1}>Estado del Pedido</Text>
-              <Select value={order.status ?? "pending"} onChange={(e) => updateStatus(e.target.value)}>
+              <Text fontWeight="bold">Estado del Pedido</Text>
+              <Select
+                value={order.status ?? "pending"}
+                onChange={(e) => updateStatus(e.target.value)}
+              >
                 <option value="pending">Pendiente</option>
                 <option value="processing">En Proceso</option>
                 <option value="completed">Completado</option>
@@ -77,39 +81,52 @@ export default function OrderDetailModal({ orderId, isOpen, onClose, onUpdated }
             </GridItem>
           </Grid>
 
-          <VStack align="stretch" mt={6} spacing={3}>
-            <Text mt={4} fontWeight="bold">Ítems del pedido</Text>
-
+          {/* Items */}
+          <VStack mt={6} spacing={4} align="stretch">
             {(order.items ?? []).map((item, idx) => {
               const imageUrl = item.product?.imgPrimary?.url || item.product?.image || "";
               const displayName = item.name ?? "Artículo";
               const productId = item.productId ?? item.product?._id ?? "—";
 
               return (
-                <HStack key={idx} justify="space-between" py={2} borderBottom="1px solid #eee">
-                  <HStack spacing={3}>
-                    {imageUrl && <Image src={imageUrl} boxSize="50px" objectFit="cover" borderRadius="md" />}
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="bold">{displayName} {item.color && `(${item.color})`}</Text>
+                <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
+                  <HStack align="start" spacing={4}>
+                    {imageUrl && (
+                      <Image
+                        src={imageUrl}
+                        boxSize="100px"
+                        objectFit="cover"
+                        borderRadius="md"
+                      />
+                    )}
+                    <VStack align="start" spacing={1} flex="1">
+                      <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
-                      <Text fontSize="sm" color="gray.600">Cantidad: {item.quantity ?? 1}</Text>
+                      {item.product?.description && (
+                        <Text fontSize="sm" color="gray.600" noOfLines={3}>
+                          {item.product.description}
+                        </Text>
+                      )}
+                      <Text>Color: {item.color ?? "—"}</Text>
+                      <Text>Unitario: ${formatNumber(item.unitPrice)}</Text>
+                      {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
+                      <Text>Cantidad: {item.quantity}</Text>
+                      <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
+                      <Text>Stock: {item.stock ?? 0}</Text>
+                      <Checkbox
+                        isChecked={item.picked ?? false}
+                        onChange={(e) => togglePicked(idx, e.target.checked)}
+                      >
+                        Armado
+                      </Checkbox>
                     </VStack>
                   </HStack>
-
-                  <HStack>
-                    <Text fontWeight="bold">${formatNumber(item.totalPrice)}</Text>
-                    <Checkbox
-                      isChecked={item.picked ?? false}
-                      onChange={(e) => togglePicked(idx, e.target.checked)}
-                    >
-                      Armado
-                    </Checkbox>
-                  </HStack>
-                </HStack>
+                </Box>
               );
             })}
           </VStack>
 
+          {/* Totales */}
           <VStack mt={6} spacing={1} align="flex-end">
             <Text>Subtotal: ${formatNumber(order.subtotal)}</Text>
             <Text>Envío: ${formatNumber(order.shipping)}</Text>
