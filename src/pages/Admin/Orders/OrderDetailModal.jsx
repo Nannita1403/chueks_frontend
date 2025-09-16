@@ -85,7 +85,6 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
           {/* Items */}
           <VStack mt={6} spacing={4} align="stretch">
             {(order.items ?? []).map((item, idx, it) => {
-              const imageUrl = item.product?.imgPrimary?.url || item.product?.image || "";
               const displayName = item.name ?? "Artículo";
               const productId = item.productId ?? item.product?._id ?? "—";
 
