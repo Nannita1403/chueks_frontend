@@ -134,7 +134,7 @@ const { toast } = useToast();
   if (filterStatus) filteredProducts = filteredProducts.filter(p => p.status === filterStatus);
 
   return (
-    <Box minH="100vh" bg="gray.50" py={8}>
+    <Box minH="100vh" bg="gray.50" py={{ base: 6, md: 8 }} px={{ base: 4, md: 0 }}>
       <Container maxW="7xl">
         <VStack spacing={6}>
           <Flex justify="space-between" align="center" w="full">
@@ -142,7 +142,7 @@ const { toast } = useToast();
             <Button leftIcon={<FiPlus />} colorScheme="pink" onClick={() => setIsCreateOpen(true)}>Nuevo Producto</Button>
           </Flex>
 
-          <Flex w="full" mb={4}>
+          <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
             <Select placeholder="Filtrar por categoría" mr={2} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
               {productOptions.categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
@@ -153,13 +153,13 @@ const { toast } = useToast();
           </Flex>
 
           {/* Tarjetas de productos */}
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+          <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6} w="full">
             {filteredProducts.length > 0 ? (
               filteredProducts.map(p => (
                 <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
                   <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h="200px" objectFit="cover" />
 
-                  <Box p={4}>
+                  <Box p={{ base: 3, md: 4 }}>
                     <Heading size="md" mb={2}>{p.name}</Heading>
                     <Box fontSize="sm" color="gray.600" mb={1}>
                       <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}
@@ -203,13 +203,10 @@ const { toast } = useToast();
                       </Select>
                     </Box>
 
-                    <Flex justify="flex-end" gap={2}>
-                      <IconButton icon={<FiEdit />} aria-label="Editar" onClick={() => handleOpenEdit(p)} />
-                      <IconButton icon={<FiCopy />} aria-label="Duplicar" onClick={() => handleDuplicate(p)} />
-                      <IconButton
-                        icon={<FiTrash2 />}
-                        aria-label="Eliminar"
-                        colorScheme="red"
+                    <Flex justify="flex-end" gap={2} wrap="wrap">
+                      <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
+                      <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
+                      <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red"
                         onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }}
                       />
                     </Flex>

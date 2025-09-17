@@ -65,7 +65,7 @@ export default function AdminOrders() {
   }, [orders, search]);
 
   return (
-    <Box p={6}>
+    <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 6 }}>
       {/* Header */}
       <Flex justify="space-between" align="center" mb={6}>
         <Box>
@@ -101,8 +101,8 @@ export default function AdminOrders() {
             </Flex>
 
             <Card>
-              <CardBody p={0}>
-                <Table variant="simple" size="sm">
+              <CardBody p={0} overflowX="auto">
+                <Table variant="simple" size="sm" minW="800px">
                   <Thead>
                     <Tr>
                       <Th>ID</Th>
