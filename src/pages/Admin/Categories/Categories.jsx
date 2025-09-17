@@ -41,7 +41,7 @@ const AdminCategories = () => {
       }
     };
     fetchCategories();
-  }, [toast]);
+  }, []);
 
   // 🔹 Crear nueva categoría
   const handleCreate = async () => {
