@@ -91,15 +91,16 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
               return (
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4}>
-                      <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md" />
+                     {item.image && (
+                      <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md"/>
+                    )}
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
-                      <Text fontWeight="bold" fontSize="lg">{item.code}</Text>
+                      <Text fontSize="sm" color="gray.500">Código: {item.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
-                      <Text fontWeight="bold" fontSize="lg">{item.category}</Text>
+                      <Text fontSize="sm" color="gray.500">Category: {item.category}</Text>
                       <Text>Color: {item.color ?? "—"}</Text>
-                      {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
-                      <Text>Cantidad: {item.quantity}</Text>
+                      <Text>Precio Mayorista: ${formatNumber(item.priceMay)}</Text>                      <Text>Cantidad: {item.quantity}</Text>
                       <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
                       <Checkbox
                         isChecked={item.picked ?? false}
