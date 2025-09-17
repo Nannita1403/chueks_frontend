@@ -84,19 +84,19 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
 
           {/* Items */}
           <VStack mt={6} spacing={4} align="stretch">
-            {(order.items ?? []).map((item, idx, it) => {
+            {(order.items ?? []).map((item, idx,) => {
               const displayName = item.name ?? "Artículo";
               const productId = item.productId ?? item.product?._id ?? "—";
 
               return (
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4}>
-                      <Image src={it.image} boxSize="100px" objectFit="cover" borderRadius="md" />
+                      <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md" />
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
-                      <Text fontWeight="bold" fontSize="lg">{it.code}</Text>
+                      <Text fontWeight="bold" fontSize="lg">{item.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
-                      <Text fontWeight="bold" fontSize="lg">{it.category}</Text>
+                      <Text fontWeight="bold" fontSize="lg">{item.category}</Text>
                       <Text>Color: {item.color ?? "—"}</Text>
                       {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
                       <Text>Cantidad: {item.quantity}</Text>
