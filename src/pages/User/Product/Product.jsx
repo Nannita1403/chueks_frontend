@@ -6,19 +6,21 @@ import { useProducts } from "../../../context/Products/products.context.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import CustomButton from "../../../components/Button/Button.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
+import { useToast } from "../../../Hooks/useToast.jsx";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { dispatch } = useProducts();
-  const { user, token } = useAuth();
+  const { user, token, toggleFavorite } = useAuth();
+  const { toast } = useToast();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [likeLoading, setLikeLoading] = useState(false);
 
-  const isLiked = user ? product?.likes?.includes(user.id) : false;
+  const isLiked = !!product?.isFavorite;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -31,9 +33,7 @@ const ProductDetail = () => {
         setLoading(true);
         const res = await axios.get(
           `https://chueks-backend.vercel.app/api/v1/products/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setProduct(res.data.product);
       } catch (err) {
@@ -45,22 +45,32 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id, token]);
 
-  const handleToggleLike = async () => {
-    if (!user || !product) return;
-    try {
-      setLikeLoading(true);
-      const res = await axios.put(
-        `https://chueks-backend.vercel.app/api/v1/products/toggleLike/${product._id}/${!isLiked}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setProduct(res.data.product);
-      dispatch({ type: "UPDATE_PRODUCT", payload: res.data.product });
-    } finally {
-      setLikeLoading(false);
-    }
-  };
+const handleToggleLike = async () => {
+  if (!user || !product) {
+    return toast({ title: "Debes iniciar sesión para dar like", status: "warning" });
+  }
 
+  try {
+    setLikeLoading(true);
+
+    // 1. Toggle global en productos (contador de likes)
+    const updatedProduct = await ProductsActions.toggleLike(product._id, !isLiked);
+    dispatch({ type: "TOGGLE_LIKE", payload: updatedProduct });
+
+    // 2. Toggle en favoritos de usuario
+    await toggleFavorite(product._id);
+    await refreshFavorites();
+
+    // 3. Actualizar estado local
+    setProduct(updatedProduct);
+
+    toast({ title: updatedProduct.isFavorite ? "Agregado a favoritos" : "Quitado de favoritos", status: "success" });
+  } catch (err) {
+    toast({ title: "Error al actualizar favoritos", status: "error" });
+  } finally {
+    setLikeLoading(false);
+  }
+};
   if (loading) return <ProductCardSkeleton />;
   if (error) return <Box textAlign="center" p={6}><Text color="red.500">{error}</Text></Box>;
   if (!product) return <Box textAlign="center" p={6}><Text>Producto no encontrado</Text></Box>;
@@ -70,9 +80,7 @@ const ProductDetail = () => {
       {/* Header con botón atrás */}
       <Flex justify="space-between" align="center" mb={6}>
         <Heading size="lg">{product.name}</Heading>
-        <Button colorScheme="teal" onClick={() => navigate(-1)}>
-          ⬅ Volver
-        </Button>
+        <Button colorScheme="teal" onClick={() => navigate(-1)}>⬅ Volver</Button>
       </Flex>
 
       <Image src={product.imgPrimary || "/placeholder.svg"} alt={product.name} mb={4} borderRadius="md" />
@@ -80,9 +88,14 @@ const ProductDetail = () => {
       <Text mb={2}><strong>Precio Unitario:</strong> ${product.priceMin}</Text>
       <Text mb={2}><strong>Precio Mayorista:</strong> ${product.priceMay}</Text>
 
+      {/* Botón de favorito */}
       <Flex align="center" gap={2} mb={4}>
-        <CustomButton onClick={handleToggleLike} isDisabled={likeLoading || !user} size="sm">
-          {isLiked ? "❤️" : "🤍"} {product.likes?.length || 0}
+        <CustomButton
+          onClick={handleToggleLike}
+          isDisabled={likeLoading || !user}
+          size="sm"
+        >
+          {isLiked ? "❤️" : "🤍"} {product.likes || 0}
         </CustomButton>
       </Flex>
 

@@ -116,12 +116,10 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
           align="center"
         >
           <IconButton
-          
             icon={<FiMenu />}
             aria-label="Abrir menú"
             onClick={onOpen}
             variant="outline"
-            color="white"
             mr={2}
           />
           <Image src={logoSrc2} alt="Logo" h={8} />

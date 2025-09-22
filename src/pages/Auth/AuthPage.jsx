@@ -1,4 +1,3 @@
-// src/pages/Auth/AuthPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logoRedondo from "/logoRedondo.png";
@@ -27,6 +26,11 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from "@chakra-ui/react";
 import Loading from "../../components/Loading/Loading.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
@@ -38,7 +42,7 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
-const { toast } = useToast();
+  const { toast } = useToast();
   const { login, registerUser } = useAuth();
 
   // --- LOGIN ---
@@ -112,12 +116,12 @@ const { toast } = useToast();
 
       toast({
         title: "Registro exitoso",
-        description: "Revisa tu correo para verificar tu cuenta antes de iniciar sesión.",
+        description:
+          "Revisa tu correo para verificar tu cuenta antes de iniciar sesión.",
         status: "success",
         duration: 5000,
       });
 
-      // 🔄 siempre lo mandamos a /auth (login)
       navigate("/auth", { replace: true });
     } catch (error) {
       toast({
@@ -145,7 +149,8 @@ const { toast } = useToast();
     } else if (verified === "0") {
       toast({
         title: "❌ Error en la verificación",
-        description: "Hubo un problema al verificar tu cuenta. Intenta nuevamente.",
+        description:
+          "Hubo un problema al verificar tu cuenta. Intenta nuevamente.",
         status: "error",
       });
     }
@@ -157,10 +162,78 @@ const { toast } = useToast();
 
   const bgColor = useColorModeValue("white", "gray.800");
 
+  // 🔹 Bloque de descripción (reutilizado en escritorio y acordeón en móvil)
+  const descriptionBlock = (
+    <Box maxW="md">
+      <VStack spacing={6} align="start">
+        <Heading size="lg" color="white">
+          Catálogo Exclusivo de Accesorios y Carteras
+        </Heading>
+
+        <VStack spacing={4} align="start">
+          <Text color="gray.300">
+            Bienvenido a CHUEKS, tu destino para accesorios y carteras de
+            diseño exclusivo para venta mayorista.
+          </Text>
+
+          <VStack spacing={2} align="start">
+            <HStack>
+              <Box w={4} h={4} borderRadius="full" bg="pink.500" />
+              <Heading size="sm" color="white">
+                Diseños Exclusivos
+              </Heading>
+            </HStack>
+            <Text color="gray.300" pl={6}>
+              Accede a nuestra colección de productos únicos y de alta calidad.
+            </Text>
+          </VStack>
+
+          <VStack spacing={2} align="start">
+            <HStack>
+              <Box w={4} h={4} borderRadius="full" bg="cyan.500" />
+              <Heading size="sm" color="white">
+                Información Detallada
+              </Heading>
+            </HStack>
+            <Text color="gray.300" pl={6}>
+              Consulta precios, colores, categorías y materiales de confección.
+            </Text>
+          </VStack>
+
+          <VStack spacing={2} align="start">
+            <HStack>
+              <Box w={4} h={4} borderRadius="full" bg="yellow.400" />
+              <Heading size="sm" color="white">
+                Listas Personalizadas
+              </Heading>
+            </HStack>
+            <Text color="gray.300" pl={6}>
+              Guarda tus favoritos y crea listas de compra para enviar al
+              administrador.
+            </Text>
+          </VStack>
+        </VStack>
+
+        <Box pt={4}>
+          <Text fontSize="sm" color="gray.400" fontStyle="italic">
+            "Eleva tu negocio con nuestros productos exclusivos y de alta
+            calidad."
+          </Text>
+        </Box>
+      </VStack>
+    </Box>
+  );
+
   return (
-    <Flex minH="100vh" bg={bgColor}>
+    <Flex minH="100vh" bg={bgColor} flexDir={{ base: "column", md: "row" }}>
       {/* Form Section */}
-      <Flex w={{ base: "100%", md: "50%" }} align="center" justify="center" p={8}>
+      <Flex
+        w={{ base: "100%", md: "50%" }}
+        align="center"
+        justify="center"
+        p={8}
+        bg={bgColor}
+      >
         <Container maxW="md">
           <VStack spacing={8}>
             <VStack spacing={4}>
@@ -179,7 +252,8 @@ const { toast } = useToast();
                     {verificationError.message}
                     <br />
                     <Text fontSize="sm" mt={2}>
-                      Revisa tu email <strong>{verificationError.email}</strong> y haz clic en el enlace de verificación.
+                      Revisa tu email <strong>{verificationError.email}</strong>{" "}
+                      y haz clic en el enlace de verificación.
                     </Text>
                   </AlertDescription>
                 </Box>
@@ -205,7 +279,12 @@ const { toast } = useToast();
                             <FormLabel>Contraseña</FormLabel>
                             <Input name="password" type="password" required />
                           </FormControl>
-                          <Button type="submit" colorScheme="primary" size="lg" w="full">
+                          <Button
+                            type="submit"
+                            colorScheme="pink"
+                            size="lg"
+                            w="full"
+                          >
                             Iniciar Sesión
                           </Button>
                         </VStack>
@@ -230,7 +309,12 @@ const { toast } = useToast();
                             <FormLabel>Contraseña</FormLabel>
                             <Input name="password" type="password" required />
                           </FormControl>
-                          <Button type="submit" colorScheme="primary" size="lg" w="full">
+                          <Button
+                            type="submit"
+                            colorScheme="cyan"
+                            size="lg"
+                            w="full"
+                          >
                             Registrarse
                           </Button>
                         </VStack>
@@ -240,67 +324,44 @@ const { toast } = useToast();
                 </Tabs>
               </CardBody>
             </Card>
+
+            {/* 🔹 Acordeón solo visible en móvil */}
+            <Box w="full" display={{ base: "block", md: "none" }}>
+              <Accordion allowToggle>
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton
+                      bg="black"
+                      color="white"
+                      _expanded={{ bg: "gray.700" }}
+                    >
+                      <Box as="span" flex="1" textAlign="left">
+                        Más sobre CHUEKS
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel bg="black" color="white">
+                    {descriptionBlock}
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+            </Box>
           </VStack>
         </Container>
       </Flex>
 
-      {/* Description Section */}
-      <Flex w={{ base: "100%", md: "50%" }} bg="black" color="white" p={8} align="center" justify="center">
-        <Box maxW="md">
-          <VStack spacing={6} align="start">
-            <Heading size="lg" color="white">
-              Catálogo Exclusivo de Accesorios y Carteras
-            </Heading>
-
-            <VStack spacing={4} align="start">
-              <Text color="gray.300">
-                Bienvenido a CHUEKS, tu destino para accesorios y carteras de diseño exclusivo para venta mayorista.
-              </Text>
-
-              <VStack spacing={2} align="start">
-                <HStack>
-                  <Box w={4} h={4} borderRadius="full" bg="pink.500" />
-                  <Heading size="sm" color="white">
-                    Diseños Exclusivos
-                  </Heading>
-                </HStack>
-                <Text color="gray.300" pl={6}>
-                  Accede a nuestra colección de productos únicos y de alta calidad.
-                </Text>
-              </VStack>
-
-              <VStack spacing={2} align="start">
-                <HStack>
-                  <Box w={4} h={4} borderRadius="full" bg="cyan.500" />
-                  <Heading size="sm" color="white">
-                    Información Detallada
-                  </Heading>
-                </HStack>
-                <Text color="gray.300" pl={6}>
-                  Consulta precios, colores, categorías y materiales de confección.
-                </Text>
-              </VStack>
-
-              <VStack spacing={2} align="start">
-                <HStack>
-                  <Box w={4} h={4} borderRadius="full" bg="yellow.400" />
-                  <Heading size="sm" color="white">
-                    Listas Personalizadas
-                  </Heading>
-                </HStack>
-                <Text color="gray.300" pl={6}>
-                  Guarda tus favoritos y crea listas de compra para enviar al administrador.
-                </Text>
-              </VStack>
-            </VStack>
-
-            <Box pt={4}>
-              <Text fontSize="sm" color="gray.400" fontStyle="italic">
-                "Eleva tu negocio con nuestros productos exclusivos y de alta calidad."
-              </Text>
-            </Box>
-          </VStack>
-        </Box>
+      {/* Description Section (solo escritorio) */}
+      <Flex
+        w={{ base: "100%", md: "50%" }}
+        bg="black"
+        color="white"
+        p={8}
+        align="center"
+        justify="center"
+        display={{ base: "none", md: "flex" }}
+      >
+        {descriptionBlock}
       </Flex>
     </Flex>
   );

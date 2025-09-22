@@ -117,5 +117,4 @@ class ProductsActions {
   }
 }
 
-// Exportamos la instancia directamente
 export default new ProductsActions();

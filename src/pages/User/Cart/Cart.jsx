@@ -160,7 +160,6 @@ export default function Cart() {
     </Box>
   );
 
-  // ---- Render principal ----
   return (
     <Box minH="100vh" bg={pageBg}>
       <AppHeader />
@@ -191,7 +190,7 @@ export default function Cart() {
           </CardContent>
         </Card>
 
-        <Grid templateColumns={{ base: "1fr", lg: "1fr 320px" }} gap={4}>
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 320px" }} gap={6}>
           <GridItem>
             {items.length === 0 ? (
               <Card bg={panelBg} borderColor={borderColor}>
@@ -202,15 +201,18 @@ export default function Cart() {
             ) : (
               <VStack spacing={3} align="stretch">
                 {items.map((it) => (
-                  <Card key={it.lineId} bg={panelBg} borderColor={borderColor}>
+                  <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
-                      <Grid templateColumns="72px 1fr 170px" gap={3} alignItems="center">
-                        <Box w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg} cursor="pointer"
-                          onClick={() => openProductDetail(it.productId)}>
+                      <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
+                        <Box w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg}
+                          onClick={() => openProductDetail(it.productId)}
+                          mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
+                        >
                           {!!it.image && <Image src={it.image} alt={it.name} w="100%" h="100%" objectFit="cover" />}
                         </Box>
 
-                        <VStack align="stretch" spacing={1}>
+                        {/* Info */}
+                        <VStack align="stretch" spacing={1} mb={{ base: 2, md: 0 }}>
                           <HStack justify="space-between" align="start">
                             <Box>
                               <Text fontWeight="semibold" noOfLines={1} cursor="pointer"
@@ -223,24 +225,29 @@ export default function Cart() {
                             <IconButton
                               aria-label="Eliminar"
                               icon={<CloseIcon boxSize={3} />}
-                              size="sm"
-                              variant="ghost"
+                              size="sm" variant="ghost"
                               color={muted}
                               onClick={() => onRemoveLine(it.id)}
                             />
                           </HStack>
                         </VStack>
-
-                        <VStack align="end" spacing={2}>
-                          <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
+                        <VStack align={{ base: "stretch", md: "end" }} spacing={2} mt={{ base: 2, md: 0 }}>
+                          <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden"
+                            justify={{ base: "center", md: "flex-end" }}>
                             <IconButton aria-label="Restar" icon={<MinusIcon boxSize={3} />}
-                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, -1)}
-                              isDisabled={it.quantity <= 1} />
+                              size="sm" variant="ghost"
+                              onClick={() => onChangeQtyLine(it.id, -1)}
+                              isDisabled={it.quantity <= 1}
+                            />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
                             <IconButton aria-label="Sumar" icon={<AddIcon boxSize={3} />}
-                              size="sm" variant="ghost" onClick={() => onChangeQtyLine(it.id, +1)} />
+                              size="sm" variant="ghost"
+                              onClick={() => onChangeQtyLine(it.id, +1)}
+                            />
                           </HStack>
-                          <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
+                          <Text fontWeight="semibold" textAlign={{ base: "center", md: "right" }}>
+                            {money(it.price * it.quantity)}
+                          </Text>
                         </VStack>
                       </Grid>
                     </CardContent>
@@ -251,7 +258,7 @@ export default function Cart() {
           </GridItem>
 
           <GridItem>
-            <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
+            <Card  position={{ lg: "sticky" }} top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
                 <CardTitle>Resumen del Pedido</CardTitle>
                 <CardDescription>Revisa los totales antes de continuar</CardDescription>
