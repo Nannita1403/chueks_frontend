@@ -131,13 +131,43 @@ export default function Favorites() {
 
           {/* RESUMEN LATERAL */}
           {favorites && favorites.length > 0 && (
-            <Box w="280px" p={4} bg="gray.50" _dark={{ bg: "gray.800" }} rounded="md" shadow="sm">
+          <>
+            {/* Mobile (acordeón arriba) */}
+            <Box
+              display={{ base: "block", lg: "none" }}
+              position="sticky"
+              top="0"
+              zIndex="10"
+              bg="pink.500"
+              color="white"
+              shadow="md"
+            >
+              <Box px={4} py={2} cursor="pointer" _hover={{ bg: "pink.600" }}>
+                <Text fontWeight="bold">Resumen ▾</Text>
+              </Box>
+              <Box px={4} py={2} bg="white" color="gray.800" display="none" _groupHover={{ display: "block" }}>
+                <Text mb={1}>Productos: {favorites.length}</Text>
+                <Text mb={1}>Subtotal: ${subtotal}</Text>
+              </Box>
+            </Box>
+
+            {/* Desktop (panel lateral) */}
+            <Box
+              display={{ base: "none", lg: "block" }}
+              w="280px"
+              p={4}
+              bg="gray.50"
+              _dark={{ bg: "gray.800" }}
+              rounded="md"
+              shadow="sm"
+            >
               <Heading size="md" mb={2}>Resumen</Heading>
               <Divider mb={2} />
               <Text mb={1}>Productos: {favorites.length}</Text>
               <Text mb={1}>Subtotal: ${subtotal}</Text>
             </Box>
-          )}
+          </>
+        )}
         </HStack>
       </Container>
     </Box>

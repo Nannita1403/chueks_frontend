@@ -257,8 +257,29 @@ export default function Cart() {
             )}
           </GridItem>
 
-          <GridItem>
-            <Card  position={{ lg: "sticky" }} top={4} bg={panelBg} borderColor={borderColor}>
+        {/* Mobile: resumen desplegable arriba */}
+          <Box  display={{ base: "block", lg: "none" }} position="sticky" top="0" zIndex="10"
+            bg={headerBg} color="white" shadow="md" >
+              <Box px={4} py={2} cursor="pointer" _hover={{ bg: "pink.600" }}>
+                <Text fontWeight="bold">Resumen del Pedido ▾</Text>
+              </Box>
+              <Box px={4} py={3} bg="white" color="gray.800" display="none" _groupHover={{ display: "block" }}>
+                <HStack justify="space-between" mb={2}>
+                  <Text>Subtotal</Text><Text fontWeight="semibold">{money(subtotal)}</Text>
+                </HStack>
+                <HStack justify="space-between" mb={2}>
+                  <Text>Envío</Text><Text fontWeight="semibold">{cart.shipping ? money(cart.shipping) : "Gratis"}</Text>
+                </HStack>
+                <Divider my={2} />
+                <HStack justify="space-between">
+                  <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
+                </HStack>
+              </Box>
+          </Box>
+
+          {/* Desktop: resumen lateral */}
+          <GridItem display={{ base: "none", lg: "block" }}>
+            <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
                 <CardTitle>Resumen del Pedido</CardTitle>
                 <CardDescription>Revisa los totales antes de continuar</CardDescription>
@@ -275,19 +296,8 @@ export default function Cart() {
                   <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
                 </HStack>
               </CardContent>
-              <CardFooter flexDir="column" alignItems="stretch">
-                <Tooltip isDisabled={canCheckout} hasArrow
-                  label={canCheckout ? "Continuar con el pago" : `Faltan ${missing} ${missing === 1 ? "producto" : "productos"}`} placement="top">
-                  <CustomButton onClick={onCheckout} isDisabled={!canCheckout} size="lg">Completar la compra</CustomButton>
-                </Tooltip>
-                {!canCheckout && (
-                  <Text mt={2} fontSize="sm" color={muted}>
-                    🔒 Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"} para continuar.
-                  </Text>
-                )}
-                <Text mt={3} fontSize="xs" color={muted}>
-                  Al finalizar, se enviará la solicitud de pedido para revisión.
-                </Text>
+              <CardFooter>
+                <CustomButton onClick={onCheckout} isDisabled={!canCheckout} size="lg">Completar la compra</CustomButton>
               </CardFooter>
             </Card>
           </GridItem>
