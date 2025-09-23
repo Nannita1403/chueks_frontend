@@ -18,36 +18,24 @@ import {
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
-import { toggleFavorite } from "../ToggleFavorite/ToggleFavorite.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
 
 function flattenColors(colors = []) {
   const out = [];
   colors.forEach((c) => {
-    const names = Array.isArray(c?.name)
-      ? c.name
-      : c?.name
-      ? [c.name]
-      : [];
-    names.forEach((n) =>
-      out.push({ name: n, stock: Number(c?.stock) || 0 })
-    );
+    const names = Array.isArray(c?.name) ? c.name : c?.name ? [c.name] : [];
+    names.forEach((n) => out.push({ name: n, stock: Number(c?.stock) || 0 }));
   });
   return out;
 }
 
 const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
-  const { user, refreshCart } = useAuth();
-  const { toast } = useToast(); // ✅ nuestro hook
+  const { user, refreshCart, toggleFavorite, refreshFavorites } = useAuth();
+  const { toast } = useToast();
 
   const [modalProduct, setModalProduct] = useState(product);
-  const colorItems = useMemo(
-    () => flattenColors(product?.colors),
-    [product]
-  );
-  const [selectedColor, setSelectedColor] = useState(
-    colorItems?.[0] || null
-  );
+  const colorItems = useMemo(() => flattenColors(product?.colors), [product]);
+  const [selectedColor, setSelectedColor] = useState(colorItems?.[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -56,9 +44,7 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
     setModalProduct(product);
     setSelectedColor(colorItems?.[0] || null);
     setQuantity(1);
-    setIsFavorite(
-      Boolean(user?.favorites?.some?.((f) => f._id === product._id))
-    );
+    setIsFavorite(Boolean(user?.favorites?.some?.((f) => f._id === product._id)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product?._id, user]);
 
@@ -72,8 +58,18 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
         status: "warning",
       });
     }
-      await toggleFavorite(modalProduct._id, toast, refreshFavorites);
-      setIsFavorite(!isFavorite);
+
+    try {
+      const data = await toggleFavorite(modalProduct._id);
+      setIsFavorite(data?.favorites?.some((f) => f._id === modalProduct._id));
+      await refreshFavorites();
+    } catch (e) {
+      console.error("Error al togglear favorito:", e);
+      toast({
+        title: "No se pudo actualizar favoritos",
+        status: "error",
+      });
+    }
   };
 
   // 🛒 Agregar al carrito
@@ -148,8 +144,7 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
           </Text>
           {typeof modalProduct?.priceMay === "number" && (
             <Text>
-              <strong>Precio Mayorista:</strong> $
-              {modalProduct.priceMay}
+              <strong>Precio Mayorista:</strong> ${modalProduct.priceMay}
             </Text>
           )}
 
@@ -168,9 +163,7 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
             mt={3}
             value={selectedColor?.name || ""}
             onChange={(e) => {
-              const color = colorItems.find(
-                (c) => c.name === e.target.value
-              );
+              const color = colorItems.find((c) => c.name === e.target.value);
               setSelectedColor(color || null);
               setQuantity(1);
             }}
@@ -183,19 +176,11 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
           </Select>
 
           <Flex mt={3} align="center" gap={2}>
-            <Button
-              onClick={() =>
-                setQuantity((q) => Math.max(1, q - 1))
-              }
-            >
+            <Button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
               -
             </Button>
             <Text>{quantity}</Text>
-            <Button
-              onClick={() =>
-                setQuantity((q) => Math.min(maxQty, q + 1))
-              }
-            >
+            <Button onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}>
               +
             </Button>
           </Flex>
@@ -210,13 +195,7 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
             </Button>
             <IconButton
               aria-label="Favorito"
-              icon={
-                isFavorite ? (
-                  <FaHeart color="red" />
-                ) : (
-                  <FaRegHeart />
-                )
-              }
+              icon={isFavorite ? <FaHeart color="red" /> : <FaRegHeart />}
               onClick={handleToggleFavorite}
             />
           </Flex>
