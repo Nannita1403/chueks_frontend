@@ -70,39 +70,35 @@ export default function AdminOrders() {
   );
 
   return (
-    <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 6 }}>
+    <Box px={{ base: 2, md: 6 }} py={{ base: 4, md: 6 }}>
       {/* Header */}
-      <Flex justify="space-between" align="center" mb={6}>
+      <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "start", md: "center" }} mb={6} gap={4}>
         <Box>
           <Heading size="lg">Pedidos</Heading>
           <Text color="gray.600">Gestiona y da seguimiento a los pedidos</Text>
         </Box>
-        <Button leftIcon={<FiDownload />} variant="outline">Exportar</Button>
+        <Button leftIcon={<FiDownload />} variant="outline" size="sm">Exportar</Button>
       </Flex>
 
       {/* Tabs por estado */}
-      <Tabs index={tab} onChange={setTab} mb={4}>
-        <TabList>
-          <Tab>Todos</Tab>
-          <Tab>Pendientes</Tab>
-          <Tab>En Proceso</Tab>
-          <Tab>Completados</Tab>
+      <Tabs index={tab} onChange={setTab} variant="soft-rounded" colorScheme="blue" mb={4}>
+        <TabList flexWrap="wrap">
+          <Tab flex="1" minW="90px">Todos</Tab>
+          <Tab flex="1" minW="90px">Pendientes</Tab>
+          <Tab flex="1" minW="90px">En Proceso</Tab>
+          <Tab flex="1" minW="90px">Completados</Tab>
         </TabList>
         <TabPanels>
           <TabPanel p={0}>
-            {/* Search */}
-            <Flex justify="space-between" align="center" mb={4} gap={4}>
-              <InputGroup maxW="md">
-                <InputLeftElement pointerEvents="none">
-                  <FiSearch color="gray" />
-                </InputLeftElement>
-                <Input
-                  placeholder="Buscar por ID o cliente…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </InputGroup>
-            </Flex>
+                {/* Search */}
+            <InputGroup mb={4}>
+              <InputLeftElement pointerEvents="none"><FiSearch color="gray" /></InputLeftElement>
+              <Input
+                placeholder="Buscar por ID o cliente…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </InputGroup>
 
             <Card>
               <CardBody p={0}>
@@ -150,29 +146,25 @@ export default function AdminOrders() {
                   </Table>
                 </Box>
 
-                {/* Mobile: cards */}
-                <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
-                  {!loading && filtered.map(o => (
-                    <Box key={o._id} borderWidth="1px" borderRadius="lg" p={4} shadow="sm">
-                      <Text fontWeight="bold">{codeOrId(o)}</Text>
-                      <Text>{o.user?.name || "—"}</Text>
-                      <Text fontSize="sm" color="gray.500">{o.user?.email || ""}</Text>
-                      <Text fontSize="sm">{when(o)}</Text>
-                      <Text fontWeight="semibold">{money(o.total || o.subtotal || 0)}</Text>
-                      <OrderStatusBadge status={o.status} />
-                      <Button
-                        size="sm"
-                        mt={2}
-                        leftIcon={<FiEye />}
-                        onClick={() => { setCurrent(o); modal.onOpen(); }}
-                      >
-                        Ver
-                      </Button>
-                    </Box>
-                  ))}
-                  {loading && <StatusMessage text="Cargando…" />}
-                  {!loading && filtered.length === 0 && <StatusMessage text="Sin resultados" />}
-                </Box>
+
+              {/* Mobile Cards */}
+              <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={3}>
+                {!loading && filtered.map(o => (
+                  <Card key={o._id} size="sm" p={3} shadow="sm">
+                    <Text fontWeight="bold">{codeOrId(o)}</Text>
+                    <Text>{o.user?.name || "—"}</Text>
+                    <Text fontSize="sm" color="gray.500">{o.user?.email || ""}</Text>
+                    <Text fontSize="sm">{when(o)}</Text>
+                    <Text fontWeight="semibold">{money(o.total || o.subtotal || 0)}</Text>
+                    <OrderStatusBadge status={o.status} />
+                    <Button size="sm" mt={2} leftIcon={<FiEye />} onClick={() => { setCurrent(o); modal.onOpen(); }}>
+                      Ver
+                    </Button>
+                  </Card>
+                ))}
+                {loading && <StatusMessage text="Cargando…" />}
+                {!loading && filtered.length === 0 && <StatusMessage text="Sin resultados" />}
+              </Box>
               </CardBody>
             </Card>
           </TabPanel>

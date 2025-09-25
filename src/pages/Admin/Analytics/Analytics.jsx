@@ -114,7 +114,7 @@ export default function AnalyticsPage() {
 
         <TabPanels>
           <TabPanel>
-            <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={6}>
+            <Grid templateColumns={{ base: "1fr", md: "repeat(auto-fit, minmax(250px, 1fr))" }} gap={4}>
               <Card>
                 <CardHeader>
                   <Heading size="md">Productos Más Vistos</Heading>
@@ -141,8 +141,8 @@ export default function AnalyticsPage() {
                   <Text color="gray.600">Los productos más añadidos a favoritos</Text>
                 </CardHeader>
                 <CardBody>
-                  <Box h="320px">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <Box h={{ base: "250px", md: "320px" }}>
+                      <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={productAnalytics.mostWishlisted} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                         <XAxis type="number" />
