@@ -135,11 +135,15 @@ const { toast } = useToast();
 
   return (
     <Box minH="100vh" bg="gray.50" py={{ base: 6, md: 8 }} px={{ base: 4, md: 0 }}>
-      <Container maxW="7xl">
+      <Container maxW={{ base: "100%", md: "7xl" }} px={{ base: 0, md: 4 }}>
         <VStack spacing={6}>
-          <Flex justify="space-between" align="center" w="full">
-            <Heading size="xl">Gestión de Productos</Heading>
-            <Button leftIcon={<FiPlus />} colorScheme="pink" onClick={() => setIsCreateOpen(true)}>Nuevo Producto</Button>
+          <Flex   justify="space-between" align="center" w="full" direction={{ base: "column", sm: "row" }} gap={3} >
+            <Heading size={{ base: "lg", md: "xl" }} >
+              Gestión de Productos
+            </Heading>
+            <Button leftIcon={<FiPlus />} colorScheme="pink" w={{ base: "full", sm: "auto" }}>
+              Nuevo Producto
+            </Button>
           </Flex>
 
           <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
@@ -157,7 +161,7 @@ const { toast } = useToast();
             {filteredProducts.length > 0 ? (
               filteredProducts.map(p => (
                 <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
-                  <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h="200px" objectFit="cover" />
+                  <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
 
                   <Box p={{ base: 3, md: 4 }}>
                     <Heading size="md" mb={2}>{p.name}</Heading>

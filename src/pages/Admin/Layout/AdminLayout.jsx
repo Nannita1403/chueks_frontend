@@ -125,7 +125,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
           <Image src={logoSrc2} alt="Logo" h={8} />
         </Flex>
 
-        <Box flex="1" p={8} maxW="1200px" mx="auto" overflowY="auto">
+        <Box  flex="1" p={{ base: 4, md: 8 }} maxW="100%" mx="auto" w="full" overflowY="auto">
           <Outlet />
         </Box>
       </Flex>
