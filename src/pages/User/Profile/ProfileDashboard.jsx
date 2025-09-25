@@ -26,12 +26,8 @@ export default function ProfileDashboard() {
   const [loading, setLoading] = useState(true);
 
   // Control de modals
-  const {
-    isOpen: isNameOpen,
-    onOpen: onOpenName,
-    onClose: onCloseName,
-  } = useDisclosure();
-
+  const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } =
+    useDisclosure();
   const {
     isOpen: isLastNameOpen,
     onOpen: onOpenLastName,
@@ -45,10 +41,8 @@ export default function ProfileDashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const list = Array.isArray(res.data)
-          ? res.data
-          : res.data?.orders || [];
-
+        // Ajuste: siempre res.data.orders
+        const list = res.data?.orders || [];
         setOrders(list);
       } catch (err) {
         console.error("❌ Error cargando pedidos:", err);
@@ -64,20 +58,13 @@ export default function ProfileDashboard() {
 
   return (
     <VStack align="stretch" spacing={6}>
-      {/* Título general */}
       <Text fontSize="2xl" fontWeight="bold">
         Mi Perfil
       </Text>
 
       {/* Nombre */}
       <Box>
-        <HStack
-          justify="space-between"
-          bg="gray.100"
-          px={4}
-          py={2}
-          borderRadius="md"
-        >
+        <HStack justify="space-between" bg="gray.100" px={4} py={2} borderRadius="md">
           <Text fontWeight="bold">Nombre</Text>
           <Button size="sm" colorScheme="blue" onClick={onOpenName}>
             Editar
@@ -90,13 +77,7 @@ export default function ProfileDashboard() {
 
       {/* Apellido */}
       <Box>
-        <HStack
-          justify="space-between"
-          bg="gray.100"
-          px={4}
-          py={2}
-          borderRadius="md"
-        >
+        <HStack justify="space-between" bg="gray.100" px={4} py={2} borderRadius="md">
           <Text fontWeight="bold">Apellido</Text>
           <Button size="sm" colorScheme="blue" onClick={onOpenLastName}>
             Editar
@@ -113,9 +94,7 @@ export default function ProfileDashboard() {
           <Text fontWeight="bold">Dirección</Text>
         </Box>
         <Box px={4} py={2}>
-          <Text>
-            {user?.address || "No disponible. Carga una nueva dirección"}
-          </Text>
+          <Text>{user?.address || "No disponible. Carga una nueva dirección"}</Text>
         </Box>
       </Box>
 
@@ -141,7 +120,7 @@ export default function ProfileDashboard() {
             <>
               {orders.slice(0, 3).map((order) => (
                 <Text key={order._id}>
-                  Pedido #{order._id} – {order.status || "En proceso"}
+                  Pedido #{order.code || order._id} – {order.status || "En proceso"}
                 </Text>
               ))}
               {orders.length > 3 && (
@@ -156,9 +135,7 @@ export default function ProfileDashboard() {
               )}
             </>
           ) : (
-            <Text>
-              No hay historial de pedidos. ¡Vamos haz un nuevo pedido!
-            </Text>
+            <Text>No hay historial de pedidos. ¡Haz un nuevo pedido!</Text>
           )}
         </Box>
       </Box>

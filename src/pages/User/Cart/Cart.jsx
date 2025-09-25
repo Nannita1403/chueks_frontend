@@ -45,7 +45,7 @@ export default function Cart() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
   const { toast } = useToast();
-  const { refreshCart } = useAuth();
+  const { refreshCart, user } = useAuth();
   const navigate = useNavigate();
 
   const pageBg      = useColorModeValue("gray.50", "gray.900");
@@ -296,9 +296,19 @@ export default function Cart() {
                   <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
                 </HStack>
               </CardContent>
-              <CardFooter>
-                <CustomButton onClick={onCheckout} isDisabled={!canCheckout} size="lg">Completar la compra</CustomButton>
-              </CardFooter>
+                <CardFooter>
+                {(!user?.address || !user?.phone) && (
+                  <Text fontSize="sm" color="orange.500" mb={2}>
+                    Debes completar tu <b>{!user?.address ? "dirección" : ""}{!user?.address && !user?.phone ? " y " : ""}{!user?.phone ? "teléfono" : ""}</b> para continuar.
+                  </Text>
+                )}
+                <CustomButton
+                  onClick={onCheckout}
+                  isDisabled={!canCheckout || !user?.address || !user?.phone}
+                  size="lg"
+                > Completar la compra
+                 </CustomButton>
+                </CardFooter>
             </Card>
           </GridItem>
         </Grid>

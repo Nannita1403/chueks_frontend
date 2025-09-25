@@ -16,8 +16,6 @@ import { useToast } from "../../../Hooks/useToast.jsx";
 import OrderCard from "../../../components/Order/OrderCard.jsx";
 import OrderModal from "../../../components/Order/OrderModal.jsx";
 import UserLayout from "../UserLayout.jsx";
-
-// ✅ Managers como modals
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
@@ -29,18 +27,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // 👉 control de modals
-  const {
-    isOpen: isAddressesOpen,
-    onOpen: onOpenAddresses,
-    onClose: onCloseAddresses,
-  } = useDisclosure();
-
-  const {
-    isOpen: isPhonesOpen,
-    onOpen: onOpenPhones,
-    onClose: onClosePhones,
-  } = useDisclosure();
+  const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
+  const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
   const muted = useColorModeValue("gray.600", "gray.400");
 
@@ -50,12 +38,7 @@ export default function Profile() {
         const res = await axios.get("/api/orders/my-orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        const list = Array.isArray(res.data)
-          ? res.data
-          : res.data?.orders || [];
-
-        setOrders(list);
+        setOrders(res.data?.orders || []);
       } catch (err) {
         console.error("❌ Error cargando pedidos:", err);
         toast({ title: "Error al cargar pedidos", status: "error" });
@@ -72,27 +55,20 @@ export default function Profile() {
     return (
       <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
         <Spinner />
-        <Text mt={2} color={muted}>
-          Cargando perfil...
-        </Text>
+        <Text mt={2} color={muted}>Cargando perfil...</Text>
       </Box>
     );
   }
 
   return (
-    <UserLayout
-      onOpenAddresses={onOpenAddresses}
-      onOpenPhones={onOpenPhones}
-    >
+    <UserLayout onOpenAddresses={onOpenAddresses} onOpenPhones={onOpenPhones}>
       <Box maxW="container.xl" mx="auto" py={8}>
-        <Heading mb={8}>Perfil de {user?.name || "Usuario"}</Heading>
+        <Heading mb={8}>Perfil de {user?.firstName || "Usuario"}</Heading>
 
         <VStack align="stretch" spacing={10}>
-          {/* 👇 Pedidos en la página principal */}
+          {/* Pedidos */}
           <Box>
-            <Heading size="md" mb={3}>
-              Mis pedidos
-            </Heading>
+            <Heading size="md" mb={3}>Mis pedidos</Heading>
             <Divider mb={4} />
 
             {orders.length > 0 ? (
@@ -118,7 +94,7 @@ export default function Profile() {
           order={selectedOrder}
         />
 
-        {/* ✅ Modals para direcciones y teléfonos */}
+        {/* Modals de dirección y teléfono */}
         <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} />
         <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} />
       </Box>
