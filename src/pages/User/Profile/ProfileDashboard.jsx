@@ -13,9 +13,8 @@ import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 
-// Modales de edición
+// Modal de edición de nombre (si lo querés mantener)
 import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
-import EditLastNameModal from "../../../components/Profile/EditLastNameModal.jsx";
 
 export default function ProfileDashboard() {
   const { user, token } = useAuth();
@@ -25,14 +24,9 @@ export default function ProfileDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Control de modals
+  // Control de modal de nombre
   const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } =
     useDisclosure();
-  const {
-    isOpen: isLastNameOpen,
-    onOpen: onOpenLastName,
-    onClose: onCloseLastName,
-  } = useDisclosure();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -41,7 +35,6 @@ export default function ProfileDashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Ajuste: siempre res.data.orders
         const list = res.data?.orders || [];
         setOrders(list);
       } catch (err) {
@@ -64,27 +57,20 @@ export default function ProfileDashboard() {
 
       {/* Nombre */}
       <Box>
-        <HStack justify="space-between" bg="gray.100" px={4} py={2} borderRadius="md">
+        <HStack
+          justify="space-between"
+          bg="gray.100"
+          px={4}
+          py={2}
+          borderRadius="md"
+        >
           <Text fontWeight="bold">Nombre</Text>
           <Button size="sm" colorScheme="blue" onClick={onOpenName}>
             Editar
           </Button>
         </HStack>
         <Box px={4} py={2}>
-          <Text>{user?.firstName || "Sin nombre"}</Text>
-        </Box>
-      </Box>
-
-      {/* Apellido */}
-      <Box>
-        <HStack justify="space-between" bg="gray.100" px={4} py={2} borderRadius="md">
-          <Text fontWeight="bold">Apellido</Text>
-          <Button size="sm" colorScheme="blue" onClick={onOpenLastName}>
-            Editar
-          </Button>
-        </HStack>
-        <Box px={4} py={2}>
-          <Text>{user?.lastName || "Sin apellido"}</Text>
+          <Text>{user?.name || "Sin nombre"}</Text>
         </Box>
       </Box>
 
@@ -94,7 +80,14 @@ export default function ProfileDashboard() {
           <Text fontWeight="bold">Dirección</Text>
         </Box>
         <Box px={4} py={2}>
-          <Text>{user?.address || "No disponible. Carga una nueva dirección"}</Text>
+          {user?.addresses?.length ? (
+            <Text>
+              {user.addresses[0].street}, {user.addresses[0].city} (
+              {user.addresses[0].zip})
+            </Text>
+          ) : (
+            <Text>No disponible. Carga una nueva dirección</Text>
+          )}
         </Box>
       </Box>
 
@@ -104,7 +97,10 @@ export default function ProfileDashboard() {
           <Text fontWeight="bold">Teléfono</Text>
         </Box>
         <Box px={4} py={2}>
-          <Text>{user?.phone || "No disponible. Carga un nuevo teléfono"}</Text>
+          <Text>
+            {user?.phones?.[0]?.number ||
+              "No disponible. Carga un nuevo teléfono"}
+          </Text>
         </Box>
       </Box>
 
@@ -120,7 +116,8 @@ export default function ProfileDashboard() {
             <>
               {orders.slice(0, 3).map((order) => (
                 <Text key={order._id}>
-                  Pedido #{order.code || order._id} – {order.status || "En proceso"}
+                  Pedido #{order.code || order._id} –{" "}
+                  {order.status || "En proceso"}
                 </Text>
               ))}
               {orders.length > 3 && (
@@ -140,9 +137,8 @@ export default function ProfileDashboard() {
         </Box>
       </Box>
 
-      {/* Modales */}
+      {/* Modal editar nombre */}
       <EditNameModal isOpen={isNameOpen} onClose={onCloseName} />
-      <EditLastNameModal isOpen={isLastNameOpen} onClose={onCloseLastName} />
     </VStack>
   );
 }

@@ -27,8 +27,16 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
-  const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
+  const {
+    isOpen: isAddressesOpen,
+    onOpen: onOpenAddresses,
+    onClose: onCloseAddresses,
+  } = useDisclosure();
+  const {
+    isOpen: isPhonesOpen,
+    onOpen: onOpenPhones,
+    onClose: onClosePhones,
+  } = useDisclosure();
 
   const muted = useColorModeValue("gray.600", "gray.400");
 
@@ -55,7 +63,9 @@ export default function Profile() {
     return (
       <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
         <Spinner />
-        <Text mt={2} color={muted}>Cargando perfil...</Text>
+        <Text mt={2} color={muted}>
+          Cargando perfil...
+        </Text>
       </Box>
     );
   }
@@ -63,12 +73,14 @@ export default function Profile() {
   return (
     <UserLayout onOpenAddresses={onOpenAddresses} onOpenPhones={onOpenPhones}>
       <Box maxW="container.xl" mx="auto" py={8}>
-        <Heading mb={8}>Perfil de {user?.firstName || "Usuario"}</Heading>
+        <Heading mb={8}>Perfil de {user?.name || "Usuario"}</Heading>
 
         <VStack align="stretch" spacing={10}>
           {/* Pedidos */}
           <Box>
-            <Heading size="md" mb={3}>Mis pedidos</Heading>
+            <Heading size="md" mb={3}>
+              Mis pedidos
+            </Heading>
             <Divider mb={4} />
 
             {orders.length > 0 ? (
