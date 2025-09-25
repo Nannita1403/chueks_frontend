@@ -96,8 +96,10 @@ const AdminDashboard = () => {
                 </Link>
               </Flex>
             </CardHeader>
-            <CardBody p={0} overflowX="auto">
-              <Table variant="simple" size="sm" minW="600px">
+            <CardBody p={0}>
+            {/* Desktop */}
+            <Box display={{ base: "none", md: "block" }}>
+              <Table variant="simple" size="sm">
                 <Thead>
                   <Tr>
                     <Th>ID</Th>
@@ -127,7 +129,25 @@ const AdminDashboard = () => {
                   ))}
                 </Tbody>
               </Table>
-            </CardBody>
+            </Box>
+
+            {/* Mobile */}
+            <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
+              {recentOrders.map((order) => (
+                <Box key={order.id} borderWidth="1px" borderRadius="lg" p={4} shadow="sm">
+                  <Text fontWeight="bold">Pedido #{order.id}</Text>
+                  <Text>{order.customer}</Text>
+                  <Text fontSize="sm">{new Date(order.date).toLocaleDateString()}</Text>
+                  <Text>Productos: {order.items}</Text>
+                  <Text fontWeight="semibold">${order.total.toLocaleString()}</Text>
+                  <OrderStatusBadge status={order.status} />
+                  <Link to={`/admin/orders/${order.id}`}>
+                    <Button size="sm" mt={2} leftIcon={<FiEye />}>Ver</Button>
+                  </Link>
+                </Box>
+              ))}
+            </Box>
+          </CardBody>
           </Card>
         </VStack>
       </Container>

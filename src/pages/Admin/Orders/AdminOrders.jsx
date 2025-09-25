@@ -101,19 +101,21 @@ export default function AdminOrders() {
             </Flex>
 
             <Card>
-              <CardBody p={0} overflowX="auto">
-                <Table variant="simple" size="sm" minW="700px">
-                  <Thead>
-                    <Tr>
-                      <Th>ID</Th>
-                      <Th>Cliente</Th>
-                      <Th>Fecha</Th>
-                      <Th isNumeric>Total</Th>
-                      <Th>Estado</Th>
-                      <Th>Acciones</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
+              <CardBody p={0}>
+                {/* Desktop: tabla */}
+                <Box display={{ base: "none", md: "block" }}>
+                      <Table variant="simple" size="sm">
+                        <Thead>
+                          <Tr>
+                            <Th>ID</Th>
+                            <Th>Cliente</Th>
+                            <Th>Fecha</Th>
+                            <Th isNumeric>Total</Th>
+                            <Th>Estado</Th>
+                            <Th>Acciones</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
                     {!loading && filtered.map((o) => (
                       <Tr key={o._id}>
                         <Td fontWeight="medium">{codeOrId(o)}</Td>
@@ -146,6 +148,34 @@ export default function AdminOrders() {
                     )}
                   </Tbody>
                 </Table>
+                </Box>
+                {/* Mobile: cards */}
+                <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
+                    {!loading && filtered.map((o) => (                    
+                      <Box   key={o._id} borderWidth="1px" borderRadius="lg" p={4} shadow="sm" >
+                      <Text fontWeight="bold">{codeOrId(o)}</Text>
+                      <Text>{o.user?.name || "—"}</Text>
+                      <Text fontSize="sm" color="gray.500">{o.user?.email || ""}</Text>
+                      <Text fontSize="sm">{when(o)}</Text>
+                      <Text fontWeight="semibold">{money(o.total || o.subtotal || 0)}</Text>
+                      <OrderStatusBadge status={o.status} />
+                      <Button
+                        size="sm"
+                        mt={2}
+                        leftIcon={<FiEye />}
+                        onClick={() => { setCurrent(o); modal.onOpen(); }}
+                      >
+                        Ver
+                      </Button>
+                    </Box>
+                  ))}
+                     {loading && (
+                      <Tr><Td colSpan={6}><Box p={4}><Text color="gray.500">Cargando…</Text></Box></Td></Tr>
+                    )}
+                    {!loading && filtered.length === 0 && (
+                      <Tr><Td colSpan={6}><Box p={4}><Text color="gray.500">Sin resultados</Text></Box></Td></Tr>
+                    )}
+                </Box>
               </CardBody>
             </Card>
           </TabPanel>

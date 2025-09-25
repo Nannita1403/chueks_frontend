@@ -50,7 +50,7 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "4xl" }} scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Pedido: {order.code ?? order._id?.slice(-6).toUpperCase()}</ModalHeader>
