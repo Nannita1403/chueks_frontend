@@ -34,28 +34,45 @@ export default function ProfileDashboard() {
   const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
+  // 📌 Traer usuario completo al montar
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("/api/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(res.data.user);
+      } catch (err) {
+        console.error("Error cargando perfil:", err);
+        toast({ title: "Error cargando perfil", status: "error" });
+      }
+    };
+    if (token) fetchUser();
+  }, [token, setUser, toast]);
+
   // Dirección y teléfono por defecto
   const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
   const defaultPhone = user?.phones?.find(p => p.default) || user?.phones?.[0];
 
-  // Traer pedidos del usuario
+  // 📌 Traer pedidos del usuario
+  const fetchOrders = async () => {
+    try {
+      const res = await axios.get("/api/orders/my-orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOrders(res.data?.orders || []);
+    } catch (err) {
+      console.error("❌ Error cargando pedidos:", err);
+      toast({ title: "Error al cargar pedidos", status: "error" });
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get("/api/orders/my-orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOrders(res.data?.orders || []);
-      } catch (err) {
-        console.error("❌ Error cargando pedidos:", err);
-        toast({ title: "Error al cargar pedidos", status: "error" });
-        setOrders([]);
-      } finally {
-        setLoadingOrders(false);
-      }
-    };
     if (token) fetchOrders();
-  }, [token, toast]);
+  }, [token]);
 
   // Actualizar user local y backend
   const handleUpdateUser = async (updatedFields) => {
@@ -79,6 +96,8 @@ export default function ProfileDashboard() {
       default: return "gray";
     }
   };
+
+  const formatPrice = (value) => (value / 100).toFixed(2); // centavos → €
 
   return (
     <VStack align="stretch" spacing={6}>
@@ -156,20 +175,24 @@ export default function ProfileDashboard() {
                     Fecha: {new Date(order.createdAt).toLocaleDateString()}
                   </Text>
                   <Text fontWeight="medium" mb={2}>
-                    Total: {(order.total / 100)?.toFixed(2) || "-"} €
+                    Total: {formatPrice(order.total)} €
                   </Text>
 
                   {/* Dirección y teléfono del pedido */}
                   <Box mb={2}>
                     <Text fontWeight="medium">Dirección:</Text>
                     <Text fontSize="sm">
-                      {order.address ? `${order.address.street}, ${order.address.city} (${order.address.zip}) [${order.address.country}]` : "No disponible"}
+                      {order.address
+                        ? `${order.address.street}, ${order.address.city} (${order.address.zip}) [${order.address.country}]`
+                        : "No disponible"}
                     </Text>
                   </Box>
                   <Box mb={2}>
                     <Text fontWeight="medium">Teléfono:</Text>
                     <Text fontSize="sm">
-                      {order.phone ? `${order.phone.number} (${order.phone.country})` : "No disponible"}
+                      {order.phone
+                        ? `${order.phone.number} (${order.phone.country})`
+                        : "No disponible"}
                     </Text>
                   </Box>
 
@@ -179,7 +202,7 @@ export default function ProfileDashboard() {
                     <VStack align="start" spacing={1}>
                       {order.items?.map((item, idx) => (
                         <Text key={idx} fontSize="sm">
-                          {item.name} x {item.quantity} - {(item.price / 100).toFixed(2)} €
+                          {item.name} x {item.quantity} - {formatPrice(item.price)} €
                         </Text>
                       ))}
                     </VStack>
@@ -202,21 +225,28 @@ export default function ProfileDashboard() {
       <EditNameModal
         isOpen={isNameOpen}
         onClose={onCloseName}
+        initialValue={user?.firstName}
         onSave={(newName) => handleUpdateUser({ firstName: newName })}
       />
+
       <EditLastNameModal
         isOpen={isLastNameOpen}
         onClose={onCloseLastName}
+        initialValue={user?.lastName}
         onSave={(newLastName) => handleUpdateUser({ lastName: newLastName })}
       />
+
       <AddressModal
         isOpen={isAddressesOpen}
         onClose={onCloseAddresses}
+        initialValue={user?.addresses}
         onSave={(newAddresses) => handleUpdateUser({ addresses: newAddresses })}
       />
+
       <PhoneModal
         isOpen={isPhonesOpen}
         onClose={onClosePhones}
+        initialValue={user?.phones}
         onSave={(newPhones) => handleUpdateUser({ phones: newPhones })}
       />
     </VStack>

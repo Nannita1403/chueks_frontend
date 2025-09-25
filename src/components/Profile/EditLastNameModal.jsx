@@ -1,4 +1,3 @@
-// src/pages/Profile/modals/EditLastNameModal.jsx
 import {
   Modal,
   ModalOverlay,
@@ -10,13 +9,18 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function EditLastNameModal({ isOpen, onClose }) {
+export default function EditLastNameModal({ isOpen, onClose, onSave, initialValue }) {
   const [lastName, setLastName] = useState("");
 
+  useEffect(() => {
+    if (isOpen) setLastName(initialValue || "");
+  }, [isOpen, initialValue]);
+
   const handleSave = () => {
-    console.log("Nuevo apellido:", lastName);
+    if (!lastName.trim()) return;
+    onSave(lastName.trim());
     onClose();
   };
 
@@ -34,12 +38,8 @@ export default function EditLastNameModal({ isOpen, onClose }) {
           />
         </ModalBody>
         <ModalFooter>
-          <Button onClick={onClose} mr={3}>
-            Cancelar
-          </Button>
-          <Button colorScheme="blue" onClick={handleSave}>
-            Guardar
-          </Button>
+          <Button onClick={onClose} mr={3}>Cancelar</Button>
+          <Button colorScheme="blue" onClick={handleSave}>Guardar</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

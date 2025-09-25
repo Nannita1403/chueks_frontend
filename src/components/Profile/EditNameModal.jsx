@@ -10,14 +10,22 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function EditNameModal({ isOpen, onClose }) {
+export default function EditNameModal({ isOpen, onClose, onSave, initialValue }) {
   const [name, setName] = useState("");
 
+  // Cuando se abra el modal, inicializamos el input con el valor actual
+  useEffect(() => {
+    if (isOpen) {
+      setName(initialValue || "");
+    }
+  }, [isOpen, initialValue]);
+
   const handleSave = () => {
-    console.log("Nuevo nombre:", name);
-    onClose();
+    if (!name.trim()) return; // evitar guardar vacío
+    onSave(name.trim());       // ✅ llama al handler que actualiza user y backend
+    onClose();                 // cierra el modal
   };
 
   return (
