@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Box,
   VStack,
@@ -5,9 +6,9 @@ import {
   HStack,
   Button,
   Spinner,
+  Badge,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
@@ -56,12 +57,21 @@ export default function ProfileDashboard() {
     if (token) fetchOrders();
   }, [token, toast]);
 
-  // Función para actualizar el user local después de editar
-  const handleUpdateUser = (updatedFields) => {
-    setUser({ ...user, ...updatedFields });
+  // Actualizar user local y backend
+  const handleUpdateUser = async (updatedFields) => {
+    try {
+      const res = await axios.patch("/api/users/me", updatedFields, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data.user);
+      toast({ title: "Datos actualizados", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al actualizar datos", status: "error" });
+    }
   };
 
-   const getStatusColor = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "pending": return "yellow";
       case "completed": return "green";
@@ -146,14 +156,30 @@ export default function ProfileDashboard() {
                     Fecha: {new Date(order.createdAt).toLocaleDateString()}
                   </Text>
                   <Text fontWeight="medium" mb={2}>
-                    Total: {order.total?.toFixed(2) || "-"} €
+                    Total: {(order.total / 100)?.toFixed(2) || "-"} €
                   </Text>
+
+                  {/* Dirección y teléfono del pedido */}
+                  <Box mb={2}>
+                    <Text fontWeight="medium">Dirección:</Text>
+                    <Text fontSize="sm">
+                      {order.address ? `${order.address.street}, ${order.address.city} (${order.address.zip}) [${order.address.country}]` : "No disponible"}
+                    </Text>
+                  </Box>
+                  <Box mb={2}>
+                    <Text fontWeight="medium">Teléfono:</Text>
+                    <Text fontSize="sm">
+                      {order.phone ? `${order.phone.number} (${order.phone.country})` : "No disponible"}
+                    </Text>
+                  </Box>
+
+                  {/* Items del pedido */}
                   <Box>
                     <Text fontWeight="medium">Productos:</Text>
                     <VStack align="start" spacing={1}>
                       {order.items?.map((item, idx) => (
                         <Text key={idx} fontSize="sm">
-                          {item.name} x {item.quantity}
+                          {item.name} x {item.quantity} - {(item.price / 100).toFixed(2)} €
                         </Text>
                       ))}
                     </VStack>
