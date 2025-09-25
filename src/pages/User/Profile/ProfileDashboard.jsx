@@ -14,10 +14,10 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 
 // Modales
-import EditNameModal from "../../../pages/Profile/modals/EditNameModal.jsx";
-import EditLastNameModal from "../../../pages/Profile/modals/EditLastNameModal.jsx";
-import AddressModal from "../../../pages/Profile/modals/AddressModal.jsx";
-import PhoneModal from "../../../pages/Profile/modals/PhoneModal.jsx";
+import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
+import EditLastNameModal from "../../../components/Profile/EditLastNameModal.jsx";
+import AddressModal from "../../../components/Profile/AddressModal.jsx";
+import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
   const { user, token, setUser } = useAuth();
@@ -53,13 +53,21 @@ export default function ProfileDashboard() {
         setLoadingOrders(false);
       }
     };
-
     if (token) fetchOrders();
   }, [token, toast]);
 
   // Función para actualizar el user local después de editar
   const handleUpdateUser = (updatedFields) => {
     setUser({ ...user, ...updatedFields });
+  };
+
+   const getStatusColor = (status) => {
+    switch (status) {
+      case "pending": return "yellow";
+      case "completed": return "green";
+      case "cancelled": return "red";
+      default: return "gray";
+    }
   };
 
   return (
@@ -127,20 +135,37 @@ export default function ProfileDashboard() {
           {loadingOrders ? (
             <Spinner />
           ) : orders.length > 0 ? (
-            <>
+            <VStack spacing={4} align="stretch">
               {orders.map(order => (
-                <Box key={order._id} borderWidth="1px" borderRadius="md" p={3} mb={2}>
-                  <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
-                  <Text>Estado: {order.status}</Text>
-                  <Text>Total: {order.total?.toFixed(2) || "-"}</Text>
+                <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
+                  <HStack justify="space-between" mb={2}>
+                    <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
+                    <Badge colorScheme={getStatusColor(order.status)}>{order.status}</Badge>
+                  </HStack>
+                  <Text fontSize="sm" color="gray.500" mb={2}>
+                    Fecha: {new Date(order.createdAt).toLocaleDateString()}
+                  </Text>
+                  <Text fontWeight="medium" mb={2}>
+                    Total: {order.total?.toFixed(2) || "-"} €
+                  </Text>
+                  <Box>
+                    <Text fontWeight="medium">Productos:</Text>
+                    <VStack align="start" spacing={1}>
+                      {order.items?.map((item, idx) => (
+                        <Text key={idx} fontSize="sm">
+                          {item.name} x {item.quantity}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
                 </Box>
               ))}
               {orders.length > 3 && (
-                <Button mt={3} size="sm" colorScheme="blue" onClick={() => navigate("/profile/orders")}>
+                <Button size="sm" colorScheme="blue" onClick={() => navigate("/profile/orders")}>
                   Ver todos los pedidos
                 </Button>
               )}
-            </>
+            </VStack>
           ) : (
             <Text>No tienes pedidos todavía.</Text>
           )}
