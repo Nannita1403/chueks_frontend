@@ -88,11 +88,11 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
 
               return (
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
-                  <HStack align="start" spacing={4}>
+                  <HStack align="start" spacing={4} flexDir={{ base: "column", md: "row" }}>
                      {item.image && (
-                    <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md" />
+                    <Image src={item.image}  boxSize={{ base: "100%", md: "100px" }} objectFit="cover" borderRadius="md" />
                   )}
-                    <VStack align="start" spacing={1} flex="1">
+                    <VStack align="start" spacing={1} flex="1" w="full">
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
                       <Text fontSize="sm" color="gray.500">Código: {item.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>

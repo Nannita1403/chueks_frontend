@@ -102,7 +102,7 @@ export default function AdminOrders() {
 
             <Card>
               <CardBody p={0} overflowX="auto">
-                <Table variant="simple" size="sm" minW="800px">
+                <Table variant="simple" size="sm" minW="700px">
                   <Thead>
                     <Tr>
                       <Th>ID</Th>

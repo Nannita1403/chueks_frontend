@@ -58,7 +58,7 @@ const AdminDashboard = () => {
             <Text color="gray.600">Resumen general de la tienda</Text>
           </Box>
 
-          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={6} w="full">
+          <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={{ base: 4, md: 6 }} w="full">
             {stats.map((stat, index) => (
               <StatsCard key={index} stat={stat} />
             ))}
@@ -96,8 +96,8 @@ const AdminDashboard = () => {
                 </Link>
               </Flex>
             </CardHeader>
-            <CardBody p={{ base: 3, md: 5 }}>
-              <Table variant="simple">
+            <CardBody p={0} overflowX="auto">
+              <Table variant="simple" size="sm" minW="600px">
                 <Thead>
                   <Tr>
                     <Th>ID</Th>
