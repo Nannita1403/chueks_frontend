@@ -10,20 +10,21 @@ import ApiService from "../../../reducers/api/Api.jsx";
 import OrderDetailModal from "./OrderDetailModal.jsx";
 
 /* ================= helpers ================= */
-const money = (n=0) =>
+const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-// Mapeo Tabs → query del API
 const TAB_TO_API = ["all", "pending", "processing", "completed"];
 const STATUS_BADGE = {
-  pending:    { scheme: "yellow", label: "Pendiente" },
-  processing: { scheme: "blue",   label: "En proceso" },
-  completed:  { scheme: "green",  label: "Completado" },
+  pending: { scheme: "yellow", label: "Pendiente" },
+  processing: { scheme: "blue", label: "En proceso" },
+  completed: { scheme: "green", label: "Completado" },
 };
+
 const OrderStatusBadge = ({ status }) => {
   const cfg = STATUS_BADGE[status] || { scheme: "gray", label: status || "—" };
   return <Badge colorScheme={cfg.scheme} variant="subtle">{cfg.label}</Badge>;
 };
+
 const codeOrId = (o) => o?.code || (o?._id ? `#${String(o._id).slice(-6).toUpperCase()}` : "—");
 const when = (o) => new Date(o?.createdAt || o?.date || Date.now()).toLocaleString();
 
@@ -33,14 +34,13 @@ export default function AdminOrders() {
   const [search, setSearch] = useState("");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [current, setCurrent] = useState(null);
   const modal = useDisclosure();
 
   const load = async () => {
     setLoading(true);
     try {
-      const status = TAB_TO_API[tab];                 // all | pending | processing | completed
+      const status = TAB_TO_API[tab];
       const resp = await ApiService.get(`/orders?status=${status}`);
       setOrders(resp?.orders || []);
     } catch (e) {
@@ -64,6 +64,11 @@ export default function AdminOrders() {
     });
   }, [orders, search]);
 
+  /* Mensaje común de estado */
+  const StatusMessage = ({ text }) => (
+    <Box p={4}><Text color="gray.500">{text}</Text></Box>
+  );
+
   return (
     <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 6 }}>
       {/* Header */}
@@ -84,7 +89,6 @@ export default function AdminOrders() {
           <Tab>Completados</Tab>
         </TabList>
         <TabPanels>
-          {/* Usamos un único panel; el contenido depende de 'tab' */}
           <TabPanel p={0}>
             {/* Search */}
             <Flex justify="space-between" align="center" mb={4} gap={4}>
@@ -104,55 +108,52 @@ export default function AdminOrders() {
               <CardBody p={0}>
                 {/* Desktop: tabla */}
                 <Box display={{ base: "none", md: "block" }}>
-                      <Table variant="simple" size="sm">
-                        <Thead>
-                          <Tr>
-                            <Th>ID</Th>
-                            <Th>Cliente</Th>
-                            <Th>Fecha</Th>
-                            <Th isNumeric>Total</Th>
-                            <Th>Estado</Th>
-                            <Th>Acciones</Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                    {!loading && filtered.map((o) => (
-                      <Tr key={o._id}>
-                        <Td fontWeight="medium">{codeOrId(o)}</Td>
-                        <Td>
-                          <Box>
-                            <Text fontWeight="medium">{o.user?.name || "—"}</Text>
-                            <Text fontSize="sm" color="gray.500">{o.user?.email || ""}</Text>
-                          </Box>
-                        </Td>
-                        <Td>{when(o)}</Td>
-                        <Td isNumeric>{money(o.total || o.subtotal || 0)}</Td>
-                        <Td><OrderStatusBadge status={o.status} /></Td>
-                        <Td>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            leftIcon={<FiEye />}
-                            onClick={() => { setCurrent(o); modal.onOpen(); }}
-                          >
-                            Ver
-                          </Button>
-                        </Td>
+                  <Table variant="simple" size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>ID</Th>
+                        <Th>Cliente</Th>
+                        <Th>Fecha</Th>
+                        <Th isNumeric>Total</Th>
+                        <Th>Estado</Th>
+                        <Th>Acciones</Th>
                       </Tr>
-                    ))}
-                    {loading && (
-                      <Tr><Td colSpan={6}><Box p={4}><Text color="gray.500">Cargando…</Text></Box></Td></Tr>
-                    )}
-                    {!loading && filtered.length === 0 && (
-                      <Tr><Td colSpan={6}><Box p={4}><Text color="gray.500">Sin resultados</Text></Box></Td></Tr>
-                    )}
-                  </Tbody>
-                </Table>
+                    </Thead>
+                    <Tbody>
+                      {!loading && filtered.map(o => (
+                        <Tr key={o._id}>
+                          <Td fontWeight="medium">{codeOrId(o)}</Td>
+                          <Td>
+                            <Box>
+                              <Text fontWeight="medium">{o.user?.name || "—"}</Text>
+                              <Text fontSize="sm" color="gray.500">{o.user?.email || ""}</Text>
+                            </Box>
+                          </Td>
+                          <Td>{when(o)}</Td>
+                          <Td isNumeric>{money(o.total || o.subtotal || 0)}</Td>
+                          <Td><OrderStatusBadge status={o.status} /></Td>
+                          <Td>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              leftIcon={<FiEye />}
+                              onClick={() => { setCurrent(o); modal.onOpen(); }}
+                            >
+                              Ver
+                            </Button>
+                          </Td>
+                        </Tr>
+                      ))}
+                      {loading && <Tr><Td colSpan={6}><StatusMessage text="Cargando…" /></Td></Tr>}
+                      {!loading && filtered.length === 0 && <Tr><Td colSpan={6}><StatusMessage text="Sin resultados" /></Td></Tr>}
+                    </Tbody>
+                  </Table>
                 </Box>
+
                 {/* Mobile: cards */}
                 <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
-                    {!loading && filtered.map((o) => (                    
-                      <Box   key={o._id} borderWidth="1px" borderRadius="lg" p={4} shadow="sm" >
+                  {!loading && filtered.map(o => (
+                    <Box key={o._id} borderWidth="1px" borderRadius="lg" p={4} shadow="sm">
                       <Text fontWeight="bold">{codeOrId(o)}</Text>
                       <Text>{o.user?.name || "—"}</Text>
                       <Text fontSize="sm" color="gray.500">{o.user?.email || ""}</Text>
@@ -169,18 +170,14 @@ export default function AdminOrders() {
                       </Button>
                     </Box>
                   ))}
-                     {loading && (
-                      <Tr><Td colSpan={6}><Box p={4}><Text color="gray.500">Cargando…</Text></Box></Td></Tr>
-                    )}
-                    {!loading && filtered.length === 0 && (
-                      <Tr><Td colSpan={6}><Box p={4}><Text color="gray.500">Sin resultados</Text></Box></Td></Tr>
-                    )}
+                  {loading && <StatusMessage text="Cargando…" />}
+                  {!loading && filtered.length === 0 && <StatusMessage text="Sin resultados" />}
                 </Box>
               </CardBody>
             </Card>
           </TabPanel>
 
-          {/* Los demás tabs reusan el mismo contenido (se recarga por 'tab') */}
+          {/* Tabs vacíos: reutilizamos el mismo panel mediante 'tab' */}
           <TabPanel p={0} />
           <TabPanel p={0} />
           <TabPanel p={0} />
@@ -189,7 +186,6 @@ export default function AdminOrders() {
 
       {/* Modal de detalle */}
       <OrderDetailModal
-        // puede recibir _id o code; el backend acepta ambos
         orderId={current?.code || current?._id}
         isOpen={modal.isOpen}
         onClose={() => { modal.onClose(); setCurrent(null); }}
