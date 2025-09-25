@@ -16,7 +16,7 @@ import { useToast } from "../../../Hooks/useToast.jsx";
 // Modales
 import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
 import EditLastNameModal from "../../../components/Profile/EditLastNameModal.jsx";
-import AddressModal from "../../../components/Profile/AddressModal.jsx";
+import AddressModal from "../../../components/Profile/AddressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
