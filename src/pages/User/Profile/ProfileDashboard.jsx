@@ -222,7 +222,7 @@ export default function ProfileDashboard() {
                     <VStack align="start" spacing={1}>
                       {order.items?.map((item, idx) => (
                         <Text key={idx} fontSize="sm">
-                          {item.name} x {item.quantity} - {formatPrice(item.price)} €
+                          {item.name} x {item.quantity} - {item.color.name} 
                         </Text>
                       ))}
                     </VStack>
