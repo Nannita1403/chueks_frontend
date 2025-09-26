@@ -21,7 +21,7 @@ import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
-  const { user, setUser, logout } = useAuth();
+  const { user, setUser, logout, refreshCart, refreshFavorites } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,22 +33,6 @@ export default function ProfileDashboard() {
   const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
   const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
-
-  // Traer usuario completo al montar
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await ApiService.get("/users/checksession");
-        setUser(res.user); // checksession devuelve { user }
-      } catch (err) {
-        console.error("Error cargando perfil:", err);
-        toast({ title: "Error cargando perfil", status: "error" });
-        logout();
-      }
-    };
-
-    fetchUser();
-  }, [setUser, toast, logout]);
 
   // Traer pedidos del usuario
   useEffect(() => {
@@ -74,6 +58,8 @@ export default function ProfileDashboard() {
       const res = await ApiService.put("/users/update", updatedFields);
       setUser(res.user);
       toast({ title: "Datos actualizados", status: "success" });
+      // Refrescar carrito y favoritos después de actualizar
+      await Promise.all([refreshCart(), refreshFavorites()]);
     } catch (err) {
       console.error(err);
       toast({ title: "Error al actualizar datos", status: "error" });
