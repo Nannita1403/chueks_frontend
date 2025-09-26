@@ -21,7 +21,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import AddressModal from "../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../components/Profile/PhoneModal.jsx";
-import { useAuth } from "@/context/Auth/auth.context.jsx";
+import { useAuth } from "../../context/Auth/auth.context.jsx";
 
 const menuItems = [
   { label: "Mis datos", path: "/profile", color: "purple.400", type: "link" },
