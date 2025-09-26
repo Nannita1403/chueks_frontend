@@ -1,4 +1,3 @@
-// src/context/Auth/auth.context.jsx
 import { createContext, useContext, useReducer, useEffect, useCallback, useState } from "react";
 import authService from "../../reducers/users/users.actions.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
@@ -20,47 +19,20 @@ const authReducer = (state, action) => {
   switch (action.type) {
     case "LOGIN_START":
       return { ...state, loading: true, error: null };
-
     case "LOGIN_SUCCESS":
-      return {
-        ...state,
-        loading: false,
-        isAuthenticated: true,
-        user: action.payload.user,
-        token: action.payload.token,
-        error: null,
-      };
-
+      return { ...state, loading: false, isAuthenticated: true, user: action.payload.user, token: action.payload.token, error: null };
     case "LOGIN_FAILURE":
-      return {
-        ...state,
-        loading: false,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        error: action.payload,
-      };
-
+      return { ...state, loading: false, isAuthenticated: false, user: null, token: null, error: action.payload };
     case "LOGOUT":
       return { ...initialState, loading: false };
-
     case "SET_USER":
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: !!action.payload,
-        loading: false,
-      };
-
+      return { ...state, user: action.payload, isAuthenticated: !!action.payload, loading: false };
     case "CLEAR_ERROR":
       return { ...state, error: null };
-
     case "SET_CART_ITEMS":
       return { ...state, cartItems: Array.isArray(action.payload) ? action.payload : [] };
-
     case "SET_FAVORITES":
       return { ...state, favorites: Array.isArray(action.payload) ? action.payload : [] };
-
     default:
       return state;
   }
@@ -69,22 +41,16 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const navigate = useNavigate();
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // --- LOGOUT primero ---
   const logout = useCallback(() => {
-    try {
-      authService.logout?.();
-    } catch (e) {
-      console.warn("⚠️ authService.logout no definido:", e);
-    }
+    try { authService.logout?.(); } catch (e) { console.warn("⚠️ authService.logout no definido:", e); }
     localStorage.removeItem("token");
     ApiService.setToken(null);
     dispatch({ type: "LOGOUT" });
     navigate("/auth", { replace: true });
   }, [navigate]);
 
-  // --- refrescar carrito ---
   const refreshCart = useCallback(async () => {
     try {
       const data = await ApiService.get("/cart");
@@ -97,7 +63,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [logout]);
 
-  // --- refrescar favoritos ---
   const refreshFavorites = useCallback(async () => {
     try {
       const data = await ApiService.get("/users/favorites");
@@ -110,18 +75,30 @@ export const AuthProvider = ({ children }) => {
     }
   }, [logout]);
 
-  // 🔁 cargar sesión inicial
+  // 🔁 Inicializar sesión
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = authService.getCurrentUser();
-    if (token && user) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setAuthLoading(false);
+        return;
+      }
       ApiService.setToken(token);
-    }
-    setInitialLoading(false);
-  }, []);
 
-  // sincronizar carrito + favoritos cuando el usuario cambia
+      try {
+        const user = await authService.fetchCurrentUser(); // validar token con backend
+        dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+      } catch (err) {
+        console.warn("Token inválido o expirado", err);
+        logout();
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, [logout]);
+
   useEffect(() => {
     if (state.isAuthenticated) {
       refreshCart();
@@ -132,29 +109,18 @@ export const AuthProvider = ({ children }) => {
     }
   }, [state.isAuthenticated, refreshCart, refreshFavorites]);
 
-  // --- LOGIN ---
   const login = async (credentials) => {
     dispatch({ type: "LOGIN_START" });
     try {
       const response = await authService.login(credentials);
-
       if (response.status === 403 || response.message?.includes("verifica")) {
-        dispatch({
-          type: "LOGIN_FAILURE",
-          payload: "Debes verificar tu correo antes de ingresar.",
-        });
+        dispatch({ type: "LOGIN_FAILURE", payload: "Debes verificar tu correo antes de ingresar." });
         alert("⚠️ Debes verificar tu correo antes de ingresar.");
         return;
       }
-
-      dispatch({
-        type: "LOGIN_SUCCESS",
-        payload: { user: response.user, token: response.token },
-      });
-
+      dispatch({ type: "LOGIN_SUCCESS", payload: { user: response.user, token: response.token } });
       ApiService.setToken(response.token);
       localStorage.setItem("token", response.token);
-
       await Promise.all([refreshCart(), refreshFavorites()]);
       navigate("/home");
       return response;
@@ -164,7 +130,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- REGISTER ---
   const registerUser = async (userData) => {
     dispatch({ type: "LOGIN_START" });
     try {
@@ -179,7 +144,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- SET USER ---
   const setUser = useCallback((user) => {
     dispatch({ type: "SET_USER", payload: user });
     if (user?.token) {
@@ -193,7 +157,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // --- TOGGLE FAVORITE ---
   const toggleFavorite = useCallback(async (productId) => {
     try {
       const data = await ApiService.put(`/users/favorites/${productId}/toggle`);
@@ -206,11 +169,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
-
-  // contador de carrito
   const cartCount = state.cartItems.reduce((acc, it) => acc + (Number(it?.quantity) || 0), 0);
 
-  if (initialLoading) return <div>Loading...</div>;
+  if (authLoading) return <div>Loading...</div>;
 
   return (
     <AuthContext.Provider
