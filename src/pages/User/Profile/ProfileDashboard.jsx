@@ -21,21 +21,23 @@ import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
-  const { user, setUser, logout, refreshCart, refreshFavorites } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // Control de modales
+  // Modales
   const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } = useDisclosure();
   const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
   const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
-  // Traer pedidos del usuario
+  // -------- Traer pedidos del usuario --------
   useEffect(() => {
+    if (!user) return;
+
     const fetchOrders = async () => {
       try {
         const res = await ApiService.get("/orders/my-orders");
@@ -50,23 +52,67 @@ export default function ProfileDashboard() {
     };
 
     fetchOrders();
-  }, [toast]);
+  }, [user, toast]);
 
-  // Actualizar user
-  const handleUpdateUser = async (updatedFields) => {
+  // -------- Actualizar nombre / teléfono --------
+  const handleUpdateProfile = async (updatedFields) => {
     try {
-      const res = await ApiService.put("/users/update", updatedFields);
-      setUser(res.user);
+      const res = await ApiService.patch("/users/update", updatedFields);
+      setUser(res.user); // backend devuelve { message, user }
       toast({ title: "Datos actualizados", status: "success" });
-      // Refrescar carrito y favoritos después de actualizar
-      await Promise.all([refreshCart(), refreshFavorites()]);
     } catch (err) {
       console.error(err);
       toast({ title: "Error al actualizar datos", status: "error" });
     }
   };
 
-  // Dirección y teléfono por defecto
+  // -------- Direcciones --------
+  const handleAddAddress = async (addressData) => {
+    try {
+      const res = await ApiService.post("/users/addresses", addressData);
+      setUser({ ...user, addresses: res.addresses });
+      toast({ title: "Dirección añadida", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al añadir dirección", status: "error" });
+    }
+  };
+
+  const handleUpdateAddress = async (id, updatedAddress) => {
+    try {
+      const res = await ApiService.put(`/users/addresses/${id}`, updatedAddress);
+      setUser({ ...user, addresses: res.addresses });
+      toast({ title: "Dirección actualizada", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al actualizar dirección", status: "error" });
+    }
+  };
+
+  // -------- Teléfonos --------
+  const handleAddPhone = async (phoneData) => {
+    try {
+      const res = await ApiService.post("/users/phones", phoneData);
+      setUser({ ...user, phones: res.phones });
+      toast({ title: "Teléfono añadido", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al añadir teléfono", status: "error" });
+    }
+  };
+
+  const handleUpdatePhone = async (id, updatedPhone) => {
+    try {
+      const res = await ApiService.put(`/users/phones/${id}`, updatedPhone);
+      setUser({ ...user, phones: res.phones });
+      toast({ title: "Teléfono actualizado", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al actualizar teléfono", status: "error" });
+    }
+  };
+
+  // -------- Datos por defecto --------
   const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
   const defaultPhone = user?.phones?.find(p => p.default) || user?.phones?.[0];
 
@@ -93,16 +139,9 @@ export default function ProfileDashboard() {
           <Text fontWeight="bold">Nombre</Text>
           <Button size="sm" colorScheme="blue" onClick={onOpenName}>Editar</Button>
         </HStack>
-        <Box px={4} py={2}><Text>{user?.firstName || "Sin nombre"}</Text></Box>
-      </Box>
-
-      {/* Apellido */}
-      <Box>
-        <HStack justify="space-between" bg="gray.100" px={4} py={2} borderRadius="md">
-          <Text fontWeight="bold">Apellido</Text>
-          <Button size="sm" colorScheme="blue" onClick={onOpenLastName}>Editar</Button>
-        </HStack>
-        <Box px={4} py={2}><Text>{user?.lastName || "Sin apellido"}</Text></Box>
+        <Box px={4} py={2}>
+          <Text>{user?.name || "Sin nombre"}</Text>
+        </Box>
       </Box>
 
       {/* Dirección */}
@@ -128,7 +167,7 @@ export default function ProfileDashboard() {
         </HStack>
         <Box px={4} py={2}>
           {defaultPhone ? (
-            <Text>{defaultPhone.number} ({defaultPhone.country})</Text>
+            <Text>{defaultPhone.number} ({defaultPhone.label || "personal"})</Text>
           ) : (
             <Text>No disponible. Carga un nuevo teléfono</Text>
           )}
@@ -154,39 +193,7 @@ export default function ProfileDashboard() {
                   <Text fontSize="sm" color="gray.500" mb={2}>
                     Fecha: {new Date(order.createdAt).toLocaleDateString()}
                   </Text>
-                  <Text fontWeight="medium" mb={2}>
-                    Total: {formatPrice(order.total)} €
-                  </Text>
-
-                  {/* Dirección y teléfono */}
-                  <Box mb={2}>
-                    <Text fontWeight="medium">Dirección:</Text>
-                    <Text fontSize="sm">
-                      {order.address
-                        ? `${order.address.street}, ${order.address.city} (${order.address.zip}) [${order.address.country}]`
-                        : "No disponible"}
-                    </Text>
-                  </Box>
-                  <Box mb={2}>
-                    <Text fontWeight="medium">Teléfono:</Text>
-                    <Text fontSize="sm">
-                      {order.phone
-                        ? `${order.phone.number} (${order.phone.country})`
-                        : "No disponible"}
-                    </Text>
-                  </Box>
-
-                  {/* Productos */}
-                  <Box>
-                    <Text fontWeight="medium">Productos:</Text>
-                    <VStack align="start" spacing={1}>
-                      {order.items?.map((item, idx) => (
-                        <Text key={idx} fontSize="sm">
-                          {item.name} x {item.quantity} - {formatPrice(item.price)} €
-                        </Text>
-                      ))}
-                    </VStack>
-                  </Box>
+                  <Text fontWeight="medium" mb={2}>Total: {formatPrice(order.total)} €</Text>
                 </Box>
               ))}
               {orders.length > 3 && (
@@ -202,10 +209,9 @@ export default function ProfileDashboard() {
       </Box>
 
       {/* Modales */}
-      <EditNameModal isOpen={isNameOpen} onClose={onCloseName} onSave={(newName) => handleUpdateUser({ firstName: newName })} />
-      <EditLastNameModal isOpen={isLastNameOpen} onClose={onCloseLastName} initialValue={user?.lastName} onSave={(newLastName) => handleUpdateUser({ lastName: newLastName })} />
-      <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} initialValue={user?.addresses || []} onSave={(newAddresses) => handleUpdateUser({ addresses: newAddresses })} />
-      <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} initialValue={user?.phones || []} onSave={(newPhones) => handleUpdateUser({ phones: newPhones })} />
+      <EditNameModal isOpen={isNameOpen} onClose={onCloseName} onSave={(newName) => handleUpdateProfile({ name: newName })} />
+      <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} initialValue={user?.addresses || []} onSave={handleAddAddress} onUpdate={handleUpdateAddress} />
+      <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} initialValue={user?.phones || []} onSave={handleAddPhone} onUpdate={handleUpdatePhone} />
     </VStack>
   );
 }
