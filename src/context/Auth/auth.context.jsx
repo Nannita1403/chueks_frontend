@@ -86,8 +86,8 @@ export const AuthProvider = ({ children }) => {
       ApiService.setToken(token);
 
       try {
-        const user = await authService.fetchCurrentUser(); // validar token con backend
-        dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+        const res = await ApiService.get("/users/me"); // validar token con backend
+        dispatch({ type: "LOGIN_SUCCESS", payload: { user: res.user, token } });
       } catch (err) {
         console.warn("Token inválido o expirado", err);
         logout();
