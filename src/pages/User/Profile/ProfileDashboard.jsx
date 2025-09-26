@@ -52,25 +52,25 @@ export default function ProfileDashboard() {
     };
 
     fetchOrders();
-  }, [user, toast]);
+  }, []);
 
   // -------- Actualizar nombre / teléfono --------
   const handleUpdateProfile = async (updatedFields) => {
     try {
       const res = await ApiService.patch("/users/update", updatedFields);
-      setUser(res.user); // backend devuelve { message, user }
-      toast({ title: "Datos actualizados", status: "success" });
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Error al actualizar datos", status: "error" });
-    }
-  };
+       setUser(prev => ({ ...prev, ...res.user }));
+        toast({ title: "Datos actualizados", status: "success" });
+      } catch (err) {
+        console.error(err);
+        toast({ title: "Error al actualizar datos", status: "error" });
+      }
+    };
 
   // -------- Direcciones --------
   const handleAddAddress = async (addressData) => {
     try {
       const res = await ApiService.post("/users/addresses", addressData);
-      setUser({ ...user, addresses: res.addresses });
+      setUser(prev => ({ ...prev, addresses: res.addresses }));
       toast({ title: "Dirección añadida", status: "success" });
     } catch (err) {
       console.error(err);
@@ -81,7 +81,7 @@ export default function ProfileDashboard() {
   const handleUpdateAddress = async (id, updatedAddress) => {
     try {
       const res = await ApiService.put(`/users/addresses/${id}`, updatedAddress);
-      setUser({ ...user, addresses: res.addresses });
+      setUser(prev => ({ ...prev, addresses: res.addresses }));
       toast({ title: "Dirección actualizada", status: "success" });
     } catch (err) {
       console.error(err);
@@ -93,7 +93,7 @@ export default function ProfileDashboard() {
   const handleAddPhone = async (phoneData) => {
     try {
       const res = await ApiService.post("/users/phones", phoneData);
-      setUser({ ...user, phones: res.phones });
+      setUser(prev => ({ ...prev, phones: res.phones }));
       toast({ title: "Teléfono añadido", status: "success" });
     } catch (err) {
       console.error(err);
@@ -104,7 +104,7 @@ export default function ProfileDashboard() {
   const handleUpdatePhone = async (id, updatedPhone) => {
     try {
       const res = await ApiService.put(`/users/phones/${id}`, updatedPhone);
-      setUser({ ...user, phones: res.phones });
+      setUser(prev => ({ ...prev, phones: res.phones }));
       toast({ title: "Teléfono actualizado", status: "success" });
     } catch (err) {
       console.error(err);
