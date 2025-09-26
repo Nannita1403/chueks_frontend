@@ -44,8 +44,13 @@ const authReducer = (state, action) => {
     case "LOGOUT":
       return { ...initialState, loading: false };
 
-    case "SET_USER":
-      return { ...state, user: action.payload, isAuthenticated: true, loading: false };
+   case "SET_USER":
+      return { 
+        ...state, 
+        user: action.payload, 
+        isAuthenticated: !!action.payload, 
+        loading: false 
+      };
 
     case "CLEAR_ERROR":
       return { ...state, error: null };
@@ -176,7 +181,21 @@ const toggleFavorite = useCallback(async (productId) => {
   }
 }, []);
 
-  // --- LOGOUT ---
+// --- SET USER  ---
+const setUser = useCallback((user) => {
+  dispatch({ type: "SET_USER", payload: user });
+  if (user?.token) {
+    ApiService.setToken(user.token);
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", user.token);
+  } else {
+    ApiService.setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+  }
+}, []);
+
+// --- LOGOUT ---
   const logout = useCallback(() => {
     try { authService.logout?.(); } catch (e) {
       console.warn("⚠️ authService.logout no definido:", e);
@@ -204,6 +223,7 @@ const toggleFavorite = useCallback(async (productId) => {
         refreshCart,
         refreshFavorites,
         toggleFavorite,
+        setUser,
         isAdmin: () => state.user?.rol === "admin",
       }}
     >

@@ -46,26 +46,24 @@ const categoryColors = ["pink.400", "teal.400", "blue.400", "orange.400", "purpl
 
 // Opciones de filtros
 const filterOptions = {
-  colors: ["lila", "verde", "animal print", "suela", "nude", "blanca","beige", "gris","negro tramado",
-            "rose gold", "negro", "glitter dorada", "dorada", "borgoña", "naranja", "amarillo",
-            "habano", "cobre", "peltre", "crema", "celeste", "plateada", "rosa", "rojo","burdeos",
-            "vison", "verde oliva", "cristal", "negro opaco", "negro croco", "negro con crudo", "turquesa"],
-  styles: ["Urbana", "Fiesta", "Noche", "Casual", "Diario", "Ejecutivo", "Trabajo", "Viaje", "Playa", "Deporte"],
-  material: ["cuero", "tela Andorra", "simil cuero","símil cuero","sublimado CHUEKS", "tela puffer","cinta sublimada",
-            "metálico", "resina", "plastico", "tela","iman","tafeta negra", "grabado laser", 
-            "simil cuero rigido", "neoprene", "nylon", "sublimda", "tela impermeable"]
-
+  colors: ["lila","verde","animal print","suela","nude","blanca","beige","gris","negro tramado","rose gold",
+           "negro","glitter dorada","dorada","borgoña","naranja","amarillo","habano","cobre","peltre",
+           "crema","celeste","plateada","rosa","rojo","burdeos","vison","verde oliva","cristal",
+           "negro opaco","negro croco","negro con crudo","turquesa"],
+  styles: ["Urbana","Fiesta","Noche","Casual","Diario","Ejecutivo","Trabajo","Viaje","Playa","Deporte"],
+  material: ["cuero","tela Andorra","simil cuero","símil cuero","sublimado CHUEKS","tela puffer","cinta sublimada",
+             "metálico","resina","plastico","tela","iman","tafeta negra","grabado laser",
+             "simil cuero rigido","neoprene","nylon","sublimda","tela impermeable"]
 };
 
 export default function CategoryPage() {
-  const { id } = useParams(); // slug
+  const { id } = useParams(); // slug o "all"
   const navigate = useNavigate();
   const { user, toggleFavorite, refreshCart } = useAuth();
   const { toast } = useToast();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({ colors: [], styles: [] });
   const [sortBy, setSortBy] = useState("recent");
@@ -74,10 +72,9 @@ export default function CategoryPage() {
   const muted = useColorModeValue("gray.600", "gray.400");
   const bannerBg = useColorModeValue("pink.500", "pink.400");
 
-  const enumCategory = useMemo(() => slugToEnum[(id || "").toLowerCase()] || id, [id]);
-  const bannerTitle = useMemo(() => titleCase(enumCategory), [enumCategory]);
+  const enumCategory = useMemo(() => id === "all" || !id ? null : slugToEnum[id.toLowerCase()] || id, [id]);
+  const bannerTitle = useMemo(() => enumCategory ? titleCase(enumCategory) : "Todos los productos", [enumCategory]);
 
-  // Lista de categorías para los botones
   const allCategories = Object.values(slugToEnum);
   const categoryButtons = allCategories.filter((c) => c !== enumCategory);
 
@@ -86,25 +83,33 @@ export default function CategoryPage() {
     (async () => {
       setLoading(true);
       try {
-        let resp = await ApiService.get(`/products?category=${encodeURIComponent(enumCategory)}`);
-        let list = normalizeList(resp);
-
-        if (!list.length && /ñ/i.test(enumCategory)) {
-          const alt = enumCategory.replace(/ñ/gi, "n");
-          resp = await ApiService.get(`/products?category=${encodeURIComponent(alt)}`);
+        let list = [];
+        if (!enumCategory) {
+          // Todos los productos
+          const resp = await ApiService.get("/products");
           list = normalizeList(resp);
-        }
+        } else {
+          // Filtrar por categoría
+          let resp = await ApiService.get(`/products?category=${encodeURIComponent(enumCategory)}`);
+          list = normalizeList(resp);
 
-        if (!list.length) {
-          const allResp = await ApiService.get("/products");
-          const all = normalizeList(allResp);
-          const target = removeAccents(enumCategory).toLowerCase();
-          list = all.filter((p) => categoryMatches(p, target));
+          if (!list.length && /ñ/i.test(enumCategory)) {
+            const alt = enumCategory.replace(/ñ/gi, "n");
+            resp = await ApiService.get(`/products?category=${encodeURIComponent(alt)}`);
+            list = normalizeList(resp);
+          }
+
+          if (!list.length) {
+            const allResp = await ApiService.get("/products");
+            const all = normalizeList(allResp);
+            const target = removeAccents(enumCategory).toLowerCase();
+            list = all.filter((p) => categoryMatches(p, target));
+          }
         }
 
         let normalized = list.map(normalize);
 
-        // filtros locales
+        // Filtros locales
         if (filters.colors.length) {
           const setColors = new Set(filters.colors);
           normalized = normalized.filter((p) =>
@@ -137,7 +142,6 @@ export default function CategoryPage() {
     })();
   }, [enumCategory, filters, sortBy]);
 
-  /* ----------- favoritos ----------- */
   const handleToggleFavorite = async (productId) => {
     if (!user) return toast({ title: "Debes iniciar sesión para agregar favoritos", status: "warning" });
     try {
@@ -150,7 +154,6 @@ export default function CategoryPage() {
     }
   };
 
-  /* ----------- add to cart ----------- */
   const addToCartHandler = async (product, qty, color) => {
     const payload = { productId: product._id, quantity: qty, color: color?.name };
     try {
@@ -168,20 +171,17 @@ export default function CategoryPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <Box maxW="container.xl" mx="auto" px={4} py={8}>
-        <Spinner />
-        <Text ml={2} color={muted} display="inline-block">Cargando productos…</Text>
-      </Box>
-    );
-  }
+  if (loading) return (
+    <Box maxW="container.xl" mx="auto" px={4} py={8}>
+      <Spinner />
+      <Text ml={2} color={muted} display="inline-block">Cargando productos…</Text>
+    </Box>
+  );
 
   return (
     <Box minH="100vh">
       <AppHeader />
 
-      {/* Banner */}
       <Box bg={bannerBg} color="white" py={3}>
         <Container maxW="container.xl">
           <HStack justify="space-between">
@@ -192,7 +192,6 @@ export default function CategoryPage() {
         </Container>
       </Box>
 
-      {/* Botones de categorías */}
       <Container maxW="container.xl" py={4}>
         <Wrap spacing={2} justify="center">
           <WrapItem>
@@ -221,7 +220,6 @@ export default function CategoryPage() {
         </Wrap>
       </Container>
 
-      {/* Controles */}
       <Container maxW="container.xl" py={6}>
         <HStack justify="space-between" mb={4}>
           <Button leftIcon={<Icon as={FiFilter} />} variant="outline" onClick={() => setDrawerOpen(true)}>
@@ -237,10 +235,9 @@ export default function CategoryPage() {
           </HStack>
         </HStack>
 
-        {/* Grid productos */}
         {products.length === 0 ? (
           <Box py={16} textAlign="center">
-            <Text>No hay productos en esta categoría</Text>
+            <Text>No hay productos disponibles</Text>
           </Box>
         ) : (
           <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
@@ -256,7 +253,6 @@ export default function CategoryPage() {
         )}
       </Container>
 
-      {/* Filtros */}
       <CategoryFiltersDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -265,7 +261,6 @@ export default function CategoryPage() {
         options={filterOptions}
       />
 
-      {/* Modal detalle */}
       <ProductModal
         isOpen={!!selected}
         onClose={() => setSelected(null)}
