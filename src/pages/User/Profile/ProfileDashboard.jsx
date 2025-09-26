@@ -175,6 +175,7 @@ export default function ProfileDashboard() {
       </Box>
 
       {/* Pedidos */}
+      {/* Pedidos */}
       <Box>
         <Box bg="gray.100" px={4} py={2} borderRadius="md">
           <Text fontWeight="bold">Mis Pedidos</Text>
@@ -193,7 +194,39 @@ export default function ProfileDashboard() {
                   <Text fontSize="sm" color="gray.500" mb={2}>
                     Fecha: {new Date(order.createdAt).toLocaleDateString()}
                   </Text>
-                  <Text fontWeight="medium" mb={2}>Total: {formatPrice(order.total)} €</Text>
+                  <Text fontWeight="medium" mb={2}>
+                    Total: {formatPrice(order.total)} €
+                  </Text>
+
+                  {/* Dirección y teléfono */}
+                  <Box mb={2}>
+                    <Text fontWeight="medium">Dirección:</Text>
+                    <Text fontSize="sm">
+                      {order.address
+                        ? `${order.address.street}, ${order.address.city} (${order.address.zip}) [${order.address.country}]`
+                        : "No disponible"}
+                    </Text>
+                  </Box>
+                  <Box mb={2}>
+                    <Text fontWeight="medium">Teléfono:</Text>
+                    <Text fontSize="sm">
+                      {order.phone
+                        ? `${order.phone.number} (${order.phone.country})`
+                        : "No disponible"}
+                    </Text>
+                  </Box>
+
+                  {/* Productos */}
+                  <Box>
+                    <Text fontWeight="medium">Productos:</Text>
+                    <VStack align="start" spacing={1}>
+                      {order.items?.map((item, idx) => (
+                        <Text key={idx} fontSize="sm">
+                          {item.name} x {item.quantity} - {formatPrice(item.price)} €
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
                 </Box>
               ))}
               {orders.length > 3 && (
