@@ -36,22 +36,28 @@ export default function ProfileDashboard() {
 
   // 📌 Traer usuario completo al montar
   useEffect(() => {
-    if (!token) return;
+  if (!token) return;
 
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get("/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(res.data.user);
-      } catch (err) {
-        console.error("Error cargando perfil:", err);
-        toast({ title: "Error cargando perfil", status: "error" });
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get("/api/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data.user);
+    } catch (err) {
+      console.error("Error cargando perfil:", err);
+
+      // Logout solo si es 401
+      if (err.response?.status === 401) {
+        toast({ title: "Sesión expirada", status: "error" });
         logout();
+      } else {
+        toast({ title: "Error cargando perfil, intenta de nuevo", status: "error" });
       }
-    };
-    fetchUser();
-  }, [token, setUser, toast, logout]);
+    }
+  };
+  fetchUser();
+}, [token, setUser, toast, logout]);
 
   // Dirección y teléfono por defecto
   const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
