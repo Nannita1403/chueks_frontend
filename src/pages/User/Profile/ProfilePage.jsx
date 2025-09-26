@@ -7,12 +7,12 @@ import OrdersPage from "../Order/OrdersPage.jsx";
 
 const ProfilePage = () => {
   return (
-    <UserLayout>
-      <Routes>
-        <Route path="/" element={<ProfileDashboard />} />
+    <Routes>
+      <Route path="/" element={<UserLayout />}>
+        <Route index element={<ProfileDashboard />} />
         <Route path="orders" element={<OrdersPage />} />
-      </Routes>
-    </UserLayout>
+      </Route>
+    </Routes>
   );
 };
 

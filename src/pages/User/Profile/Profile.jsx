@@ -17,8 +17,7 @@ import OrderModal from "../../../components/Order/OrderModal.jsx";
 import UserLayout from "../UserLayout.jsx";
 
 export default function Profile() {
-  const { user, token } = useAuth();
-  const { toast } = useToast();
+  const { user, token, logout } = useAuth(); 
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +25,10 @@ export default function Profile() {
 
   const muted = useColorModeValue("gray.600", "gray.400");
 
+  // 📌 Cargar órdenes
   useEffect(() => {
+    if (!token) return logout(); 
+
     const fetchOrders = async () => {
       try {
         const res = await axios.get("/api/orders/my-orders", {
@@ -42,8 +44,8 @@ export default function Profile() {
       }
     };
 
-    if (token) fetchOrders();
-  }, [token, toast]);
+    fetchOrders();
+  }, [token, toast, logout]);
 
   if (loading) {
     return (
@@ -52,6 +54,14 @@ export default function Profile() {
         <Text mt={2} color={muted}>
           Cargando perfil...
         </Text>
+      </Box>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
+        <Text color={muted}>Usuario no autenticado</Text>
       </Box>
     );
   }

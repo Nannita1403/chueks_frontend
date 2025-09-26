@@ -36,6 +36,8 @@ export default function ProfileDashboard() {
 
   // 📌 Traer usuario completo al montar
   useEffect(() => {
+    if (!token) return;
+
     const fetchUser = async () => {
       try {
         const res = await axios.get("/api/users/me", {
@@ -45,10 +47,11 @@ export default function ProfileDashboard() {
       } catch (err) {
         console.error("Error cargando perfil:", err);
         toast({ title: "Error cargando perfil", status: "error" });
+        logout();
       }
     };
-    if (token) fetchUser();
-  }, [token, setUser, toast]);
+    fetchUser();
+  }, [token, setUser, toast, logout]);
 
   // Dirección y teléfono por defecto
   const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
