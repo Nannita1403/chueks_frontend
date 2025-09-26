@@ -22,10 +22,9 @@ export default function EditNameModal({ isOpen, onClose, onSave, initialValue })
     }
   }, [isOpen, initialValue]);
 
-  const handleSave = () => {
-    if (!name.trim()) return; // evitar guardar vacío
-    onSave(name.trim());       // ✅ llama al handler que actualiza user y backend
-    onClose();                 // cierra el modal
+    const handleSave = () => {
+    if (onSave) onSave(name);  
+    onClose();
   };
 
   return (

@@ -19,8 +19,7 @@ export default function EditLastNameModal({ isOpen, onClose, onSave, initialValu
   }, [isOpen, initialValue]);
 
   const handleSave = () => {
-    if (!lastName.trim()) return;
-    onSave(lastName.trim());
+    if (onSave) onSave(lastName); 
     onClose();
   };
 

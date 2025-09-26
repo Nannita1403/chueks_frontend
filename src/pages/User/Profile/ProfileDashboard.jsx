@@ -225,7 +225,6 @@ export default function ProfileDashboard() {
       <EditNameModal
         isOpen={isNameOpen}
         onClose={onCloseName}
-        initialValue={user?.firstName}
         onSave={(newName) => handleUpdateUser({ firstName: newName })}
       />
 
@@ -239,14 +238,14 @@ export default function ProfileDashboard() {
       <AddressModal
         isOpen={isAddressesOpen}
         onClose={onCloseAddresses}
-        initialValue={user?.addresses}
+        initialValue={user?.addresses || []}
         onSave={(newAddresses) => handleUpdateUser({ addresses: newAddresses })}
       />
 
       <PhoneModal
         isOpen={isPhonesOpen}
         onClose={onClosePhones}
-        initialValue={user?.phones}
+        initialValue={user?.phones || []}
         onSave={(newPhones) => handleUpdateUser({ phones: newPhones })}
       />
     </VStack>
