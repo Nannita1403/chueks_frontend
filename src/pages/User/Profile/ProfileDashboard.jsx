@@ -39,11 +39,13 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
       const fetchUser = async () => {
         try {
-          const res = await axios.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } });
-          setUser(res.data.user);
+          const res = await axios.get("/api/v1/users/checksession", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(res.data.user); // suponiendo que checkSession devuelve { user: ... }
         } catch (err) {
-          console.error("Error cargando perfil:", err);
-          toast({ title: "Error cargando perfil", status: "error" });
+          console.error("Token inválido o expirado:", err);
+          logout();
         }
       };
 
