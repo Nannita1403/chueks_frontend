@@ -20,76 +20,70 @@ import EditLastNameModal from "../../../components/Profile/EditLastNameModal.jsx
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
-export default function ProfileDashboard() {
-  const { user, token, setUser, logout, loading } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  export default function ProfileDashboard() {
+    const { user, token, setUser, loading } = useAuth();
+    const { toast } = useToast();
+    const navigate = useNavigate();
 
-  const [orders, setOrders] = useState([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
+    const [orders, setOrders] = useState([]);
+    const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // Control de modales
-  const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } = useDisclosure();
-  const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
-  const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
-  const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
+    const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } = useDisclosure();
+    const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
+    const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
+    const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
-  // 📌 Traer usuario completo al montar
-  useEffect(() => {
-  if (loading) return; 
-  if (!token) return;
+    // ✅ Esperar que AuthProvider cargue el user
+    useEffect(() => {
+      if (loading || !token) return;
 
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get("/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data.user);
-    } catch (err) {
-      console.error("Error cargando perfil:", err);
-    toast({ title: "Error cargando perfil", status: "error" });
-          }
-        };
-        fetchUser();
-      }, [token, setUser, toast, loading]);
+      const fetchUser = async () => {
+        try {
+          const res = await axios.get("/api/users/me", { headers: { Authorization: `Bearer ${token}` } });
+          setUser(res.data.user);
+        } catch (err) {
+          console.error("Error cargando perfil:", err);
+          toast({ title: "Error cargando perfil", status: "error" });
+        }
+      };
 
-  // Dirección y teléfono por defecto
-  const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
-  const defaultPhone = user?.phones?.find(p => p.default) || user?.phones?.[0];
+      fetchUser();
+    }, [token, setUser, toast, loading]);
 
-  // 📌 Traer pedidos del usuario
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get("/api/orders/my-orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOrders(res.data?.orders || []);
-    } catch (err) {
-      console.error("❌ Error cargando pedidos:", err);
-      toast({ title: "Error al cargar pedidos", status: "error" });
-      setOrders([]);
-    } finally {
-      setLoadingOrders(false);
-    }
-  };
+    // Dirección y teléfono por defecto
+    const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
+    const defaultPhone = user?.phones?.find(p => p.default) || user?.phones?.[0];
 
-  useEffect(() => {
-    if (token) fetchOrders();
-  }, [token]);
+    // Pedidos
+    useEffect(() => {
+      if (!token) return;
+      const fetchOrders = async () => {
+        try {
+          const res = await axios.get("/api/orders/my-orders", { headers: { Authorization: `Bearer ${token}` } });
+          setOrders(res.data?.orders || []);
+        } catch (err) {
+          console.error("❌ Error cargando pedidos:", err);
+          toast({ title: "Error al cargar pedidos", status: "error" });
+          setOrders([]);
+        } finally {
+          setLoadingOrders(false);
+        }
+      };
+      fetchOrders();
+    }, [token, toast]);
 
-  // Actualizar user local y backend
-  const handleUpdateUser = async (updatedFields) => {
-    try {
-      const res = await axios.put("/api/users/me", updatedFields, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data.user);
-      toast({ title: "Datos actualizados", status: "success" });
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Error al actualizar datos", status: "error" });
-    }
-  };
+    // Actualizar user
+    const handleUpdateUser = async (updatedFields) => {
+      try {
+        const res = await axios.put("/api/users/me", updatedFields, { headers: { Authorization: `Bearer ${token}` } });
+        setUser(res.data.user);
+        toast({ title: "Datos actualizados", status: "success" });
+      } catch (err) {
+        console.error(err);
+        toast({ title: "Error al actualizar datos", status: "error" });
+      }
+    };
+    if (!user) return <Spinner />; 
 
   const getStatusColor = (status) => {
     switch (status) {
