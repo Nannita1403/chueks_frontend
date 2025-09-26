@@ -21,7 +21,7 @@ import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
-  const { user, token, setUser, logout } = useAuth();
+  const { user, token, setUser, logout, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -36,6 +36,7 @@ export default function ProfileDashboard() {
 
   // 📌 Traer usuario completo al montar
   useEffect(() => {
+  if (loading) return; 
   if (!token) return;
 
   const fetchUser = async () => {
@@ -46,18 +47,11 @@ export default function ProfileDashboard() {
       setUser(res.data.user);
     } catch (err) {
       console.error("Error cargando perfil:", err);
-
-      // Logout solo si es 401
-      if (err.response?.status === 401) {
-        toast({ title: "Sesión expirada", status: "error" });
-        logout();
-      } else {
-        toast({ title: "Error cargando perfil, intenta de nuevo", status: "error" });
-      }
-    }
-  };
-  fetchUser();
-}, [token, setUser, toast, logout]);
+    toast({ title: "Error cargando perfil", status: "error" });
+          }
+        };
+        fetchUser();
+      }, [token, setUser, toast, loading]);
 
   // Dirección y teléfono por defecto
   const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
