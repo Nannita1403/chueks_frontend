@@ -16,12 +16,11 @@ import ApiService from "../../../reducers/api/Api.jsx";
 
 // Modales
 import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
-import EditLastNameModal from "../../../components/Profile/EditLastNameModal.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
-  const { user, setUser, logout } = useAuth();
+  const { user, setUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -30,11 +29,10 @@ export default function ProfileDashboard() {
 
   // Modales
   const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } = useDisclosure();
-  const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
   const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
-  // -------- Traer pedidos del usuario --------
+  // -------- Traer pedidos del usuario solo al montar --------
   useEffect(() => {
     if (!user) return;
 
@@ -45,26 +43,25 @@ export default function ProfileDashboard() {
       } catch (err) {
         console.error("Error cargando pedidos:", err);
         toast({ title: "Error al cargar pedidos", status: "error" });
-        setOrders([]);
       } finally {
         setLoadingOrders(false);
       }
     };
 
     fetchOrders();
-  }, []);
+  }, [user]); // <-- solo cuando cambie el usuario
 
   // -------- Actualizar nombre / teléfono --------
   const handleUpdateProfile = async (updatedFields) => {
     try {
       const res = await ApiService.patch("/users/update", updatedFields);
-       setUser(prev => ({ ...prev, ...res.user }));
-        toast({ title: "Datos actualizados", status: "success" });
-      } catch (err) {
-        console.error(err);
-        toast({ title: "Error al actualizar datos", status: "error" });
-      }
-    };
+      setUser(prev => ({ ...prev, ...res.user }));
+      toast({ title: "Datos actualizados", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al actualizar datos", status: "error" });
+    }
+  };
 
   // -------- Direcciones --------
   const handleAddAddress = async (addressData) => {
@@ -175,7 +172,6 @@ export default function ProfileDashboard() {
       </Box>
 
       {/* Pedidos */}
-      {/* Pedidos */}
       <Box>
         <Box bg="gray.100" px={4} py={2} borderRadius="md">
           <Text fontWeight="bold">Mis Pedidos</Text>
@@ -242,9 +238,25 @@ export default function ProfileDashboard() {
       </Box>
 
       {/* Modales */}
-      <EditNameModal isOpen={isNameOpen} onClose={onCloseName} onSave={(newName) => handleUpdateProfile({ name: newName })} />
-      <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} initialValue={user?.addresses || []} onSave={handleAddAddress} onUpdate={handleUpdateAddress} />
-      <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} initialValue={user?.phones || []} onSave={handleAddPhone} onUpdate={handleUpdatePhone} />
+      <EditNameModal 
+        isOpen={isNameOpen} 
+        onClose={onCloseName} 
+        onSave={(newName) => handleUpdateProfile({ name: newName })} 
+      />
+      <AddressModal 
+        isOpen={isAddressesOpen} 
+        onClose={onCloseAddresses} 
+        initialValue={user?.addresses || []} 
+        onSave={handleAddAddress} 
+        onUpdate={handleUpdateAddress} 
+      />
+      <PhoneModal 
+        isOpen={isPhonesOpen} 
+        onClose={onClosePhones} 
+        initialValue={user?.phones || []} 
+        onSave={handleAddPhone} 
+        onUpdate={handleUpdatePhone} 
+      />
     </VStack>
   );
 }
