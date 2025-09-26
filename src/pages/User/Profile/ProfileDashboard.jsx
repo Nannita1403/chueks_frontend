@@ -10,9 +10,9 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import ApiService from "../../../reducers/api/Api.jsx";
 
 // Modales
 import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
@@ -20,72 +20,69 @@ import EditLastNameModal from "../../../components/Profile/EditLastNameModal.jsx
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
-  export default function ProfileDashboard() {
-    const { user, token, setUser, loading } = useAuth();
-    const { toast } = useToast();
-    const navigate = useNavigate();
+export default function ProfileDashboard() {
+  const { user, setUser, logout } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-    const [orders, setOrders] = useState([]);
-    const [loadingOrders, setLoadingOrders] = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
-    const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } = useDisclosure();
-    const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
-    const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
-    const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
+  // Control de modales
+  const { isOpen: isNameOpen, onOpen: onOpenName, onClose: onCloseName } = useDisclosure();
+  const { isOpen: isLastNameOpen, onOpen: onOpenLastName, onClose: onCloseLastName } = useDisclosure();
+  const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
+  const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
-    // ✅ Esperar que AuthProvider cargue el user
-    useEffect(() => {
-      if (loading || !token) return;
-
-      const fetchUser = async () => {
-        try {
-          const res = await axios.get("/api/v1/users/checksession", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setUser(res.data.user); // suponiendo que checkSession devuelve { user: ... }
-        } catch (err) {
-          console.error("Token inválido o expirado:", err);
-          logout();
-        }
-      };
-
-      fetchUser();
-    }, [token, setUser, toast, loading]);
-
-    // Dirección y teléfono por defecto
-    const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
-    const defaultPhone = user?.phones?.find(p => p.default) || user?.phones?.[0];
-
-    // Pedidos
-    useEffect(() => {
-      if (!token) return;
-      const fetchOrders = async () => {
-        try {
-          const res = await axios.get("/api/orders/my-orders", { headers: { Authorization: `Bearer ${token}` } });
-          setOrders(res.data?.orders || []);
-        } catch (err) {
-          console.error("❌ Error cargando pedidos:", err);
-          toast({ title: "Error al cargar pedidos", status: "error" });
-          setOrders([]);
-        } finally {
-          setLoadingOrders(false);
-        }
-      };
-      fetchOrders();
-    }, [token, toast]);
-
-    // Actualizar user
-    const handleUpdateUser = async (updatedFields) => {
+  // Traer usuario completo al montar
+  useEffect(() => {
+    const fetchUser = async () => {
       try {
-        const res = await axios.put("/api/users/me", updatedFields, { headers: { Authorization: `Bearer ${token}` } });
-        setUser(res.data.user);
-        toast({ title: "Datos actualizados", status: "success" });
+        const res = await ApiService.get("/users/checksession");
+        setUser(res.user); // checksession devuelve { user }
       } catch (err) {
-        console.error(err);
-        toast({ title: "Error al actualizar datos", status: "error" });
+        console.error("Error cargando perfil:", err);
+        toast({ title: "Error cargando perfil", status: "error" });
+        logout();
       }
     };
-    if (!user) return <Spinner />; 
+
+    fetchUser();
+  }, [setUser, toast, logout]);
+
+  // Traer pedidos del usuario
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await ApiService.get("/orders/my-orders");
+        setOrders(res.orders || []);
+      } catch (err) {
+        console.error("Error cargando pedidos:", err);
+        toast({ title: "Error al cargar pedidos", status: "error" });
+        setOrders([]);
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    fetchOrders();
+  }, [toast]);
+
+  // Actualizar user
+  const handleUpdateUser = async (updatedFields) => {
+    try {
+      const res = await ApiService.put("/users/update", updatedFields);
+      setUser(res.user);
+      toast({ title: "Datos actualizados", status: "success" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error al actualizar datos", status: "error" });
+    }
+  };
+
+  // Dirección y teléfono por defecto
+  const defaultAddress = user?.addresses?.find(a => a.default) || user?.addresses?.[0];
+  const defaultPhone = user?.phones?.find(p => p.default) || user?.phones?.[0];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -96,7 +93,9 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
     }
   };
 
-  const formatPrice = (value) => (value / 100).toFixed(2); // centavos → €
+  const formatPrice = (value) => (value / 100).toFixed(2);
+
+  if (!user) return <Spinner />;
 
   return (
     <VStack align="stretch" spacing={6}>
@@ -108,9 +107,7 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
           <Text fontWeight="bold">Nombre</Text>
           <Button size="sm" colorScheme="blue" onClick={onOpenName}>Editar</Button>
         </HStack>
-        <Box px={4} py={2}>
-          <Text>{user?.firstName || "Sin nombre"}</Text>
-        </Box>
+        <Box px={4} py={2}><Text>{user?.firstName || "Sin nombre"}</Text></Box>
       </Box>
 
       {/* Apellido */}
@@ -119,9 +116,7 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
           <Text fontWeight="bold">Apellido</Text>
           <Button size="sm" colorScheme="blue" onClick={onOpenLastName}>Editar</Button>
         </HStack>
-        <Box px={4} py={2}>
-          <Text>{user?.lastName || "Sin apellido"}</Text>
-        </Box>
+        <Box px={4} py={2}><Text>{user?.lastName || "Sin apellido"}</Text></Box>
       </Box>
 
       {/* Dirección */}
@@ -177,7 +172,7 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
                     Total: {formatPrice(order.total)} €
                   </Text>
 
-                  {/* Dirección y teléfono del pedido */}
+                  {/* Dirección y teléfono */}
                   <Box mb={2}>
                     <Text fontWeight="medium">Dirección:</Text>
                     <Text fontSize="sm">
@@ -195,7 +190,7 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
                     </Text>
                   </Box>
 
-                  {/* Items del pedido */}
+                  {/* Productos */}
                   <Box>
                     <Text fontWeight="medium">Productos:</Text>
                     <VStack align="start" spacing={1}>
@@ -221,32 +216,10 @@ import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
       </Box>
 
       {/* Modales */}
-      <EditNameModal
-        isOpen={isNameOpen}
-        onClose={onCloseName}
-        onSave={(newName) => handleUpdateUser({ firstName: newName })}
-      />
-
-      <EditLastNameModal
-        isOpen={isLastNameOpen}
-        onClose={onCloseLastName}
-        initialValue={user?.lastName}
-        onSave={(newLastName) => handleUpdateUser({ lastName: newLastName })}
-      />
-
-      <AddressModal
-        isOpen={isAddressesOpen}
-        onClose={onCloseAddresses}
-        initialValue={user?.addresses || []}
-        onSave={(newAddresses) => handleUpdateUser({ addresses: newAddresses })}
-      />
-
-      <PhoneModal
-        isOpen={isPhonesOpen}
-        onClose={onClosePhones}
-        initialValue={user?.phones || []}
-        onSave={(newPhones) => handleUpdateUser({ phones: newPhones })}
-      />
+      <EditNameModal isOpen={isNameOpen} onClose={onCloseName} onSave={(newName) => handleUpdateUser({ firstName: newName })} />
+      <EditLastNameModal isOpen={isLastNameOpen} onClose={onCloseLastName} initialValue={user?.lastName} onSave={(newLastName) => handleUpdateUser({ lastName: newLastName })} />
+      <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} initialValue={user?.addresses || []} onSave={(newAddresses) => handleUpdateUser({ addresses: newAddresses })} />
+      <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} initialValue={user?.phones || []} onSave={(newPhones) => handleUpdateUser({ phones: newPhones })} />
     </VStack>
   );
 }
