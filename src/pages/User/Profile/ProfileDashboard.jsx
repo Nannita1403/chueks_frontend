@@ -21,7 +21,7 @@ import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function ProfileDashboard() {
-  const { user, token, setUser } = useAuth();
+  const { user, token, setUser, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
