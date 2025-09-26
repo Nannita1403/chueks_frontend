@@ -1,5 +1,5 @@
 // src/context/Auth/auth.context.jsx
-import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback, useState } from "react";
 import authService from "../../reducers/users/users.actions.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 import { useNavigate } from "react-router-dom";
