@@ -77,7 +77,7 @@ export default function ProfileDashboard() {
   // Actualizar user local y backend
   const handleUpdateUser = async (updatedFields) => {
     try {
-      const res = await axios.patch("/api/users/me", updatedFields, {
+      const res = await axios.put("/api/users/me", updatedFields, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data.user);

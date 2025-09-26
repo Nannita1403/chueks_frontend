@@ -8,7 +8,6 @@ import {
   Spinner,
   SimpleGrid,
   useColorModeValue,
-  useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
@@ -16,8 +15,6 @@ import { useToast } from "../../../Hooks/useToast.jsx";
 import OrderCard from "../../../components/Order/OrderCard.jsx";
 import OrderModal from "../../../components/Order/OrderModal.jsx";
 import UserLayout from "../UserLayout.jsx";
-import AddressModal from "../../../components/Profile/AdressesModal.jsx";
-import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 export default function Profile() {
   const { user, token } = useAuth();
@@ -26,17 +23,6 @@ export default function Profile() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
-  const {
-    isOpen: isAddressesOpen,
-    onOpen: onOpenAddresses,
-    onClose: onCloseAddresses,
-  } = useDisclosure();
-  const {
-    isOpen: isPhonesOpen,
-    onOpen: onOpenPhones,
-    onClose: onClosePhones,
-  } = useDisclosure();
 
   const muted = useColorModeValue("gray.600", "gray.400");
 
@@ -71,7 +57,7 @@ export default function Profile() {
   }
 
   return (
-    <UserLayout onOpenAddresses={onOpenAddresses} onOpenPhones={onOpenPhones}>
+    <UserLayout>
       <Box maxW="container.xl" mx="auto" py={8}>
         <Heading mb={8}>Perfil de {user?.name || "Usuario"}</Heading>
 
@@ -105,10 +91,6 @@ export default function Profile() {
           onClose={() => setSelectedOrder(null)}
           order={selectedOrder}
         />
-
-        {/* Modals de dirección y teléfono */}
-        <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} />
-        <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} />
       </Box>
     </UserLayout>
   );
