@@ -1,4 +1,3 @@
-// src/layouts/UserLayout.jsx
 import {
   Box,
   Flex,
@@ -19,9 +18,9 @@ import {
 } from "@chakra-ui/react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { HamburgerIcon } from "@chakra-ui/icons";
+import { useAuth } from "../../context/Auth/auth.context.jsx";
 import AddressModal from "../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../components/Profile/PhoneModal.jsx";
-import { useAuth } from "../../context/Auth/auth.context.jsx";
 
 const menuItems = [
   { label: "Mis datos", path: "/profile", color: "purple.400", type: "link" },
@@ -30,32 +29,13 @@ const menuItems = [
   { label: "Teléfonos", path: "/profile/phones", color: "yellow.400", type: "modal" },
 ];
 
-const SidebarContent = ({
-  onClose,
-  onOpenAddresses,
-  onOpenPhones,
-  logoSrc,
-  handleLogout,
-  handleClick,
-  location,
-  navigate,
-}) => (
-  <Flex
-    direction="column"
-    h="100%"
-    justify="space-between"
-    bg="gray.900"
-    color="white"
-    p={4}
-    w="250px"
-  >
+const SidebarContent = ({ onClose, onOpenAddresses, onOpenPhones, logoSrc, handleLogout, handleClick, location, navigate }) => (
+  <Flex direction="column" h="100%" justify="space-between" bg="gray.900" color="white" p={4} w="250px">
     <VStack spacing={6} align="stretch">
       {/* Logo */}
       <Box textAlign="center" bg="white" borderRadius="md" p={2}>
         <Image src={logoSrc} alt="Logo" mx="auto" mb={2} maxH="60px" />
-        <Text fontWeight="bold" fontSize="lg" color="gray.900">
-          Mi Perfil
-        </Text>
+        <Text fontWeight="bold" fontSize="lg" color="gray.900">Mi Perfil</Text>
       </Box>
 
       {/* Volver al Home */}
@@ -65,10 +45,7 @@ const SidebarContent = ({
         w="full"
         mb={4}
         _hover={{ bg: "gray.200" }}
-        onClick={() => {
-          navigate("/");
-          onClose?.();
-        }}
+        onClick={() => { navigate("/"); onClose?.(); }}
       >
         Volver al Home
       </Button>
@@ -77,7 +54,6 @@ const SidebarContent = ({
       <Box>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
-
           return (
             <Button
               key={item.path}
@@ -88,14 +64,8 @@ const SidebarContent = ({
               color={isActive ? "white" : "gray.900"}
               fontWeight={isActive ? "bold" : "normal"}
               borderRadius="md"
-              onClick={() => {
-                handleClick(item);
-                onClose?.();
-              }}
-              _hover={{
-                bg: item.color,
-                color: "white",
-              }}
+              onClick={() => { handleClick(item); onClose?.(); }}
+              _hover={{ bg: item.color, color: "white" }}
             >
               {item.label}
             </Button>
@@ -107,16 +77,7 @@ const SidebarContent = ({
     {/* Botón salir */}
     <Box mt={6}>
       <Divider mb={4} />
-      <Button
-        bg="red.500"
-        color="white"
-        w="full"
-        _hover={{ bg: "red.600" }}
-        onClick={() => {
-          handleLogout();
-          onClose?.();
-        }}
-      >
+      <Button bg="red.500" color="white" w="full" _hover={{ bg: "red.600" }} onClick={handleLogout}>
         Salir
       </Button>
     </Box>
@@ -124,27 +85,13 @@ const SidebarContent = ({
 );
 
 const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { logout } = useAuth();
 
-  // ✅ Modals
-  const {
-    isOpen: isAddressesOpen,
-    onOpen: onOpenAddresses,
-    onClose: onCloseAddresses,
-  } = useDisclosure();
-
-  const {
-    isOpen: isPhonesOpen,
-    onOpen: onOpenPhones,
-    onClose: onClosePhones,
-  } = useDisclosure();
-
-  const handleLogout = () => {
-  logout();
-  };
+  const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
+  const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
   const handleClick = (item) => {
     if (item.type === "modal") {
@@ -157,11 +104,11 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
 
   return (
     <Flex minH="100vh">
-      {/* Sidebar fijo en desktop */}
+      {/* Sidebar fijo desktop */}
       <Box display={{ base: "none", md: "block" }} position="fixed" h="100vh">
         <SidebarContent
           logoSrc={logoSrc}
-          handleLogout={handleLogout}
+          handleLogout={logout}
           handleClick={handleClick}
           location={location}
           navigate={navigate}
@@ -170,7 +117,7 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
         />
       </Box>
 
-      {/* Botón hamburguesa en mobile */}
+      {/* Botón hamburguesa mobile */}
       <IconButton
         aria-label="Abrir menú"
         icon={<HamburgerIcon />}
@@ -182,7 +129,7 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
         onClick={onOpen}
       />
 
-      {/* Drawer en mobile */}
+      {/* Drawer mobile */}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
@@ -191,7 +138,7 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
             <SidebarContent
               onClose={onClose}
               logoSrc={logoSrc}
-              handleLogout={handleLogout}
+              handleLogout={logout}
               handleClick={handleClick}
               location={location}
               navigate={navigate}
@@ -203,17 +150,12 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
         </DrawerContent>
       </Drawer>
 
-      {/* Main content con Outlet */}
-      <Box
-        flex="1"
-        p={6}
-        ml={{ base: 0, md: "250px" }}
-        bg={useColorModeValue("gray.50", "gray.900")}
-      >
+      {/* Main content */}
+      <Box flex="1" p={6} ml={{ base: 0, md: "250px" }} bg={useColorModeValue("gray.50", "gray.900")}>
         <Outlet />
       </Box>
 
-      {/* ✅ Modals */}
+      {/* Modals globales */}
       <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} />
       <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} />
     </Flex>
