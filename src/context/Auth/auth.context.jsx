@@ -3,6 +3,7 @@ import { createContext, useContext, useReducer, useEffect, useCallback } from "r
 import authService from "../../reducers/users/users.actions.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "@chakra-ui/react";
 
 export const AuthContext = createContext();
 
@@ -69,18 +70,25 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const navigate = useNavigate();
+  const [initialLoading, setInitialLoading] = useState(true);
+
 
   // 🔁 cargar sesión inicial
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = authService.getCurrentUser();
-    if (token && user) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
-      ApiService.setToken(token);
-    } else {
-      dispatch({ type: "LOGOUT" });
-    }
-  }, []);
+  const token = localStorage.getItem("token");
+  const user = authService.getCurrentUser();
+
+  if (token && user) {
+    dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
+    ApiService.setToken(token);
+  }
+  // No hacemos logout aquí
+  setInitialLoading(false);
+}, []);
+
+if (initialLoading) {
+  return <Spinner/>; // O cualquier loader
+}
 
   // --- refrescar carrito ---
   const refreshCart = useCallback(async () => {
