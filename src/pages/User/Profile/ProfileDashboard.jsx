@@ -26,6 +26,16 @@ export default function ProfileDashboard() {
   const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
+    const getStatusColor = (status) => {
+      switch (status) {
+        case "pendiente": return "orange";
+        case "pagado": return "green";
+        case "enviado": return "blue";
+        case "cancelado": return "red";
+        default: return "gray";
+      }
+    };
+
   // ---- Traer pedidos
   useEffect(() => {
     if (!user) return;
@@ -188,7 +198,7 @@ export default function ProfileDashboard() {
                   <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
                     <HStack justify="space-between" mb={2}>
                       <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
-                      <Badge colorScheme={getStatusColor(order.status)}>{order.status}</Badge>
+                      <Badge colorScheme={getStatusColor (order.status)}>{order.status}</Badge>
                     </HStack>
                     <Text fontSize="sm" color="gray.500" mb={2}>
                       Fecha: {new Date(order.createdAt).toLocaleDateString()}
