@@ -1,4 +1,3 @@
-// src/pages/Cart/Cart.jsx
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Box, Grid, GridItem, Text, HStack, VStack, Image, Divider, IconButton,
@@ -19,8 +18,6 @@ import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
-
-// Helpers
 import { getDefaultAddress, getDefaultPhone } from "../../../components/Profile/UserUtils.jsx";
 
 const MIN_ITEMS = 10;
@@ -32,12 +29,11 @@ const money = (n) =>
     maximumFractionDigits: 0
   }).format(n);
 
-// Normaliza items y asegura lineId = _id
 function normalizeItem(it) {
   const p = it.product || {};
   const image = it.image || p?.imgPrimary?.url || p?.image || (Array.isArray(p?.images) && p.images[0]) || "";
   return {
-    id: it.id,   // línea única de carrito
+    id: it.id, // línea única
     productId: it.productId,
     name: it.name || "Producto",
     color: it.color?.toLowerCase(),
@@ -57,17 +53,17 @@ export default function Cart() {
   const { refreshCart, user } = useAuth();
   const navigate = useNavigate();
 
-  // ---- Tema UI ----
-  const pageBg      = useColorModeValue("gray.50", "gray.900");
-  const headerBg    = useColorModeValue("pink.500", "pink.400");
+  // ---- UI theme
+  const pageBg = useColorModeValue("gray.50", "gray.900");
+  const headerBg = useColorModeValue("pink.500", "pink.400");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
-  const muted       = useColorModeValue("gray.600", "gray.400");
-  const panelBg     = useColorModeValue("white", "gray.800");
-  const warnBg      = useColorModeValue("orange.50", "orange.900");
-  const warnBorder  = useColorModeValue("orange.200", "orange.700");
-  const thumbBg     = useColorModeValue("gray.100", "whiteAlpha.100");
+  const muted = useColorModeValue("gray.600", "gray.400");
+  const panelBg = useColorModeValue("white", "gray.800");
+  const warnBg = useColorModeValue("orange.50", "orange.900");
+  const warnBorder = useColorModeValue("orange.200", "orange.700");
+  const thumbBg = useColorModeValue("gray.100", "whiteAlpha.100");
 
-  // ---- API helpers ----
+  // ---- API helpers
   const apiFetchCart = useCallback(() => ApiService.get("/cart"), []);
   const apiPatchQtyByLine = useCallback(
     (lineId, delta) => ApiService.patch(`/cart/line/${encodeURIComponent(lineId)}`, { delta }),
@@ -78,7 +74,7 @@ export default function Cart() {
     []
   );
 
-  // ---- Load cart ----
+  // ---- Load cart
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -94,18 +90,18 @@ export default function Cart() {
     return () => { mounted = false; };
   }, [apiFetchCart]);
 
-  // ---- Derived state ----
+  // ---- Derived state
   const items = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
   const itemCount = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items]);
   const subtotal = useMemo(() => items.reduce((acc, it) => acc + it.price * it.quantity, 0), [items]);
   const missing = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
 
-  // Validación de dirección y teléfono
+  // ---- Default user info
   const defaultAddress = getDefaultAddress(user);
   const defaultPhone = getDefaultPhone(user);
 
-  // ---- Handlers ----
+  // ---- Handlers
   const onChangeQtyLine = async (lineId, delta) => {
     try {
       const data = await apiPatchQtyByLine(lineId, delta);
@@ -128,6 +124,11 @@ export default function Cart() {
   };
 
   const onCheckout = async () => {
+    if (!defaultAddress || !defaultPhone) {
+      toast({ title: "Completa dirección y teléfono para continuar", status: "warning" });
+      navigate("/profile");
+      return;
+    }
     try {
       const res = await ApiService.post("/orders/checkout");
       await refreshCart();
@@ -150,7 +151,7 @@ export default function Cart() {
     }
   };
 
-  // ---- Loading / Error ----
+  // ---- Loading / Error
   if (loading) return (
     <Box minH="100vh" bg={pageBg}>
       <AppHeader />
@@ -176,7 +177,6 @@ export default function Cart() {
 
   return (
     <Box minH="100vh" bg={pageBg}>
-      {/* Header */}
       <AppHeader />
       <Box bg={headerBg} color="white" py={3}>
         <Container maxW="container.xl">
@@ -193,7 +193,6 @@ export default function Cart() {
           {itemCount} {itemCount === 1 ? "producto" : "productos"} en tu carrito
         </Text>
 
-        {/* Aviso compra mínima */}
         <Card borderColor={warnBorder} bg={warnBg} mb={4}>
           <CardContent py={3}>
             {missing > 0 ? (
@@ -298,17 +297,17 @@ export default function Cart() {
               <CardFooter>
                 {(!defaultAddress || !defaultPhone) && (
                   <Text fontSize="sm" color="orange.500" mb={2}>
-                    Debes completar tu 
-                    {!defaultAddress ? " dirección" : ""} 
-                    {!defaultAddress && !defaultPhone ? " y " : ""} 
-                    {!defaultPhone ? " teléfono" : ""} 
+                    Debes completar tu
+                    {!defaultAddress ? " dirección" : ""}
+                    {!defaultAddress && !defaultPhone ? " y " : ""}
+                    {!defaultPhone ? " teléfono" : ""}
                     para continuar.
                   </Text>
                 )}
 
                 <CustomButton
                   onClick={onCheckout}
-                  isDisabled={!canCheckout || !defaultAddress || !defaultPhone}
+                  isDisabled={!canCheckout}
                   size="lg"
                 >
                   Completar la compra
@@ -325,9 +324,13 @@ export default function Cart() {
           product={selected}
           products={[]} setProducts={() => {}}
           addToCartHandler={async (product, qty, color) => {
-            await ApiService.post("/cart/add", { productId: product._id, quantity: qty, color: color?.name });
-            await refreshCart?.();
-            toast({ title: `Agregado ${qty} al carrito`, status: "success" });
+            try {
+              await ApiService.post("/cart/add", { productId: product._id, quantity: qty, color: color?.name });
+              await refreshCart?.();
+              toast({ title: `Agregado ${qty} al carrito`, status: "success" });
+            } catch {
+              toast({ title: "No se pudo agregar al carrito", status: "error" });
+            }
           }}
         />
       </Container>
