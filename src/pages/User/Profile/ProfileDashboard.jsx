@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  Box, VStack, Text, HStack, Button, Spinner, useDisclosure
+  Box, VStack, Text, HStack, Button, Spinner, useDisclosure,
+  Badge
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
