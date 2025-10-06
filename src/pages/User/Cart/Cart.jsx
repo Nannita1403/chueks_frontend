@@ -2,9 +2,11 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Box, Grid, GridItem, Text, HStack, VStack, Image, Divider, IconButton,
-  Tooltip, Alert, AlertIcon, useColorModeValue, Container
+  Alert, AlertIcon, useColorModeValue, Container
 } from "@chakra-ui/react";
 import { CloseIcon, AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { useNavigate } from "react-router-dom";
+
 import ApiService from "../../../reducers/api/Api.jsx";
 import CustomButton from "../../../components/Button/Button.jsx";
 import {
@@ -17,19 +19,25 @@ import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
-import { useNavigate } from "react-router-dom";
+
+// Helpers
+import { getDefaultAddress, getDefaultPhone } from "../../../components/Profile/UserUtils.jsx";
 
 const MIN_ITEMS = 10;
 
 const money = (n) =>
-  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0
+  }).format(n);
 
 // Normaliza items y asegura lineId = _id
 function normalizeItem(it) {
   const p = it.product || {};
   const image = it.image || p?.imgPrimary?.url || p?.image || (Array.isArray(p?.images) && p.images[0]) || "";
-   return {
-    id: it.id,   // 🔹 Línea única
+  return {
+    id: it.id,   // línea única de carrito
     productId: it.productId,
     name: it.name || "Producto",
     color: it.color?.toLowerCase(),
@@ -44,10 +52,12 @@ export default function Cart() {
   const [cart, setCart] = useState({ items: [], shipping: 0 });
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
+
   const { toast } = useToast();
   const { refreshCart, user } = useAuth();
   const navigate = useNavigate();
 
+  // ---- Tema UI ----
   const pageBg      = useColorModeValue("gray.50", "gray.900");
   const headerBg    = useColorModeValue("pink.500", "pink.400");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
@@ -90,6 +100,10 @@ export default function Cart() {
   const subtotal = useMemo(() => items.reduce((acc, it) => acc + it.price * it.quantity, 0), [items]);
   const missing = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
+
+  // Validación de dirección y teléfono
+  const defaultAddress = getDefaultAddress(user);
+  const defaultPhone = getDefaultPhone(user);
 
   // ---- Handlers ----
   const onChangeQtyLine = async (lineId, delta) => {
@@ -162,6 +176,7 @@ export default function Cart() {
 
   return (
     <Box minH="100vh" bg={pageBg}>
+      {/* Header */}
       <AppHeader />
       <Box bg={headerBg} color="white" py={3}>
         <Container maxW="container.xl">
@@ -178,11 +193,13 @@ export default function Cart() {
           {itemCount} {itemCount === 1 ? "producto" : "productos"} en tu carrito
         </Text>
 
+        {/* Aviso compra mínima */}
         <Card borderColor={warnBorder} bg={warnBg} mb={4}>
           <CardContent py={3}>
             {missing > 0 ? (
               <Text fontSize="sm">
-                Tu pedido tiene <b>{itemCount}</b> productos. La compra mínima es <b>{MIN_ITEMS}</b>. Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"}.
+                Tu pedido tiene <b>{itemCount}</b> productos. La compra mínima es <b>{MIN_ITEMS}</b>. 
+                Faltan <b>{missing}</b> {missing === 1 ? "producto" : "productos"}.
               </Text>
             ) : (
               <Text fontSize="sm">¡Perfecto! Cumples la compra mínima de {MIN_ITEMS} productos.</Text>
@@ -191,6 +208,7 @@ export default function Cart() {
         </Card>
 
         <Grid templateColumns={{ base: "1fr", lg: "1fr 320px" }} gap={6}>
+          {/* Lista de productos */}
           <GridItem>
             {items.length === 0 ? (
               <Card bg={panelBg} borderColor={borderColor}>
@@ -204,7 +222,9 @@ export default function Cart() {
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
-                        <Box w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg}
+                        {/* Imagen */}
+                        <Box
+                          w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg}
                           onClick={() => openProductDetail(it.productId)}
                           mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
                         >
@@ -231,9 +251,10 @@ export default function Cart() {
                             />
                           </HStack>
                         </VStack>
-                        <VStack align={{ base: "stretch", md: "end" }} spacing={2} mt={{ base: 2, md: 0 }}>
-                          <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden"
-                            justify={{ base: "center", md: "flex-end" }}>
+
+                        {/* Cantidad + total */}
+                        <VStack align={{ base: "stretch", md: "end" }} spacing={2}>
+                          <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
                             <IconButton aria-label="Restar" icon={<MinusIcon boxSize={3} />}
                               size="sm" variant="ghost"
                               onClick={() => onChangeQtyLine(it.id, -1)}
@@ -245,9 +266,7 @@ export default function Cart() {
                               onClick={() => onChangeQtyLine(it.id, +1)}
                             />
                           </HStack>
-                          <Text fontWeight="semibold" textAlign={{ base: "center", md: "right" }}>
-                            {money(it.price * it.quantity)}
-                          </Text>
+                          <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
                         </VStack>
                       </Grid>
                     </CardContent>
@@ -257,27 +276,7 @@ export default function Cart() {
             )}
           </GridItem>
 
-        {/* Mobile: resumen desplegable arriba */}
-          <Box  display={{ base: "block", lg: "none" }} position="sticky" top="0" zIndex="10"
-            bg={headerBg} color="white" shadow="md" >
-              <Box px={4} py={2} cursor="pointer" _hover={{ bg: "pink.600" }}>
-                <Text fontWeight="bold">Resumen del Pedido ▾</Text>
-              </Box>
-              <Box px={4} py={3} bg="white" color="gray.800" display="none" _groupHover={{ display: "block" }}>
-                <HStack justify="space-between" mb={2}>
-                  <Text>Subtotal</Text><Text fontWeight="semibold">{money(subtotal)}</Text>
-                </HStack>
-                <HStack justify="space-between" mb={2}>
-                  <Text>Envío</Text><Text fontWeight="semibold">{cart.shipping ? money(cart.shipping) : "Gratis"}</Text>
-                </HStack>
-                <Divider my={2} />
-                <HStack justify="space-between">
-                  <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
-                </HStack>
-              </Box>
-          </Box>
-
-          {/* Desktop: resumen lateral */}
+          {/* Resumen lateral */}
           <GridItem display={{ base: "none", lg: "block" }}>
             <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
@@ -296,23 +295,30 @@ export default function Cart() {
                   <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
                 </HStack>
               </CardContent>
-                <CardFooter>
-                {(!user?.address || !user?.phone) && (
+              <CardFooter>
+                {(!defaultAddress || !defaultPhone) && (
                   <Text fontSize="sm" color="orange.500" mb={2}>
-                    Debes completar tu <b>{!user?.address ? "dirección" : ""}{!user?.address && !user?.phone ? " y " : ""}{!user?.phone ? "teléfono" : ""}</b> para continuar.
+                    Debes completar tu 
+                    {!defaultAddress ? " dirección" : ""} 
+                    {!defaultAddress && !defaultPhone ? " y " : ""} 
+                    {!defaultPhone ? " teléfono" : ""} 
+                    para continuar.
                   </Text>
                 )}
+
                 <CustomButton
                   onClick={onCheckout}
-                  isDisabled={!canCheckout || !user?.address || !user?.phone}
+                  isDisabled={!canCheckout || !defaultAddress || !defaultPhone}
                   size="lg"
-                > Completar la compra
-                 </CustomButton>
-                </CardFooter>
+                >
+                  Completar la compra
+                </CustomButton>
+              </CardFooter>
             </Card>
           </GridItem>
         </Grid>
 
+        {/* Modal producto */}
         <ProductModal
           isOpen={!!selected}
           onClose={() => setSelected(null)}
