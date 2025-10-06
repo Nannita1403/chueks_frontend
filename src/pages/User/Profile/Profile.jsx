@@ -71,26 +71,42 @@ export default function Profile() {
         <Heading mb={8}>Perfil de {user?.name || "Usuario"}</Heading>
 
         <VStack align="stretch" spacing={10}>
+          
           {/* Pedidos */}
           <Box>
-            <Heading size="md" mb={3}>
-              Mis pedidos
-            </Heading>
-            <Divider mb={4} />
-
-            {orders.length > 0 ? (
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-                {orders.map((order) => (
-                  <OrderCard
-                    key={order._id}
-                    order={order}
-                    onClick={() => setSelectedOrder(order)}
-                  />
-                ))}
-              </SimpleGrid>
-            ) : (
-              <Text color={muted}>No tienes pedidos todavía.</Text>
-            )}
+            <Box bg="gray.100" px={4} py={2} borderRadius="md">
+              <Text fontWeight="bold">Mis Pedidos</Text>
+            </Box>
+            <Box px={4} py={2}>
+              {loadingOrders ? <Spinner /> : (
+                orders.length > 0 ? (
+                  <VStack spacing={4} align="stretch">
+                    {orders.map(order => (
+                      <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
+                        <HStack justify="space-between" mb={2}>
+                          <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
+                          <Badge colorScheme={getStatusColor(order.status)}>{order.status}</Badge>
+                        </HStack>
+                        <Text fontSize="sm" color="gray.500" mb={2}>
+                          Fecha: {new Date(order.createdAt).toLocaleDateString()}
+                        </Text>
+                        <Text fontWeight="medium" mb={2}>
+                          Total: {formatPrice(order.total)} €
+                        </Text>
+                        <Box mb={2}>
+                          <Text fontWeight="medium">Dirección:</Text>
+                          <Text fontSize="sm">{formatAddress(order.address) || "No disponible"}</Text>
+                        </Box>
+                        <Box mb={2}>
+                          <Text fontWeight="medium">Teléfono:</Text>
+                          <Text fontSize="sm">{formatPhone(order.phone) || "No disponible"}</Text>
+                        </Box>
+                      </Box>
+                    ))}
+                  </VStack>
+                ) : <Text>No tienes pedidos todavía.</Text>
+              )}
+            </Box>
           </Box>
         </VStack>
 
