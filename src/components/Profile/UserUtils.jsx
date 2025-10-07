@@ -24,3 +24,12 @@ export function formatPhone(phone) {
   if (!phone) return null;
   return `${phone.number}${phone.label ? ` (${phone.label})` : ""}`;
 }
+
+export function formatPrice(amount) {
+  if (typeof amount !== "number") return "";
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0
+  }).format(amount);
+}

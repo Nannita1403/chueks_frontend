@@ -12,7 +12,7 @@ import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
-import { getDefaultAddress, getDefaultPhone, formatAddress, formatPhone } from "../../../components/Profile/UserUtils.jsx";
+import { getDefaultAddress, getDefaultPhone, formatAddress, formatPhone, formatPrice } from "../../../components/Profile/UserUtils.jsx";
 
 export default function ProfileDashboard() {
   const { user, setUser } = useAuth();
