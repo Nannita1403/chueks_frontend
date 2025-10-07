@@ -23,6 +23,7 @@ export default function EditNameModal({ isOpen, onClose, onSave, initialValue })
   }, [isOpen, initialValue]);
 
     const handleSave = () => {
+    console.log(data)
     if (onSave) onSave(name);  
     onClose();
   };

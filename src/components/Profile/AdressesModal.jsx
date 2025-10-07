@@ -1,12 +1,28 @@
-// AddressModal.jsx
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
   ModalBody, ModalFooter, Button
 } from "@chakra-ui/react";
+import { useRef } from "react";
 import AddressManager from "./AddressManager";
 
-export default function AddressModal({ isOpen, onClose, onSave, initialValue = [] }) {
-  let tempAddresses = initialValue;
+export default function AddressModal({
+  isOpen,
+  onClose,
+  initialValue = [],
+  onSave,
+  onUpdate,
+  deleteAddress
+}) {
+  const tempAddresses = useRef(initialValue);
+
+  const handleChange = (updated) => {
+    tempAddresses.current = updated;
+  };
+
+  const handleSave = () => {
+    onSave?.(tempAddresses.current);
+    onClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -17,20 +33,14 @@ export default function AddressModal({ isOpen, onClose, onSave, initialValue = [
         <ModalBody>
           <AddressManager
             initialValue={initialValue}
-            onChange={(val) => (tempAddresses = val)}
+            onChange={handleChange}
+            onUpdate={onUpdate}
+            onDelete={deleteAddress}
           />
         </ModalBody>
         <ModalFooter>
           <Button onClick={onClose} mr={3}>Cancelar</Button>
-          <Button
-            colorScheme="green"
-            onClick={() => {
-              onSave?.(tempAddresses);
-              onClose();
-            }}
-          >
-            Guardar
-          </Button>
+          <Button colorScheme="green" onClick={handleSave}>Guardar</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
