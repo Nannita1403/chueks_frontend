@@ -42,7 +42,7 @@ export default function ProfileDashboard() {
     const fetchOrders = async () => {
       try {
         const res = await ApiService.get("/orders/my-orders");
-        setOrders(res.orders || res || []);
+        setOrders(res.orders || res.data || res || []);
       } catch {
         toast({ title: "Error al cargar pedidos", status: "error" });
       } finally {
@@ -100,12 +100,19 @@ export default function ProfileDashboard() {
     const handleDeleteAddress = async (id) => {
       try {
         const res = await ApiService.delete(`/users/addresses/${id}`);
-        setUser(prev => ({ ...prev,  addresses: res.user?.addresses || res.addresses || prev.addresses }));
+        setUser(prev => ({
+          ...prev,
+          addresses: res.user?.addresses || prev.addresses.filter(a => a._id !== id)
+        }));
         toast({ title: "Dirección eliminada", status: "success" });
       } catch (error) {
-        toast({ title: error?.response?.data?.message || "Error al eliminar dirección", status: "error" });
+        toast({ 
+          title: error?.response?.data?.message || "Error al eliminar dirección", 
+          status: "error" 
+        });
       }
     };
+
 
 
   // ---- Teléfonos
@@ -135,12 +142,29 @@ export default function ProfileDashboard() {
     }
     try {
       const res = await ApiService.put(`/users/phones/${id}`, data);
-      setUser(prev => ({ ...prev, phones: res.user?.phones || res.phones || prev.phone }));
+      setUser(prev => ({ ...prev, phones: res.user?.phones || res.phones || prev.phones }));
       toast({ title: "Teléfono actualizado", status: "success" });
     } catch (error) {
       toast({ title: error?.response?.data?.message || "Error al actualizar teléfono", status: "error" });
     }
   };
+    const handleDeletePhone = async (id) => {
+      try {
+        const res = await ApiService.delete(`/users/phones/${id}`);
+        setUser(prev => ({
+          ...prev,
+          phones: res.user?.phones || prev.phones.filter(p => p._id !== id)
+        }));
+        toast({ title: "Teléfono eliminado", status: "success" });
+      } catch (error) {
+        toast({ 
+          title: error?.response?.data?.message || "Error al eliminar teléfono", 
+          status: "error" 
+        });
+      }
+    };
+
+
 
   const defaultAddress = getDefaultAddress(user);
   const defaultPhone = getDefaultPhone(user);
@@ -243,6 +267,7 @@ export default function ProfileDashboard() {
         initialValue={user?.phones || []}
         onSave={handleAddPhone}
         onUpdate={handleUpdatePhone}
+        deletePhone={handleDeletePhone}
       />
     </VStack>
   );

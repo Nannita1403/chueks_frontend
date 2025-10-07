@@ -305,13 +305,16 @@ export default function Cart() {
                   </Text>
                 )}
 
+              <Box display={{ base: "block", lg: "none" }} mt={6}>
                 <CustomButton
                   onClick={onCheckout}
                   isDisabled={!canCheckout}
                   size="lg"
+                  w="100%"
                 >
                   Completar la compra
                 </CustomButton>
+              </Box>    
               </CardFooter>
             </Card>
           </GridItem>
