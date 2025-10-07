@@ -11,6 +11,8 @@ import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
+import CompleteProfileModal from "../../../components/Profile/CompleteProfileModal.jsx";
+
 import {
   getDefaultAddress,
   getDefaultPhone,
@@ -26,6 +28,7 @@ export default function ProfileDashboard() {
 
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   const {
     isOpen: isNameOpen,
@@ -43,6 +46,12 @@ export default function ProfileDashboard() {
     onClose: onClosePhones
   } = useDisclosure();
 
+  const { 
+    isOpen: isCompleteOpen, 
+    onOpen: onOpenComplete, 
+    onClose: onCloseComplete 
+  } = useDisclosure();
+
   const getStatusColor = (status) => {
     switch (status) {
       case "pendiente": return "orange";
@@ -52,6 +61,19 @@ export default function ProfileDashboard() {
       default: return "gray";
     }
   };
+
+    useEffect(() => {
+      if (user) {
+        const needsName = !user.name?.trim();
+        const needsPhone = !user.phones || user.phones.length === 0;
+        const needsAddress = !user.addresses || user.addresses.length === 0;
+
+        if (needsName || needsPhone || needsAddress) {
+          setShowCompleteModal(true);
+          onOpenComplete();
+        }
+      }
+    }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -85,7 +107,27 @@ export default function ProfileDashboard() {
     }
   };
 
-  // Reusable address/phone validation
+      const handleCompleteProfile = async (data) => {
+      if (data.name?.trim()) {
+        await handleUpdateProfile({ name: data.name });
+      }
+
+      if (data.phone?.trim()) {
+        await handleAddPhone({ number: data.phone });
+      }
+
+      if (data.street?.trim() && data.city?.trim() && data.zip?.trim()) {
+        await handleAddAddress({
+          street: data.street,
+          city: data.city,
+          zip: data.zip,
+        });
+      }
+
+      setShowCompleteModal(false);
+    };
+
+    // Reusable address/phone validation
   const isValidAddress = ({ street, city, zip }) => street?.trim() && city?.trim() && zip?.trim();
   const isValidPhone = ({ number }) => number?.trim();
 
@@ -257,6 +299,11 @@ export default function ProfileDashboard() {
         onSave={handleAddPhone}
         onUpdate={handleUpdatePhone}
         deletePhone={handleDeletePhone}
+      />
+      <CompleteProfileModal
+        isOpen={isCompleteOpen}
+        onClose={onCloseComplete}
+        onSave={handleCompleteProfile}
       />
     </VStack>
   );
