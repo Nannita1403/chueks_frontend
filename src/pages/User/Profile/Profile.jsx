@@ -4,16 +4,15 @@ import {
   Heading,
   Text,
   VStack,
-  Divider,
   Spinner,
-  SimpleGrid,
   useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
-import OrderCard from "../../../components/Order/OrderCard.jsx";
+import { useToast } from "@chakra-ui/react";
 import OrderModal from "../../../components/Order/OrderModal.jsx";
 import UserLayout from "../UserLayout.jsx";
+import { formatAddress, formatPhone, formatPrice, } from "../../../components/Profile/UserUtils.jsx";
 
 export default function Profile() {
   const { user, token, logout } = useAuth(); 
@@ -22,29 +21,43 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pendiente": return "yellow";
+      case "enviado": return "blue";
+      case "entregado": return "green";
+      case "cancelado": return "red";
+      default: return "gray";
+    }
+  };
+
   const muted = useColorModeValue("gray.600", "gray.400");
-
+  const toast = useToast();
   // 📌 Cargar órdenes
-  useEffect(() => {
-    if (!token) return logout(); 
-
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get("/api/orders/my-orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOrders(res.data?.orders || []);
-      } catch (err) {
-        console.error("❌ Error cargando pedidos:", err);
-        toast({ title: "Error al cargar pedidos", status: "error" });
-        setOrders([]);
-      } finally {
-        setLoading(false);
+    useEffect(() => {
+      if (token === undefined) return; // ⚠️ Espera a que el token esté definido (aunque sea null)
+      if (!token) {
+        logout();
+        return;
       }
-    };
 
-    fetchOrders();
-  }, [token, toast, logout]);
+      const fetchOrders = async () => {
+        try {
+          const res = await axios.get("/api/orders/my-orders", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setOrders(res.data?.orders || []);
+        } catch (err) {
+          console.error("❌ Error cargando pedidos:", err);
+          toast({ title: "Error al cargar pedidos", status: "error" });
+          setOrders([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchOrders();
+    }, [token, toast, logout]);
 
   if (loading) {
     return (
@@ -71,15 +84,15 @@ export default function Profile() {
         <Heading mb={8}>Perfil de {user?.name || "Usuario"}</Heading>
 
         <VStack align="stretch" spacing={10}>
-          
+
           {/* Pedidos */}
           <Box>
             <Box bg="gray.100" px={4} py={2} borderRadius="md">
               <Text fontWeight="bold">Mis Pedidos</Text>
             </Box>
             <Box px={4} py={2}>
-              {loadingOrders ? <Spinner /> : (
-                orders.length > 0 ? (
+                {loading ? <Spinner /> : (
+                  orders.length > 0 ? (
                   <VStack spacing={4} align="stretch">
                     {orders.map(order => (
                       <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
