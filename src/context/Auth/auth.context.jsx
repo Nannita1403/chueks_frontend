@@ -146,17 +146,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   const setUser = useCallback((user) => {
+    const currentToken = localStorage.getItem("token");
     dispatch({ type: "SET_USER", payload: user });
-    if (user?.token) {
-      ApiService.setToken(user.token);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", user.token);
-    } else {
-      ApiService.setToken(null);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+    if (user) {
+    // Usa el token que venga del user o el que ya tenías
+    const tokenToUse = user.token || currentToken;
+    ApiService.setToken(tokenToUse);
+    localStorage.setItem("user", JSON.stringify(user));
+    if (tokenToUse) {
+      localStorage.setItem("token", tokenToUse);
     }
-  }, []);
+  } else {
+    // Solo borra si user es null o undefined
+    ApiService.setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+  }
+}, []);
 
   const toggleFavorite = useCallback(async (productId) => {
     try {

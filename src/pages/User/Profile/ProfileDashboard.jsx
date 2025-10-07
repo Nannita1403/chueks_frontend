@@ -91,7 +91,7 @@ export default function ProfileDashboard() {
   }, [user]);
 
   const updateUser = (updatedFields, message = "Datos actualizados") => {
-    setUser((prev) => ({ ...prev, ...updatedFields }));
+    setUser({ ...user, ...updatedFields });
     toast({ title: message, status: "success" });
   };
 
