@@ -9,11 +9,9 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input,
-  useDisclosure,
-  useEffect,
-  useState
+  Input
 } from "@chakra-ui/react";
+import {   useDisclosure, useEffect, useState } from "react";
 
 export default function CompleteProfileModal({ isOpen, onClose, onSave }) {
   const [formData, setFormData] = useState({
