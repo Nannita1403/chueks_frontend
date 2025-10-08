@@ -47,10 +47,9 @@ function normalizeItem(it) {
 export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({ items: [], shipping: 0 });
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
-  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-
   const { toast } = useToast();
   const { refreshCart, user } = useAuth();
   const navigate = useNavigate();
@@ -143,6 +142,14 @@ export default function Cart() {
       });
     }
   };
+
+      const handleCheckoutClick = () => {
+      if (!defaultAddress || !defaultPhone) {
+        setIsAddressModalOpen(true); // Esto abre el modal
+      } else {
+        onCheckout(); // Solo hace checkout si los datos están completos
+      }
+    };
 
   const openProductDetail = async (productId) => {
     try {
@@ -390,9 +397,8 @@ export default function Cart() {
             }
           }}
         />
-      </Container>
 
-      <AddressPhoneModal
+        <AddressPhoneModal
         isOpen={isAddressModalOpen}
         onClose={() => setIsAddressModalOpen(false)}
         onConfirm={() => {
@@ -400,7 +406,8 @@ export default function Cart() {
           onCheckout(); // volver a intentar checkout luego de guardar
         }}
       />
-
+      
+      </Container>
     </Box>
   );
 }
