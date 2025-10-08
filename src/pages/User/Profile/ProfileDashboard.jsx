@@ -247,34 +247,50 @@ export default function ProfileDashboard() {
           <Text fontWeight="bold">Mis Pedidos</Text>
         </Box>
         <Box px={4} py={2}>
-          {loadingOrders ? <Spinner /> : (
-            orders.length > 0 ? (
-              <VStack spacing={4} align="stretch">
-                {orders.map(order => (
-                  <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
-                    <HStack justify="space-between" mb={2}>
-                      <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
-                      <Badge colorScheme={getStatusColor(order.status)}>{order.status}</Badge>
-                    </HStack>
-                    <Text fontSize="sm" color="gray.500" mb={2}>
-                      Fecha: {new Date(order.createdAt).toLocaleDateString()}
-                    </Text>
-                    <Text fontWeight="medium" mb={2}>
-                      Total: {formatPrice(order.total)} €
-                    </Text>
-                    <Box mb={2}>
-                      <Text fontWeight="medium">Dirección:</Text>
-                      <Text fontSize="sm">{formatAddress(order.address) || "No disponible"}</Text>
-                    </Box>
-                    <Box mb={2}>
-                      <Text fontWeight="medium">Teléfono:</Text>
-                      <Text fontSize="sm">{formatPhone(order.phone) || "No disponible"}</Text>
-                    </Box>
-                  </Box>
-                ))}
-              </VStack>
-            ) : <Text>No tienes pedidos todavía.</Text>
-          )}
+          {loadingOrders ? (
+              <Spinner />
+            ) : orders.length > 0 ? (
+              <>
+                <VStack spacing={4} align="stretch">
+                  {orders
+                    .slice() // hacemos copia para no mutar el array original
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ordenar descendente por fecha
+                    .slice(0, 3) // tomar solo los últimos 3
+                    .map(order => (
+                      <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
+                        <HStack justify="space-between" mb={2}>
+                          <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
+                          <Badge colorScheme={getStatusColor(order.status)}>{order.status}</Badge>
+                        </HStack>
+                        <Text fontSize="sm" color="gray.500" mb={2}>
+                          Fecha: {new Date(order.createdAt).toLocaleDateString()}
+                        </Text>
+                        <Text fontWeight="medium" mb={2}>
+                          Total: {formatPrice(order.total)} €
+                        </Text>
+                        <Box mb={2}>
+                          <Text fontWeight="medium">Dirección:</Text>
+                          <Text fontSize="sm">{formatAddress(order.address) || "No disponible"}</Text>
+                        </Box>
+                        <Box mb={2}>
+                          <Text fontWeight="medium">Teléfono:</Text>
+                          <Text fontSize="sm">{formatPhone(order.phone) || "No disponible"}</Text>
+                        </Box>
+                      </Box>
+                  ))}
+                </VStack>
+                <Button
+                  mt={4}
+                  colorScheme="blue"
+                  onClick={() => navigate("/profile/orders")}
+                  alignSelf="center"
+                >
+                  Ver todos los pedidos
+                </Button>
+              </>
+            ) : (
+              <Text>No tienes pedidos todavía.</Text>
+            )}
         </Box>
       </Box>
 

@@ -83,7 +83,7 @@ export default function OrdersPageUser() {
 
   return (
     <Box maxW="container.xl" mx="auto" py={8}>
-      <Heading size="lg" mb={6}>Mis pedidos</Heading>
+      <Heading size="lg" mb={6}>Historial de Pedidos</Heading>
       <Divider mb={6} />
 
       {orders.length === 0 && <Text color={muted}>No tienes pedidos todavía.</Text>}

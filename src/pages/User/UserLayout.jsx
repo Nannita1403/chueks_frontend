@@ -29,6 +29,18 @@ const menuItems = [
   { label: "Teléfonos", path: "/profile/phones", color: "yellow.400", type: "modal" },
 ];
 
+     const handleClick = (item) => {
+     console.log("Navigating to", item.path);
+     if (item.type === "modal") {
+       if (item.label === "Direcciones") onOpenAddresses();
+       if (item.label === "Teléfonos") onOpenPhones();
+     } else {
+       navigate(item.path);
+     }
+  };
+
+
+
 const SidebarContent = ({ onClose, onOpenAddresses, onOpenPhones, logoSrc, handleLogout, handleClick, location, navigate }) => (
   <Flex direction="column" h="100%" justify="space-between" bg="gray.900" color="white" p={4} w="250px">
     <VStack spacing={6} align="stretch">
@@ -93,14 +105,6 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
   const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
-  const handleClick = (item) => {
-    if (item.type === "modal") {
-      if (item.label === "Direcciones") onOpenAddresses();
-      if (item.label === "Teléfonos") onOpenPhones();
-    } else {
-      navigate(item.path);
-    }
-  };
 
   return (
     <Flex minH="100vh">
