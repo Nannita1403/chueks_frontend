@@ -5,12 +5,12 @@ import {
   ModalContent, ModalHeader, ModalBody, ModalCloseButton,
   ModalFooter, Button, Badge, Select, Checkbox
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import ApiService from "../../../reducers/api/Api.jsx";
 
 export default function OrdersPageUser() {
-  const { token, user } = useAuth();
+  const { token } = useAuth();
   const { toast } = useToast();
 
   const [orders, setOrders] = useState([]);
@@ -23,10 +23,10 @@ export default function OrdersPageUser() {
   // 📌 Cargar pedidos del usuario
   const fetchOrders = async () => {
     try {
-      const res = await axios.get("/api/orders/my-orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOrders(res.data.orders ?? []);
+      const res = await ApiService.get("/orders/my-orders");
+      // El servicio normaliza: puede venir en res.orders o res.data o res directamente
+      setOrders(res.orders || res.data || res || []);
+      console.log(res);
     } catch (err) {
       console.error(err);
       toast({ title: "Error al cargar pedidos", status: "error" });
@@ -35,19 +35,17 @@ export default function OrdersPageUser() {
     }
   };
 
-  useEffect(() => { if (token) fetchOrders(); }, [token]);
+  useEffect(() => {
+    if (token) fetchOrders();
+  }, [token]);
 
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
   // 📌 Cambiar estado del pedido
   const updateStatus = async (orderId, status) => {
     try {
-      await axios.patch(
-        `/api/orders/${orderId}/status`,
-        { status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchOrders(); // refrescar lista
+      await ApiService.patch(`/orders/${orderId}/status`, { status });
+      await fetchOrders(); // refrescar lista
     } catch (err) {
       console.error(err);
       toast({ title: "Error al actualizar estado", status: "error" });
@@ -57,20 +55,15 @@ export default function OrdersPageUser() {
   // 📌 Marcar item como armado
   const togglePicked = async (orderId, idx, picked) => {
     try {
-      await axios.patch(
-        `/api/orders/${orderId}/items/${idx}/picked`,
-        { picked },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      // refrescar modal seleccionado
+      await ApiService.patch(`/orders/${orderId}/items/${idx}/picked`, { picked });
+      // refrescar modal seleccionado localmente para UX rápido
       setSelectedOrder(prev => ({
         ...prev,
-        items: prev.items.map((it, i) =>
-          i === idx ? { ...it, picked } : it
-        )
+        items: prev.items.map((it, i) => (i === idx ? { ...it, picked } : it))
       }));
     } catch (err) {
       console.error(err);
+      toast({ title: "Error al actualizar armado del item", status: "error" });
     }
   };
 
@@ -99,9 +92,9 @@ export default function OrdersPageUser() {
               <Text fontWeight="bold">Pedido: {order.code}</Text>
               <Badge colorScheme={
                 order.status === "pending" ? "yellow" :
-                order.status === "processing" ? "blue" :
-                order.status === "completed" ? "green" :
-                "red"
+                  order.status === "processing" ? "blue" :
+                    order.status === "completed" ? "green" :
+                      "red"
               }>
                 {order.status.toUpperCase()}
               </Badge>
@@ -124,7 +117,7 @@ export default function OrdersPageUser() {
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack spacing={4} align="start">
                     {item.image && (
-                      <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md"/>
+                      <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md" />
                     )}
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">{item.name}</Text>
@@ -152,7 +145,7 @@ export default function OrdersPageUser() {
               ))}
             </VStack>
 
-            <Divider my={4}/>
+            <Divider my={4} />
 
             <VStack spacing={1} align="flex-end">
               <Text>Subtotal: ${formatNumber(selectedOrder?.subtotal)}</Text>
