@@ -1,11 +1,14 @@
 export function getDefaultAddress(user) {
-  if (!user?.addresses?.length) return null;
-  return user.addresses.find(a => a.default) || user.addresses[0];
+if (!user?.addresses?.length) return null;
+  // Busca el default, si no hay ninguno devuelve el primero
+  const defaultAddr = user.addresses.find(addr => addr.default === true);
+  return defaultAddr || user.addresses[0];
 }
 
 export function getDefaultPhone(user) {
   if (!user?.phones?.length) return null;
-  return user.phones.find(p => p.default) || user.phones[0];
+  const defaultPhone = user.phones.find(phone => phone.default === true);
+  return defaultPhone || user.phones[0];
 }
 
 export function formatAddress(address) {

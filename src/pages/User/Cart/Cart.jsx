@@ -125,32 +125,29 @@ export default function Cart() {
   };
 
   const onCheckout = async () => {
-    if (!defaultAddress || !defaultPhone) {
-      setIsAddressModalOpen(true);
-      return;
-    }
-
-    try {
-      const res = await ApiService.post("/orders/checkout");
-      await refreshCart();
-      navigate(`/order/confirm?orderId=${res.order._id}`);
-    } catch (err) {
-      toast({
-        title: "Error al procesar el pedido",
-        description: err?.response?.data?.message || err.message || "Intenta nuevamente",
-        status: "error"
-      });
-    }
-  };
-
-      const handleCheckoutClick = () => {
       if (!defaultAddress || !defaultPhone) {
-        setIsAddressModalOpen(true); // Esto abre el modal
-      } else {
-        onCheckout(); // Solo hace checkout si los datos están completos
+        setIsAddressModalOpen(true);
+        return;
+      }
+
+      try {
+        const res = await ApiService.post("/orders/checkout", {
+          addressId: defaultAddress._id,
+          phoneId: defaultPhone._id,
+        });
+
+        await refreshCart();
+        navigate(`/order/confirm?orderId=${res.order._id}`);
+      } catch (err) {
+        console.error("❌ Error en checkout:", err);
+        toast({
+          title: "Error al procesar el pedido",
+          description: err?.response?.data?.message || err.message || "Intenta nuevamente",
+          status: "error"
+        });
       }
     };
-
+      
   const openProductDetail = async (productId) => {
     try {
       const p = await ApiService.get(`/products/${productId}`);
