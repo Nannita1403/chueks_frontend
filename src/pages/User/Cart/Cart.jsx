@@ -19,6 +19,7 @@ import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { getDefaultAddress, getDefaultPhone } from "../../../components/Profile/UserUtils.jsx";
+import AddressPhoneModal from "../../../components/Order/AddressPhoneModal.jsx"
 
 const MIN_ITEMS = 10;
 
@@ -48,6 +49,7 @@ export default function Cart() {
   const [cart, setCart] = useState({ items: [], shipping: 0 });
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   const { toast } = useToast();
   const { refreshCart, user } = useAuth();
@@ -125,10 +127,10 @@ export default function Cart() {
 
   const onCheckout = async () => {
     if (!defaultAddress || !defaultPhone) {
-      toast({ title: "Completa dirección y teléfono para continuar", status: "warning" });
-      navigate("/profile");
+      setIsAddressModalOpen(true);
       return;
     }
+
     try {
       const res = await ApiService.post("/orders/checkout");
       await refreshCart();
@@ -275,7 +277,7 @@ export default function Cart() {
             )}
           </GridItem>
 
-          {/* Resumen lateral */}
+          {/* Resumen lateral en desktop */}
           <GridItem display={{ base: "none", lg: "block" }}>
             <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
@@ -306,8 +308,62 @@ export default function Cart() {
                 )}
 
                 <CustomButton
-                  onClick={onCheckout}
-                  isDisabled={!canCheckout || !defaultAddress || !defaultPhone}
+                  onClick={() => {
+                    if (!defaultAddress || !defaultPhone) {
+                      setIsAddressModalOpen(true);
+                    } else {
+                      onCheckout();
+                    }
+                  }}
+                  isDisabled={!canCheckout}
+                  size="lg"
+                  w="100%"
+                >
+                  Completar la compra
+                </CustomButton>
+              </CardFooter>
+            </Card>
+          </GridItem>
+
+          {/* Resumen en mobile */}
+          <GridItem display={{ base: "block", lg: "none" }} mt={8}>
+            <Card bg={panelBg} borderColor={borderColor}>
+              <CardHeader pb={2}>
+                <CardTitle>Resumen del Pedido</CardTitle>
+                <CardDescription>Revisa los totales antes de continuar</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HStack justify="space-between" mb={2}>
+                  <Text>Subtotal</Text><Text fontWeight="semibold">{money(subtotal)}</Text>
+                </HStack>
+                <HStack justify="space-between" mb={2}>
+                  <Text>Envío</Text><Text fontWeight="semibold">{cart.shipping ? money(cart.shipping) : "Gratis"}</Text>
+                </HStack>
+                <Divider my={3} />
+                <HStack justify="space-between" mb={2}>
+                  <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
+                </HStack>
+              </CardContent>
+              <CardFooter flexDir="column" gap={2}>
+                {(!defaultAddress || !defaultPhone) && (
+                  <Text fontSize="sm" color="orange.500">
+                    Debes completar tu
+                    {!defaultAddress ? " dirección" : ""}
+                    {!defaultAddress && !defaultPhone ? " y " : ""}
+                    {!defaultPhone ? " teléfono" : ""}
+                    para continuar.
+                  </Text>
+                )}
+
+                <CustomButton
+                  onClick={() => {
+                    if (!defaultAddress || !defaultPhone) {
+                      setIsAddressModalOpen(true);
+                    } else {
+                      onCheckout();
+                    }
+                  }}
+                  isDisabled={!canCheckout}
                   size="lg"
                   w="100%"
                 >
@@ -335,6 +391,16 @@ export default function Cart() {
           }}
         />
       </Container>
+
+      <AddressPhoneModal
+        isOpen={isAddressModalOpen}
+        onClose={() => setIsAddressModalOpen(false)}
+        onConfirm={() => {
+          setIsAddressModalOpen(false);
+          onCheckout(); // volver a intentar checkout luego de guardar
+        }}
+      />
+
     </Box>
   );
 }
