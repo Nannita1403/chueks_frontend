@@ -29,25 +29,24 @@ const menuItems = [
   { label: "Teléfonos", path: "/profile/phones", color: "yellow.400", type: "modal" },
 ];
 
-     const handleClick = (item) => {
-     console.log("Navigating to", item.path);
-     if (item.type === "modal") {
-       if (item.label === "Direcciones") onOpenAddresses();
-       if (item.label === "Teléfonos") onOpenPhones();
-     } else {
-       navigate(item.path);
-     }
-  };
-
-
-
-const SidebarContent = ({ onClose, onOpenAddresses, onOpenPhones, logoSrc, handleLogout, handleClick, location, navigate }) => (
+const SidebarContent = ({
+  onClose,
+  onOpenAddresses,
+  onOpenPhones,
+  logoSrc,
+  handleLogout,
+  handleClick,
+  location,
+  navigate,
+}) => (
   <Flex direction="column" h="100%" justify="space-between" bg="gray.900" color="white" p={4} w="250px">
     <VStack spacing={6} align="stretch">
       {/* Logo */}
       <Box textAlign="center" bg="white" borderRadius="md" p={2}>
         <Image src={logoSrc} alt="Logo" mx="auto" mb={2} maxH="60px" />
-        <Text fontWeight="bold" fontSize="lg" color="gray.900">Mi Perfil</Text>
+        <Text fontWeight="bold" fontSize="lg" color="gray.900">
+          Mi Perfil
+        </Text>
       </Box>
 
       {/* Volver al Home */}
@@ -57,7 +56,10 @@ const SidebarContent = ({ onClose, onOpenAddresses, onOpenPhones, logoSrc, handl
         w="full"
         mb={4}
         _hover={{ bg: "gray.200" }}
-        onClick={() => { navigate("/"); onClose?.(); }}
+        onClick={() => {
+          navigate("/");
+          onClose?.();
+        }}
       >
         Volver al Home
       </Button>
@@ -76,7 +78,10 @@ const SidebarContent = ({ onClose, onOpenAddresses, onOpenPhones, logoSrc, handl
               color={isActive ? "white" : "gray.900"}
               fontWeight={isActive ? "bold" : "normal"}
               borderRadius="md"
-              onClick={() => { handleClick(item); onClose?.(); }}
+              onClick={() => {
+                handleClick(item);
+                onClose?.();
+              }}
               _hover={{ bg: item.color, color: "white" }}
             >
               {item.label}
@@ -102,9 +107,23 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { isOpen: isAddressesOpen, onOpen: onOpenAddresses, onClose: onCloseAddresses } = useDisclosure();
+  const {
+    isOpen: isAddressesOpen,
+    onOpen: onOpenAddresses,
+    onClose: onCloseAddresses,
+  } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
+  // Aquí la función está dentro de UserLayout para tener acceso a navigate y modales
+  const handleClick = (item) => {
+    console.log("Navigating to", item.path);
+    if (item.type === "modal") {
+      if (item.label === "Direcciones") onOpenAddresses();
+      if (item.label === "Teléfonos") onOpenPhones();
+    } else {
+      navigate(item.path);
+    }
+  };
 
   return (
     <Flex minH="100vh">
@@ -137,7 +156,9 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
-          <DrawerHeader bg="gray.900" color="white">Menú</DrawerHeader>
+          <DrawerHeader bg="gray.900" color="white">
+            Menú
+          </DrawerHeader>
           <DrawerBody p={0}>
             <SidebarContent
               onClose={onClose}
