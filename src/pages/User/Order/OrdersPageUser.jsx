@@ -152,18 +152,17 @@ export default function OrdersPageUser() {
               <Text>Envío: ${formatNumber(selectedOrder?.shipping)}</Text>
               <Text fontWeight="bold">Total: ${formatNumber(selectedOrder?.total)}</Text>
 
-              {/* Cambiar estado */}
-              <HStack mt={2}>
+              {/* Estado */}
+              <HStack mt={2} spacing={2} align="center">
                 <Text>Estado:</Text>
-                <Select
-                  value={selectedOrder?.status}
-                  onChange={(e) => updateStatus(selectedOrder._id, e.target.value)}
-                >
-                  <option value="pending">Pendiente</option>
-                  <option value="processing">En Proceso</option>
-                  <option value="completed">Completado</option>
-                  <option value="cancelled">Cancelado</option>
-                </Select>
+                <Badge colorScheme={
+                  selectedOrder?.status === "pending" ? "yellow" :
+                  selectedOrder?.status === "processing" ? "blue" :
+                  selectedOrder?.status === "completed" ? "green" :
+                  "red"
+                }>
+                  {selectedOrder?.status.toUpperCase()}
+                </Badge>
               </HStack>
             </VStack>
           </ModalBody>
