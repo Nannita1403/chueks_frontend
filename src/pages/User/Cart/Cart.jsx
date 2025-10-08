@@ -294,9 +294,9 @@ export default function Cart() {
                   <Text>Total</Text><Text fontWeight="bold">{money(subtotal + (cart.shipping || 0))}</Text>
                 </HStack>
               </CardContent>
-              <CardFooter>
+              <CardFooter flexDir="column" gap={2}>
                 {(!defaultAddress || !defaultPhone) && (
-                  <Text fontSize="sm" color="orange.500" mb={2}>
+                  <Text fontSize="sm" color="orange.500">
                     Debes completar tu
                     {!defaultAddress ? " dirección" : ""}
                     {!defaultAddress && !defaultPhone ? " y " : ""}
@@ -305,16 +305,14 @@ export default function Cart() {
                   </Text>
                 )}
 
-              <Box display={{ base: "block", lg: "none" }} mt={6}>
                 <CustomButton
                   onClick={onCheckout}
-                  isDisabled={!canCheckout}
+                  isDisabled={!canCheckout || !defaultAddress || !defaultPhone}
                   size="lg"
                   w="100%"
                 >
                   Completar la compra
                 </CustomButton>
-              </Box>    
               </CardFooter>
             </Card>
           </GridItem>
