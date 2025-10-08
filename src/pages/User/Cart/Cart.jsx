@@ -316,6 +316,7 @@ export default function Cart() {
 
                 <CustomButton
                   onClick={() => {
+                      console.log("defaultAddress:", defaultAddress, "defaultPhone:", defaultPhone);
                     if (!defaultAddress || !defaultPhone) {
                       setIsAddressModalOpen(true);
                     } else {
@@ -364,6 +365,7 @@ export default function Cart() {
 
                 <CustomButton
                   onClick={() => {
+                    console.log("defaultAddress:", defaultAddress, "defaultPhone:", defaultPhone);
                     if (!defaultAddress || !defaultPhone) {
                       setIsAddressModalOpen(true);
                     } else {
@@ -406,7 +408,7 @@ export default function Cart() {
           onCheckout(); // volver a intentar checkout luego de guardar
         }}
       />
-      
+
       </Container>
     </Box>
   );

@@ -23,6 +23,9 @@ export default function AddressPhoneModal({ isOpen, onClose, onConfirm }) {
   }, [user]);
 
   const handleSave = async () => {
+    useEffect(() => {
+    if (isOpen) console.log("Modal abierto");
+    }, [isOpen]);
     if (!address || !phone) {
       toast({
         title: "Campos requeridos",
