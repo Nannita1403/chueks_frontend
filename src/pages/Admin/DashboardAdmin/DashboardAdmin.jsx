@@ -78,15 +78,6 @@ const AdminDashboard = () => {
             <Text color="gray.600">Resumen general de la tienda</Text>
           </Box>
 
-          {/* Stats */}
-          <Grid
-            templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
-            gap={{ base: 4, md: 6 }}
-            w="full"
-          >
-            {stats.map((stat, i) => <StatsCard key={i} stat={stat} />)}
-          </Grid>
-
           {/* Alert de stock/pedidos pendientes */}
           <Alert status="warning" borderRadius="lg" w="full">
             <AlertIcon />
@@ -106,59 +97,14 @@ const AdminDashboard = () => {
             </Box>
           </Alert>
 
-          {/* Productos bajo Stock */}
-          <Card w="full">
-            <CardHeader>
-              <Flex justify="space-between" align="center">
-                <Box>
-                  <Heading size="md">Productos con stock bajo</Heading>
-                  <Text color="gray.600" fontSize="sm">
-                    Productos con alguna variante en stock ≤ 3 unidades
-                  </Text>
-                </Box>
-                <Link to="/admin/products?filter=low-stock">
-                  <Button variant="outline" size="sm">Ver todos</Button>
-                </Link>
-              </Flex>
-            </CardHeader>
-
-            <CardBody p={0}>
-              {lowStockProducts.length === 0 ? (
-                <Box p={4}><Text color="gray.500">No hay productos con stock bajo 🎉</Text></Box>
-              ) : (
-                <Table variant="simple" size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Producto</Th>
-                      <Th>Código</Th>
-                      <Th>Colores en riesgo</Th>
-                      <Th>Acciones</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {lowStockProducts.map(product => (
-                      <Tr key={product._id}>
-                        <Td>{product.name}</Td>
-                        <Td>{product.code}</Td>
-                        <Td>
-                          {product.colors.map((c, i) => (
-                            <Badge key={i} colorScheme="red" mr={1}>
-                              {c.name}: {c.stock}
-                            </Badge>
-                          ))}
-                        </Td>
-                        <Td>
-                          <Link to={`/admin/products/${product._id}`}>
-                            <IconButton aria-label="Ver" icon={<FiEye />} variant="ghost" size="sm" />
-                          </Link>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-            </CardBody>
-          </Card>
+          {/* Stats */}
+          <Grid
+            templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
+            gap={{ base: 4, md: 6 }}
+            w="full"
+          >
+            {stats.map((stat, i) => <StatsCard key={i} stat={stat} />)}
+          </Grid>
 
           {/* Pedidos recientes */}
           <Card w="full">
@@ -186,7 +132,6 @@ const AdminDashboard = () => {
                       <Th>Productos</Th>
                       <Th>Total</Th>
                       <Th>Estado</Th>
-                      <Th>Acciones</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -196,6 +141,54 @@ const AdminDashboard = () => {
                   </Tbody>
                 </Table>
               </Box>
+
+                        {/* Productos bajo Stock */}
+          <Card w="full">
+            <CardHeader>
+              <Flex justify="space-between" align="center">
+                <Box>
+                  <Heading size="md">Productos con stock bajo</Heading>
+                  <Text color="gray.600" fontSize="sm">
+                    Productos con alguna variante en stock ≤ 3 unidades
+                  </Text>
+                </Box>
+                <Link to="/admin/products?filter=low-stock">
+                  <Button variant="outline" size="sm">Ver todos</Button>
+                </Link>
+              </Flex>
+            </CardHeader>
+
+            <CardBody p={0}>
+              {lowStockProducts.length === 0 ? (
+                <Box p={4}><Text color="gray.500">No hay productos con stock bajo 🎉</Text></Box>
+              ) : (
+                <Table variant="simple" size="sm">
+                  <Thead>
+                    <Tr>
+                      <Th>Producto</Th>
+                      <Th>Código</Th>
+                      <Th>Colores en riesgo</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {lowStockProducts.map(product => (
+                      <Tr key={product._id}>
+                        <Td>{product.name}</Td>
+                        <Td>{product.code}</Td>
+                        <Td>
+                          {product.colors.map((c, i) => (
+                            <Badge key={i} colorScheme="red" mr={1}>
+                              {c.name}: {c.stock}
+                            </Badge>
+                          ))}
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              )}
+            </CardBody>
+          </Card>
 
               {/* Mobile */}
               <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
@@ -270,11 +263,6 @@ function OrderRow({ order }) {
       </Td>
       <Td>${(order.total ?? 0).toLocaleString("es-AR")}</Td>
       <Td><OrderStatusBadge status={order.status} /></Td>
-      <Td>
-        <Link to={`/admin/orders/${order._id}`}>
-          <IconButton aria-label="Ver" icon={<FiEye />} variant="ghost" size="sm" />
-        </Link>
-      </Td>
     </Tr>
   );
 }
@@ -295,9 +283,6 @@ function MobileOrderCard({ order }) {
       </Box>
       <Text fontWeight="semibold" mt={2}>${(order.total ?? 0).toLocaleString("es-AR")}</Text>
       <OrderStatusBadge status={order.status} />
-      <Link to={`/admin/orders/${order._id}`}>
-        <Button size="sm" mt={2} leftIcon={<FiEye />}>Ver</Button>
-      </Link>
     </Box>
   );
 }
