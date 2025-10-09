@@ -24,16 +24,15 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [categoryCounts, setCategoryCounts] = useState({});
 
-
-  useEffect(() => {
+useEffect(() => {
   const loadData = async () => {
     setIsLoading(true);
     try {
       const data = await ApiService.get("/products/dashboard");
       console.log("📊 Dashboard data:", data);
 
-      // Crea las "stats" manualmente
       setStats([
         {
           title: "Stock bajo",
@@ -53,18 +52,18 @@ const AdminDashboard = () => {
         },
       ]);
 
-      setRecentOrders(data.recentPendingOrders || []);
+      setRecentOrders(data.recentOrders || []); // <- ahora todos, no solo pendientes
       setLowStockProducts(data.lowStockProducts || []);
-
+      setCategoryCounts(data.categoryCounts || {});
     } catch (error) {
       console.error("❌ Error al cargar dashboard:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
   loadData();
 }, []);
-
 
   if (isLoading) return <Loading />;
 
@@ -78,25 +77,36 @@ const AdminDashboard = () => {
             <Text color="gray.600">Resumen general de la tienda</Text>
           </Box>
 
-          {/* Alert de stock/pedidos pendientes */}
-          <Alert status="warning" borderRadius="lg" w="full">
-            <AlertIcon />
-            <Box>
-              <AlertTitle>Atención requerida</AlertTitle>
-              <AlertDescription>
-                Hay {stats[0]?.value || 0} productos con stock bajo y {stats[1]?.value || 0} pedidos pendientes.
-              </AlertDescription>
-              <HStack spacing={2} mt={2}>
-                <Link to="/admin/products?filter=low-stock">
-                  <Button variant="outline" size="sm" colorScheme="yellow">Ver productos</Button>
-                </Link>
-                <Link to="/admin/orders?filter=pending">
-                  <Button variant="outline" size="sm" colorScheme="yellow">Ver pedidos</Button>
-                </Link>
-              </HStack>
-            </Box>
-          </Alert>
+          <Card bg="orange.100" w="full">
+          <CardBody>
+            <Heading size="sm" mb={2}>⚠ Atención requerida</Heading>
+            <Text fontSize="sm" mb={2}>
+              Hay {stats[0]?.value || 0} productos con stock bajo y {stats[1]?.value || 0} pedidos pendientes.
+            </Text>
+            <HStack spacing={2}>
+              <Link to="/admin/products?filter=low-stock">
+                <Button variant="outline" size="sm" colorScheme="orange">Ver productos</Button>
+              </Link>
+              <Link to="/admin/orders?filter=pending">
+                <Button variant="outline" size="sm" colorScheme="orange">Ver pedidos</Button>
+              </Link>
+            </HStack>
+          </CardBody>
+        </Card>
 
+        <Card w="full">
+          <CardBody>
+            <Heading size="sm" mb={2}>🗂 Productos por categoría</Heading>
+            <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }} gap={2}>
+              {Object.entries(categoryCounts).map(([category, count]) => (
+                <Box key={category} bg="gray.100" p={3} borderRadius="md">
+                  <Text fontWeight="medium">{category}</Text>
+                  <Text fontSize="sm" color="gray.600">{count} productos</Text>
+                </Box>
+              ))}
+            </Grid>
+          </CardBody>
+        </Card>
           {/* Stats */}
           <Grid
             templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
@@ -107,7 +117,7 @@ const AdminDashboard = () => {
           </Grid>
 
           {/* Pedidos recientes */}
-          <Card w="full">
+          <Card w="full" mt={6}>
             <CardHeader>
               <Flex justify="space-between" align="center">
                 <Box>
@@ -142,8 +152,18 @@ const AdminDashboard = () => {
                 </Table>
               </Box>
 
-                        {/* Productos bajo Stock */}
-          <Card w="full">
+
+              {/* Mobile */}
+              <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
+                {recentOrders.map(order => (
+                  <MobileOrderCard key={order._id} order={order} />
+                ))}
+              </Box>
+            </CardBody>
+          </Card>
+
+          {/* Productos bajo Stock */}
+          <Card w="full" mt={6}>
             <CardHeader>
               <Flex justify="space-between" align="center">
                 <Box>
@@ -176,11 +196,13 @@ const AdminDashboard = () => {
                         <Td>{product.name}</Td>
                         <Td>{product.code}</Td>
                         <Td>
-                          {product.colors.map((c, i) => (
-                            <Badge key={i} colorScheme="red" mr={1}>
-                              {c.name}: {c.stock}
-                            </Badge>
-                          ))}
+                          <Grid templateColumns="repeat(2, 1fr)" gap={1}>
+                            {product.colors.map((c, i) => (
+                              <Badge key={i} colorScheme="red">
+                                {c.name}: {c.stock}
+                              </Badge>
+                            ))}
+                          </Grid>
                         </Td>
                       </Tr>
                     ))}
@@ -189,48 +211,41 @@ const AdminDashboard = () => {
               )}
             </CardBody>
           </Card>
-
-              {/* Mobile */}
-              <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={4} p={4}>
-                {recentOrders.map(order => (
-                  <MobileOrderCard key={order._id} order={order} />
-                ))}
-              </Box>
-            </CardBody>
-          </Card>
         </VStack>
       </Container>
     </Box>
   );
 };
 
-// 🔹 StatsCard
-function StatsCard({ stat }) {
-  const Icon = ICON_MAP[stat.icon] || FiPackage;
+        // 🔹 StatsCard
+        function StatsCard({ stat }) {
+          const Icon = ICON_MAP[stat.icon] || FiPackage;
 
-  return (
-    <Card>
-      <CardBody p={{ base: 4, md: 6 }}>
-        <Flex align="center" justify="space-between" mb={4}>
-          <Text color="gray.500">{stat.title}</Text>
-          <Box bg="gray.100" p={2} borderRadius="full">
-            <Icon />
-          </Box>
-        </Flex>
-        <Flex align="end" justify="space-between">
-          <Box>
-            <Text fontSize="2xl" fontWeight="bold">{stat.value}</Text>
-            <Text fontSize="sm" color="gray.500">{stat.description}</Text>
-          </Box>
-          <Flex align="center" color={stat.trend === "up" ? "green.600" : "red.600"}>
-            {stat.trend === "up" ? <FiTrendingUp /> : <FiTrendingDown />}
-            <Text fontSize="sm" ml={1}>{stat.percentage}</Text>
-          </Flex>
-        </Flex>
-      </CardBody>
-    </Card>
-  );
-}
+          return (
+            <Card>
+              <CardBody p={{ base: 4, md: 6 }}>
+                <Flex align="center" justify="space-between" mb={4}>
+                  <Text color="gray.500">{stat.title}</Text>
+                  <Box bg="gray.100" p={2} borderRadius="full">
+                    <Icon />
+                  </Box>
+                </Flex>
+                <Flex align="end" justify="space-between">
+                  <Box>
+                    <Text fontSize="2xl" fontWeight="bold">{stat.value}</Text>
+                    <Text fontSize="sm" color="gray.500">{stat.description}</Text>
+                  </Box>
+                  <Flex align="center" color={stat.trend === "up" ? "green.600" : "red.600"}>
+                    {stat.trend === "up" ? <FiTrendingUp /> : <FiTrendingDown />}
+                    <Text fontSize="sm" ml={1}>{stat.percentage}</Text>
+                  </Flex>
+                </Flex>
+              </CardBody>
+            </Card>
+          );
+        }
+
+        
 
 // 🔹 OrderStatusBadge
 function OrderStatusBadge({ status }) {
