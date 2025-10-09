@@ -3,6 +3,7 @@ import {
   Box, Flex, HStack, Text, Heading, Button, Card, CardBody, CardHeader, Grid,
   Table, Thead, Tbody, Tr, Th, Td, Badge, IconButton, Alert, AlertIcon,
   AlertTitle, AlertDescription, useColorModeValue, Container, VStack,
+  GridItem,
 } from "@chakra-ui/react";
 import {
   FiPackage, FiShoppingCart, FiUsers, FiDollarSign,
@@ -33,24 +34,31 @@ useEffect(() => {
       const data = await ApiService.get("/products/dashboard");
       console.log("📊 Dashboard data:", data);
 
-      setStats([
-        {
-          title: "Stock bajo",
-          value: data.lowStockCount,
-          description: "Productos con menos de 3 unidades",
-          icon: "FiPackage",
-          trend: "down",
-          percentage: "-",
-        },
-        {
-          title: "Pedidos pendientes",
-          value: data.pendingOrdersCount,
-          description: "Pedidos en espera",
-          icon: "FiShoppingCart",
-          trend: "up",
-          percentage: "+5%",
-        },
-      ]);
+    setStats([
+      {
+        alert: true, // <- nueva propiedad especial
+        title: "⚠ Atención requerida",
+        description: `Hay ${data.lowStockCount} productos con stock bajo y ${data.pendingOrdersCount} pedidos pendientes.`,
+        lowStock: data.lowStockCount,
+        pendingOrders: data.pendingOrdersCount,
+      },
+      {
+        title: "Stock bajo",
+        value: data.lowStockCount,
+        description: "Productos con menos de 3 unidades",
+        icon: "FiPackage",
+        trend: "down",
+        percentage: "-",
+      },
+      {
+        title: "Pedidos pendientes",
+        value: data.pendingOrdersCount,
+        description: "Pedidos en espera",
+        icon: "FiShoppingCart",
+        trend: "up",
+        percentage: "+5%",
+      },
+    ]);
 
       setRecentOrders(data.recentOrders || []); // <- ahora todos, no solo pendientes
       setLowStockProducts(data.lowStockProducts || []);
@@ -94,23 +102,9 @@ useEffect(() => {
           </CardBody>
         </Card>
 
-        {/* <Card w="full">
-          <CardBody>
-            <Heading size="sm" mb={2}>🗂 Productos por categoría</Heading>
-            <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }} gap={2}>
-              {Object.entries(categoryCounts).map(([category, count]) => (
-                <Box key={category} bg="gray.100" p={3} borderRadius="md">
-                  <Text fontWeight="medium">{category}</Text>
-                  <Text fontSize="sm" color="gray.600">{count} productos</Text>
-                </Box>
-              ))}
-            </Grid>
-          </CardBody>
-        </Card>*/}
-
           {/* Stats */}
           <Grid
-            templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
+            templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }}
             gap={{ base: 4, md: 6 }}
             w="full"
           >
@@ -218,33 +212,56 @@ useEffect(() => {
   );
 };
 
-        // 🔹 StatsCard
-        function StatsCard({ stat }) {
-          const Icon = ICON_MAP[stat.icon] || FiPackage;
+function StatsCard({ stat }) {
+  if (stat.alert) {
+    // Tarjeta especial de alerta
+    return (
+      <GridItem colSpan={{ base: 1, md: 2 }} w="full">
+        <Card bg="orange.100" h="100%">
+          <CardBody>
+            <Heading size="sm" mb={2}>{stat.title}</Heading>
+            <Text fontSize="sm" mb={2}>{stat.description}</Text>
+            <HStack spacing={2}>
+              <Link to="/admin/products?filter=low-stock">
+                <Button variant="outline" size="sm" colorScheme="orange">Ver productos</Button>
+              </Link>
+              <Link to="/admin/orders?filter=pending">
+                <Button variant="outline" size="sm" colorScheme="orange">Ver pedidos</Button>
+              </Link>
+            </HStack>
+          </CardBody>
+        </Card>
+      </GridItem>
+    );
+  }
 
-          return (
-            <Card>
-              <CardBody p={{ base: 4, md: 6 }}>
-                <Flex align="center" justify="space-between" mb={4}>
-                  <Text color="gray.500">{stat.title}</Text>
-                  <Box bg="gray.100" p={2} borderRadius="full">
-                    <Icon />
-                  </Box>
-                </Flex>
-                <Flex align="end" justify="space-between">
-                  <Box>
-                    <Text fontSize="2xl" fontWeight="bold">{stat.value}</Text>
-                    <Text fontSize="sm" color="gray.500">{stat.description}</Text>
-                  </Box>
-                  <Flex align="center" color={stat.trend === "up" ? "green.600" : "red.600"}>
-                    {stat.trend === "up" ? <FiTrendingUp /> : <FiTrendingDown />}
-                    <Text fontSize="sm" ml={1}>{stat.percentage}</Text>
-                  </Flex>
-                </Flex>
-              </CardBody>
-            </Card>
-          );
-        }
+  // Tarjetas normales
+  const Icon = ICON_MAP[stat.icon] || FiPackage;
+
+  return (
+    <Card>
+      <CardBody p={{ base: 4, md: 6 }}>
+        <Flex align="center" justify="space-between" mb={4}>
+          <Text color="gray.500">{stat.title}</Text>
+          <Box bg="gray.100" p={2} borderRadius="full">
+            <Icon />
+          </Box>
+        </Flex>
+        <Flex align="end" justify="space-between">
+          <Box>
+            <Text fontSize="2xl" fontWeight="bold">{stat.value}</Text>
+            <Text fontSize="sm" color="gray.500">{stat.description}</Text>
+          </Box>
+          <Flex align="center" color={stat.trend === "up" ? "green.600" : "red.600"}>
+            {stat.trend === "up" ? <FiTrendingUp /> : <FiTrendingDown />}
+            <Text fontSize="sm" ml={1}>{stat.percentage}</Text>
+          </Flex>
+        </Flex>
+      </CardBody>
+    </Card>
+  );
+}
+
 
 // 🔹 OrderStatusBadge
 function OrderStatusBadge({ status }) {
@@ -263,6 +280,28 @@ function OrderStatusBadge({ status }) {
     </Badge>
   );
 }
+function CategorySummary({ items }) {
+  const categoryCount = {};
+
+  items.forEach(item => {
+    const category = item.product?.category || "Sin categoría";
+    if (category in categoryCount) {
+      categoryCount[category] += item.quantity;
+    } else {
+      categoryCount[category] = item.quantity;
+    }
+  });
+
+  return (
+    <VStack align="start" spacing={1}>
+      {Object.entries(categoryCount).map(([cat, qty]) => (
+        <Text key={cat} fontSize="sm">
+          {cat}: {qty}
+        </Text>
+      ))}
+    </VStack>
+  );
+}
 
 // 🔹 OrderRow (para tabla desktop)
 function OrderRow({ order }) {
@@ -271,10 +310,7 @@ function OrderRow({ order }) {
       <Td>{order.code || order._id}</Td>
       <Td>{order.user?.name || "—"}</Td>
       <Td>{new Date(order.createdAt).toLocaleDateString("es-AR")}</Td>
-      <Td> {order.items.map((item, idx) => (
-      <Text key={idx}>{item.product?.name} x{item.quantity}</Text>
-        ))}
-      </Td>
+      <Td><CategorySummary items={order.items} /></Td>
       <Td>${(order.total ?? 0).toLocaleString("es-AR")}</Td>
       <Td><OrderStatusBadge status={order.status} /></Td>
     </Tr>
@@ -289,17 +325,12 @@ function MobileOrderCard({ order }) {
       <Text>{order.user?.name || "—"}</Text>
       <Text fontSize="sm">{new Date(order.createdAt).toLocaleDateString("es-AR")}</Text>
       <Box mt={2}>
-        {order.items.map((item, idx) => (
-          <Text key={idx} fontSize="sm">
-            {item.product?.name} x{item.quantity}
-          </Text>
-        ))}
+        <CategorySummary items={order.items} />
       </Box>
       <Text fontWeight="semibold" mt={2}>${(order.total ?? 0).toLocaleString("es-AR")}</Text>
       <OrderStatusBadge status={order.status} />
     </Box>
   );
 }
-
 
 export default AdminDashboard;
