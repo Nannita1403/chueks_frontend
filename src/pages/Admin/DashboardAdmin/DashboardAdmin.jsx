@@ -30,7 +30,7 @@ const AdminDashboard = () => {
       setIsLoading(true);
       try {
         const data = await ApiService.get("/products/dashboard");
-
+        console.log("Low Stock Products:", data.lowStockProducts);
         setStats([
           {
             alert: true,
@@ -187,8 +187,7 @@ const AdminDashboard = () => {
 };
 
 function LowStockRow({ product, threshold }) {
-  const filteredColors = product.colors.filter(c => c.stock <= threshold);
-
+  const filteredColors = (product.colors || []).filter(c => c.stock <= threshold);
    return (
     <Tr>
       <Td>{product.name}</Td>
