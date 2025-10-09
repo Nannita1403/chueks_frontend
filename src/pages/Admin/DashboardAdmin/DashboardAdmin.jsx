@@ -264,7 +264,10 @@ function OrderRow({ order }) {
       <Td>{order.code || order._id}</Td>
       <Td>{order.user?.name || "—"}</Td>
       <Td>{new Date(order.createdAt).toLocaleDateString("es-AR")}</Td>
-      <Td>{order.items}</Td>
+      <Td> {order.items.map((item, idx) => (
+      <Text key={idx}>{item.product?.name} x{item.quantity}</Text>
+        ))}
+      </Td>
       <Td>${(order.total ?? 0).toLocaleString("es-AR")}</Td>
       <Td><OrderStatusBadge status={order.status} /></Td>
       <Td>
@@ -283,8 +286,14 @@ function MobileOrderCard({ order }) {
       <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
       <Text>{order.user?.name || "—"}</Text>
       <Text fontSize="sm">{new Date(order.createdAt).toLocaleDateString("es-AR")}</Text>
-      <Text>Productos: {order.items}</Text>
-      <Text fontWeight="semibold">${(order.total ?? 0).toLocaleString("es-AR")}</Text>
+      <Box mt={2}>
+        {order.items.map((item, idx) => (
+          <Text key={idx} fontSize="sm">
+            {item.product?.name} x{item.quantity}
+          </Text>
+        ))}
+      </Box>
+      <Text fontWeight="semibold" mt={2}>${(order.total ?? 0).toLocaleString("es-AR")}</Text>
       <OrderStatusBadge status={order.status} />
       <Link to={`/admin/orders/${order._id}`}>
         <Button size="sm" mt={2} leftIcon={<FiEye />}>Ver</Button>
@@ -292,5 +301,6 @@ function MobileOrderCard({ order }) {
     </Box>
   );
 }
+
 
 export default AdminDashboard;
