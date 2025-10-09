@@ -187,37 +187,39 @@ const AdminDashboard = () => {
 };
 
 function LowStockRow({ product, threshold }) {
-  const filteredColors = product.colors.filter(c =>
-    threshold === 3 ? c.stock <= 3 : (c.stock > 3 && c.stock <= 5)
-  );
+  const filteredColors = product.colors.filter(c => c.stock <= threshold);
 
-  return (
+   return (
     <Tr>
       <Td>{product.name}</Td>
       <Td>{product.code}</Td>
       <Td>
         <VStack align="start" spacing={1}>
-          {filteredColors.map((c, i) => (
-            <HStack key={i} spacing={2}>
-              <Tooltip label={c.name} hasArrow>
-                <Box
-                  w="16px"
-                  h="16px"
-                  borderRadius="full"
-                  bg={c.hex || "gray.400"}
-                  border="1px solid #ccc"
-                  cursor="pointer"
-                />
-              </Tooltip>
-              <Text fontSize="sm">{c.stock}</Text>
-            </HStack>
-          ))}
+          {filteredColors.map((c, i) => {
+            const colorName = c.name || "Sin nombre";
+            const colorHex = c.hex && c.hex.startsWith("#") ? c.hex : "gray.400";
+            console.log("Colores del producto:", product.colors);
+            return (
+              <HStack key={i} spacing={2}>
+                <Tooltip label={colorName} hasArrow>
+                  <Box
+                    w="16px"
+                    h="16px"
+                    borderRadius="full"
+                    bg={colorHex}
+                    border="1px solid #ccc"
+                    cursor="pointer"
+                  />
+                </Tooltip>
+                <Text fontSize="sm">{c.stock}</Text>
+              </HStack>
+            );
+          })}
         </VStack>
       </Td>
     </Tr>
   );
 }
-
 
 function StatsCard({ stat }) {
   if (stat.alert) {
