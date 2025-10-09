@@ -23,6 +23,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(10); 
 
   useEffect(() => {
     const loadData = async () => {
@@ -67,6 +68,10 @@ const AdminDashboard = () => {
   }, []);
 
   if (isLoading) return <Loading />;
+
+  const handleShowMore = () => {
+  setVisibleCount(prev => prev + 10);
+};
 
   return (
     <Box minH="100vh" bg="gray.50" py={8}>
@@ -146,28 +151,37 @@ const AdminDashboard = () => {
               {lowStockProducts.length === 0 ? (
                 <Box p={4}><Text color="gray.500">No hay productos con stock bajo 🎉</Text></Box>
               ) : (
-                <Table variant="simple" size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Producto</Th>
-                      <Th>Código</Th>
-                      <Th>Colores en riesgo</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {/* Solo stock crítico (≤ 3) */}
-                    <Tr>
-                      <Td colSpan={3}>
-                        <Heading size="sm" my={2} color="red.500">🟥 Stock crítico (≤ 3)</Heading>
-                      </Td>
-                    </Tr>
-                    {lowStockProducts
-                      .filter(p => p.colors.some(c => c.stock <= 3))
-                      .map(p => <LowStockRow key={p._id} product={p} threshold={3} />)}
-                  </Tbody>
-                </Table>
+                <>
+                  <Table variant="simple" size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Producto</Th>
+                        <Th>Código</Th>
+                        <Th>Colores en riesgo</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td colSpan={3}>
+                          <Heading size="sm" my={2} color="red.500">🟥 Stock crítico (≤ 3)</Heading>
+                        </Td>
+                      </Tr>
+                      {lowStockProducts
+                        .filter(p => p.colors.some(c => c.stock <= 3))
+                        .slice(0, visibleCount)
+                        .map(p => <LowStockRow key={p._id} product={p} threshold={3} />)}
+                    </Tbody>
+                  </Table>
+
+                  {lowStockProducts.filter(p => p.colors.some(c => c.stock <= 3)).length > visibleCount && (
+                    <Box p={4} textAlign="center">
+                      <Button size="sm" onClick={handleShowMore}>Ver más</Button>
+                    </Box>
+                  )}
+                </>
               )}
             </CardBody>
+
           </Card>
         </VStack>
       </Container>
