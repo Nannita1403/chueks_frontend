@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const data = await ApiService.get("/products/admin/dashboard");
+      const data = await ApiService.get("/products/dashboard");
       console.log("📊 Dashboard data:", data);
 
       // Crea las "stats" manualmente
