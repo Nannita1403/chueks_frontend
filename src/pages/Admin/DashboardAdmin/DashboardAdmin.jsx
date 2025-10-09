@@ -94,7 +94,7 @@ useEffect(() => {
           </CardBody>
         </Card>
 
-        <Card w="full">
+        {/* <Card w="full">
           <CardBody>
             <Heading size="sm" mb={2}>🗂 Productos por categoría</Heading>
             <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }} gap={2}>
@@ -106,7 +106,8 @@ useEffect(() => {
               ))}
             </Grid>
           </CardBody>
-        </Card>
+        </Card>*/}
+
           {/* Stats */}
           <Grid
             templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }}
@@ -244,8 +245,6 @@ useEffect(() => {
             </Card>
           );
         }
-
-        
 
 // 🔹 OrderStatusBadge
 function OrderStatusBadge({ status }) {
