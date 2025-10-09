@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Box, Flex, HStack, Text, Heading, Button, Card, CardBody, CardHeader, Grid,
-  Table, Thead, Tbody, Tr, Th, Td, Badge, Container, VStack,
-  GridItem, Tooltip,
+  Table, Thead, Tbody, Tr, Th, Td, Badge, Container, VStack, GridItem, Tooltip, WrapItem, Wrap,
 } from "@chakra-ui/react";
 import {
   FiPackage, FiShoppingCart, FiUsers, FiDollarSign,
@@ -156,7 +155,7 @@ const AdminDashboard = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {/* Stock crítico (≤ 3) */}
+                    {/* Solo stock crítico (≤ 3) */}
                     <Tr>
                       <Td colSpan={3}>
                         <Heading size="sm" my={2} color="red.500">🟥 Stock crítico (≤ 3)</Heading>
@@ -165,16 +164,6 @@ const AdminDashboard = () => {
                     {lowStockProducts
                       .filter(p => p.colors.some(c => c.stock <= 3))
                       .map(p => <LowStockRow key={p._id} product={p} threshold={3} />)}
-
-                    {/* Stock bajo (4 a 5) */}
-                    <Tr>
-                      <Td colSpan={3}>
-                        <Heading size="sm" my={4} color="orange.500">🟧 Stock bajo (≤ 5)</Heading>
-                      </Td>
-                    </Tr>
-                    {lowStockProducts
-                      .filter(p => p.colors.some(c => c.stock > 3 && c.stock <= 5))
-                      .map(p => <LowStockRow key={p._id + "-low"} product={p} threshold={5} />)}
                   </Tbody>
                 </Table>
               )}
@@ -193,28 +182,28 @@ function LowStockRow({ product, threshold }) {
       <Td>{product.name}</Td>
       <Td>{product.code}</Td>
       <Td>
-        <VStack align="start" spacing={1}>
+        <Wrap spacing="8px">
           {filteredColors.map((c, i) => {
             const colorName = c.name || "Sin nombre";
             const colorHex = c.hex && c.hex.startsWith("#") ? c.hex : "gray.400";
-            console.log("Colores del producto:", product.colors);
             return (
-              <HStack key={i} spacing={2}>
+              <WrapItem key={i}>
                 <Tooltip label={colorName} hasArrow>
-                  <Box
-                    w="16px"
-                    h="16px"
-                    borderRadius="full"
-                    bg={colorHex}
-                    border="1px solid #ccc"
-                    cursor="pointer"
-                  />
+                  <HStack spacing={1}>
+                    <Box
+                      w="16px"
+                      h="16px"
+                      borderRadius="full"
+                      bg={colorHex}
+                      border="1px solid #ccc"
+                    />
+                    <Text fontSize="sm">{c.stock}</Text>
+                  </HStack>
                 </Tooltip>
-                <Text fontSize="sm">{c.stock}</Text>
-              </HStack>
+              </WrapItem>
             );
           })}
-        </VStack>
+        </Wrap>
       </Td>
     </Tr>
   );
