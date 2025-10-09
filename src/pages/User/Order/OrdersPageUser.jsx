@@ -52,20 +52,6 @@ export default function OrdersPageUser() {
     }
   };
 
-  // 📌 Marcar item como armado
-  const togglePicked = async (orderId, idx, picked) => {
-    try {
-      await ApiService.patch(`/orders/${orderId}/items/${idx}/picked`, { picked });
-      // refrescar modal seleccionado localmente para UX rápido
-      setSelectedOrder(prev => ({
-        ...prev,
-        items: prev.items.map((it, i) => (i === idx ? { ...it, picked } : it))
-      }));
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Error al actualizar armado del item", status: "error" });
-    }
-  };
 
   if (loading) return (
     <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
