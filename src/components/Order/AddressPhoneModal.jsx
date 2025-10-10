@@ -21,38 +21,41 @@ export default function AddressPhoneModal({ isOpen, onClose, onConfirm }) {
     }
   }, [user]);
 
-  const handleSave = async () => {
-    useEffect(() => {
-    if (isOpen) console.log("Modal abierto");
-    }, [isOpen]);
-    if (!address || !phone) {
-      toast({
-        title: "Campos requeridos",
-        description: "Debes completar ambos campos.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+  useEffect(() => {
+  if (isOpen) {
+    console.log("Modal abierto");
+  }
+}, [isOpen]);
 
-    try {
-      setLoading(true);
-      await ApiService.patch("/users/profile", { address, phone });
-      await refreshUser?.();
-      toast({ title: "Datos actualizados", status: "success" });
-      onClose();
-      onConfirm();
-    } catch (err) {
-      toast({
-        title: "Error al guardar",
-        description: err?.response?.data?.message || err.message,
-        status: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleSave = async () => {
+  if (!address || !phone) {
+    toast({
+      title: "Campos requeridos",
+      description: "Debes completar ambos campos.",
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    });
+    return;
+  }
+
+  try {
+    setLoading(true);
+    await ApiService.patch("/users/profile", { address, phone });
+    await refreshUser?.();
+    toast({ title: "Datos actualizados", status: "success" });
+    onClose();
+    onConfirm();
+  } catch (err) {
+    toast({
+      title: "Error al guardar",
+      description: err?.response?.data?.message || err.message,
+      status: "error",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
