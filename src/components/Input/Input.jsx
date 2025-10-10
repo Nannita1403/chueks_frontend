@@ -13,7 +13,6 @@ const Input = React.forwardRef(({ size = "md", variant = "outline", ...props }, 
     />
   )
 })
-
 Input.displayName = "Input"
 
 export { Input }

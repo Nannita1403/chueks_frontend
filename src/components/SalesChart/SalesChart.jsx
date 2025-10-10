@@ -1,10 +1,7 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Box, Text } from "@chakra-ui/react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 
-// Datos de ejemplo para el gráfico de ventas
 const salesData = {
   "7d": [
     { name: "Lun", sales: 120000 },

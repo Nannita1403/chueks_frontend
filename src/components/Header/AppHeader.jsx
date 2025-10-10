@@ -18,8 +18,6 @@ import { useAuth } from "../../context/Auth/auth.context.jsx";
 export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
-
-  // ✅ leemos directamente del contexto
   const { cartItems, favorites } = useAuth();
   const cartCount = cartItems?.length || 0;
   const wishlistCount = favorites?.length || 0;
@@ -35,7 +33,6 @@ export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) 
     >
       <Container maxW="container.xl" py={3}>
         <Flex align="center" justify="space-between">
-          {/* Logo + Menú */}
           <HStack spacing={4}>
             <IconButton
               aria-label="Menu"
@@ -49,7 +46,6 @@ export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) 
             </Link>
           </HStack>
 
-          {/* Buscador */}
           <Box
             flex={1}
             maxW="md"
@@ -64,9 +60,7 @@ export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) 
             </InputGroup>
           </Box>
 
-          {/* Iconos */}
           <HStack spacing={2}>
-            {/* ❤️ Favoritos */}
             <Link to="/wishlist">
               <Box position="relative">
                 <IconButton
@@ -93,7 +87,6 @@ export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) 
               </Box>
             </Link>
 
-            {/* 🛒 Carrito */}
             <Link to="/cart">
               <Box position="relative">
                 <IconButton
@@ -120,7 +113,6 @@ export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) 
               </Box>
             </Link>
 
-            {/* 👤 Perfil */}
             <Link to="/profile">
               <IconButton aria-label="Profile" icon={<FiUser />} variant="ghost" />
             </Link>

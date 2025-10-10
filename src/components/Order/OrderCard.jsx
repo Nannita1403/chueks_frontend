@@ -1,9 +1,7 @@
-// src/components/Order/OrderCard.jsx
 import { Box, Text, Stack, useColorModeValue } from "@chakra-ui/react";
 
 export default function OrderCard({ order, onClick }) {
   const bg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.600");
 
   return (
     <Box

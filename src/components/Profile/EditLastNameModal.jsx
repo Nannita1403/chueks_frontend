@@ -1,14 +1,5 @@
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Input,
-  Button,
-} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody,
+  ModalFooter, Input, Button} from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 
 export default function EditLastNameModal({ isOpen, onClose, onSave, initialValue }) {

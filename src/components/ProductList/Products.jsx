@@ -33,7 +33,6 @@ const Products = () => {
 
   const handleToggleFavorite = async (product) => {
   if (!user) return toast({ title: "Debes iniciar sesión", status: "warning" });
-
   try {
     await toggleFavorite(product._id);
 
@@ -51,7 +50,6 @@ const Products = () => {
   const handleViewDetail = (product) => {
     navigate(`/products/${product._id}`);
   };
-
   if (loading) return <Spinner size="xl" />;
   if (!products.length) return <Text>No hay productos disponibles</Text>;
 
@@ -68,7 +66,6 @@ const Products = () => {
             isFavorite={user?.favorites?.some(fav => fav._id === product._id)}
             onToggleLike={() => handleToggleFavorite(product)}
             onViewDetail={() => handleViewDetail(product)}
-
           />
         );
       })}

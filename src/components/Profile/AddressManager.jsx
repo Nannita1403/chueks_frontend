@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  Box, Button, Input, VStack, Text, FormControl,
-  FormLabel, Select, HStack, Divider
-} from "@chakra-ui/react";
+import {  Box, Button, Input, VStack, Text, FormControl,
+  FormLabel, Select, HStack, Divider } from "@chakra-ui/react";
 
 export default function AddressManager({
   initialValue = [],
@@ -27,14 +25,12 @@ export default function AddressManager({
 
   const handleAdd = () => {
     if (!isValid(newAddress)) return;
-
     const alreadyExists = addresses.some(
       (a) =>
         a.street === newAddress.street &&
         a.city === newAddress.city &&
         a.zip === newAddress.zip
     );
-
     if (alreadyExists) return;
 
     const newEntry = { ...newAddress, _tempId: Date.now() };
@@ -63,7 +59,6 @@ export default function AddressManager({
     const updatedAddr = updated.find(
       (a) => a._id === id || a._tempId === id
     );
-
     if (updatedAddr._id && onUpdate) {
       const { _id, ...rest } = updatedAddr;
       await onUpdate(_id, rest);

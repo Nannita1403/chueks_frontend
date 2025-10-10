@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  Box, Button, Input, VStack, Text, FormControl,
-  FormLabel, Select, HStack, Divider
-} from "@chakra-ui/react";
+import {  Box, Button, Input, VStack, Text, FormControl,
+  FormLabel, Select, HStack, Divider } from "@chakra-ui/react";
 
 export default function PhoneManager({
   initialValue = [],

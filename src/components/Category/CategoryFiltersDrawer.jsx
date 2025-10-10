@@ -4,10 +4,6 @@ import {
 } from "@chakra-ui/react";
 import { FiFilter } from "react-icons/fi";
 
-/**
- * Si props.options vienen vacías, puedes pasar también uniqueOptions
- * calculadas en el contenedor (CategoryPage) a partir de los productos.
- */
 export default function CategoryFiltersDrawer({
   isOpen,
   onClose,

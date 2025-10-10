@@ -1,4 +1,3 @@
-// src/components/ProductModal.jsx
 import { useState, useEffect, useMemo } from "react";
 import {
   Modal,
@@ -32,7 +31,6 @@ function flattenColors(colors = []) {
 const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   const { user, refreshCart, toggleFavorite, refreshFavorites } = useAuth();
   const { toast } = useToast();
-
   const [modalProduct, setModalProduct] = useState(product);
   const colorItems = useMemo(() => flattenColors(product?.colors), [product]);
   const [selectedColor, setSelectedColor] = useState(colorItems?.[0] || null);
@@ -45,12 +43,10 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
     setSelectedColor(colorItems?.[0] || null);
     setQuantity(1);
     setIsFavorite(Boolean(user?.favorites?.some?.((f) => f._id === product._id)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, product?._id, user]);
 
   const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
-  // ❤️ Toggle favoritos
   const handleToggleFavorite = async () => {
     if (!user) {
       return toast({
@@ -58,7 +54,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
         status: "warning",
       });
     }
-
     try {
       const data = await toggleFavorite(modalProduct._id);
       setIsFavorite(data?.favorites?.some((f) => f._id === modalProduct._id));
@@ -72,7 +67,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
     }
   };
 
-  // 🛒 Agregar al carrito
   const handleAddToCart = async () => {
     if (!selectedColor) {
       return toast({
@@ -88,7 +82,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
     }
 
     const qty = Math.min(quantity, maxQty);
-
     try {
       if (typeof addToCartHandler === "function") {
         await addToCartHandler(modalProduct, qty, {
@@ -101,7 +94,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
           color: (selectedColor?.name || "").trim(),
         });
       }
-
       if (typeof refreshCart === "function") await refreshCart();
       window.dispatchEvent(new CustomEvent("cart:updated"));
 
@@ -138,7 +130,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
           {modalProduct?.description && (
             <Text mb={2}>{modalProduct.description}</Text>
           )}
-
           <Text>
             <strong>Precio Unitario:</strong> ${modalProduct?.priceMin}
           </Text>
@@ -147,7 +138,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
               <strong>Precio Mayorista:</strong> ${modalProduct.priceMay}
             </Text>
           )}
-
           {selectedColor && (
             <Text mt={1}>
               <strong>Stock color:</strong> {selectedColor.stock}
@@ -158,7 +148,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
               ¡Solo quedan {selectedColor.stock} unidades de este color!
             </Text>
           )}
-
           <Select
             mt={3}
             value={selectedColor?.name || ""}
@@ -174,7 +163,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
               </option>
             ))}
           </Select>
-
           <Flex mt={3} align="center" gap={2}>
             <Button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
               -
@@ -184,7 +172,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
               +
             </Button>
           </Flex>
-
           <Flex mt={4} gap={3} wrap="wrap">
             <Button
               colorScheme="teal"
@@ -200,7 +187,6 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
             />
           </Flex>
         </ModalBody>
-
         <ModalFooter>
           <Button onClick={onClose}>Cerrar</Button>
         </ModalFooter>

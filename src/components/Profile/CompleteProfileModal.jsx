@@ -1,16 +1,6 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  Button,
-  FormControl,
-  FormLabel,
-  Input
-} from "@chakra-ui/react";
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, Button,
+  FormControl, FormLabel, Input } from "@chakra-ui/react";
 import {   useDisclosure, useEffect, useState } from "react";
 
 export default function CompleteProfileModal({ isOpen, onClose, onSave }) {

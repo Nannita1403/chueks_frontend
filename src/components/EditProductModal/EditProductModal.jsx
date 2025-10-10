@@ -1,4 +1,3 @@
-// src/components/EditProductModal.jsx
 import React from "react";
 import {
   Modal,
@@ -31,7 +30,6 @@ const EditProductModal = ({
   productOptions,
 }) => {
   const { toast } = useToast();
-
   if (!currentProduct) return null;
 
   const handleChange = (e) =>
@@ -61,7 +59,6 @@ const EditProductModal = ({
   const handleUpdate = async () => {
     try {
       await ProductsActions.updateProduct(currentProduct._id, currentProduct);
-
       toast({
         title: "Producto actualizado",
         description: `Se actualizó ${currentProduct.name} correctamente`,
@@ -143,7 +140,6 @@ const EditProductModal = ({
                 </NumberInput>
               </FormControl>
             </HStack>
-
             <FormControl>
               <FormLabel>Estilo</FormLabel>
               <Select
@@ -163,7 +159,6 @@ const EditProductModal = ({
                 ))}
               </Select>
             </FormControl>
-
             <FormControl>
               <FormLabel>Categoría</FormLabel>
               <Select
@@ -183,7 +178,6 @@ const EditProductModal = ({
                 ))}
               </Select>
             </FormControl>
-
             <FormControl>
               <FormLabel>Material</FormLabel>
               <Select
@@ -203,7 +197,6 @@ const EditProductModal = ({
                 ))}
               </Select>
             </FormControl>
-
             <FormControl>
               <FormLabel>Colores</FormLabel>
               <VStack spacing={2} align="stretch">
@@ -225,7 +218,6 @@ const EditProductModal = ({
                         </option>
                       ))}
                     </Select>
-
                     <NumberInput
                       value={c.stock || 0}
                       onChange={(v) => {
@@ -239,7 +231,6 @@ const EditProductModal = ({
                     >
                       <NumberInputField />
                     </NumberInput>
-
                     <IconButton
                       icon={<FiTrash2 />}
                       onClick={() => handleRemoveColor(idx)}
@@ -251,7 +242,6 @@ const EditProductModal = ({
                 </Button>
               </VStack>
             </FormControl>
-
             <HStack>
               <FormControl>
                 <FormLabel>Alto</FormLabel>
@@ -266,7 +256,6 @@ const EditProductModal = ({
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
-
               <FormControl>
                 <FormLabel>Ancho</FormLabel>
                 <NumberInput
@@ -280,7 +269,6 @@ const EditProductModal = ({
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
-
               <FormControl>
                 <FormLabel>Profundidad</FormLabel>
                 <NumberInput
@@ -295,7 +283,6 @@ const EditProductModal = ({
                 </NumberInput>
               </FormControl>
             </HStack>
-
             <FormControl>
               <FormLabel>Imagen Principal (URL)</FormLabel>
               <Input
@@ -304,7 +291,6 @@ const EditProductModal = ({
                 onChange={handleChange}
               />
             </FormControl>
-
             <FormControl>
               <FormLabel>Imagen Secundaria (URL)</FormLabel>
               <Input

@@ -1,7 +1,5 @@
-import {
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-  ModalBody, ModalFooter, Button
-} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
+  ModalBody, ModalFooter, Button } from "@chakra-ui/react";
 import { useRef } from "react";
 import AddressManager from "./AddressManager";
 
@@ -14,7 +12,6 @@ export default function AddressModal({
   deleteAddress
 }) {
   const tempAddresses = useRef(initialValue);
-
   const handleChange = (updated) => {
     tempAddresses.current = updated;
   };

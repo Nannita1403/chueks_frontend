@@ -10,7 +10,6 @@ import { useAuth } from "../../context/Auth/auth.context.jsx";
 export default function AddressPhoneModal({ isOpen, onClose, onConfirm }) {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
-
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,7 +42,7 @@ export default function AddressPhoneModal({ isOpen, onClose, onConfirm }) {
       await refreshUser?.();
       toast({ title: "Datos actualizados", status: "success" });
       onClose();
-      onConfirm(); // continuar checkout
+      onConfirm();
     } catch (err) {
       toast({
         title: "Error al guardar",

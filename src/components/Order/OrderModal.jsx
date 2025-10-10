@@ -1,4 +1,3 @@
-// src/components/Order/OrderModal.jsx
 import {
   Modal,
   ModalOverlay,

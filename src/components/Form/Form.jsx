@@ -1,4 +1,3 @@
-
 import { createContext, useContext, forwardRef, useId, cloneElement } from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form"
 import {
@@ -26,13 +25,11 @@ const useFormField = () => {
   const { getFieldState, formState } = useFormContext()
 
   const fieldState = getFieldState(fieldContext.name, formState)
-
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
   }
 
   const { id } = itemContext
-
   return {
     id,
     name: fieldContext.name,
@@ -48,7 +45,6 @@ const FormItemContext = createContext({})
 const FormItem = forwardRef(({ children, ...props }, ref) => {
   const id = useId()
   const { error } = useFormField()
-
   return (
     <FormItemContext.Provider value={{ id }}>
       <ChakraFormControl ref={ref} isInvalid={!!error} {...props}>
@@ -61,7 +57,6 @@ FormItem.displayName = "FormItem"
 
 const FormLabel = forwardRef(({ children, ...props }, ref) => {
   const { formItemId } = useFormField()
-
   return (
     <ChakraFormLabel ref={ref} htmlFor={formItemId} {...props}>
       {children}
@@ -72,7 +67,6 @@ FormLabel.displayName = "FormLabel"
 
 const FormControl = forwardRef(({ children, ...props }, ref) => {
   const { formItemId, formDescriptionId, formMessageId, error } = useFormField()
-
   return cloneElement(children, {
     ref,
     id: formItemId,
@@ -85,7 +79,6 @@ FormControl.displayName = "FormControl"
 
 const FormDescription = forwardRef(({ children, ...props }, ref) => {
   const { formDescriptionId } = useFormField()
-
   return (
     <FormHelperText ref={ref} id={formDescriptionId} {...props}>
       {children}
@@ -97,11 +90,9 @@ FormDescription.displayName = "FormDescription"
 const FormMessage = forwardRef(({ children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message) : children
-
   if (!body) {
     return null
   }
-
   return (
     <FormErrorMessage ref={ref} id={formMessageId} {...props}>
       {body}

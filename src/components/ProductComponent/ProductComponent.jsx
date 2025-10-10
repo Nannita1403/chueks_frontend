@@ -1,4 +1,3 @@
-// src/components/ProductComponent/ProductComponent.jsx
 import { Box, Image, Text, Flex, IconButton } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CustomButton from "../../components/Button/Button.jsx";
@@ -6,8 +5,6 @@ import { useAuth } from "../../context/Auth/auth.context.jsx";
 
 const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   const { favorites } = useAuth();
-
-  // Verifica si este producto está en la lista global de favoritos
   const isFavorite = favorites?.some((fav) => fav._id === product._id || fav === product._id);
 
   return (
@@ -20,7 +17,7 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
       _dark={{ bg: "gray.800" }}
       _hover={{ shadow: "md", transform: "translateY(-2px)", transition: "all 0.2s" }}
     >
-      {/* Imagen del producto */}
+
       <Image
         src={product.imgPrimary?.url || product.imgPrimary || "/placeholder.svg"}
         alt={product.name}
@@ -31,7 +28,6 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
         objectFit="cover"
       />
 
-      {/* Info del producto */}
       <Text fontWeight="bold" fontSize="lg" mb={1}>
         {product.name}
       </Text>
@@ -39,7 +35,6 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
         ${product.priceMin}
       </Text>
 
-      {/* Acciones */}
       <Flex align="center" gap={3} mt={3}>
         {/* Botón de favoritos */}
         <IconButton
@@ -50,7 +45,6 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
           onClick={() => onToggleLike(product._id)}
         />
 
-        {/* Botón detalle */}
         <CustomButton size="sm" colorScheme="teal" onClick={onViewDetail}>
           Ver detalle
         </CustomButton>

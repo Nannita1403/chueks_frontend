@@ -1,4 +1,3 @@
-// src/components/CreateProductModal.jsx
 import React from "react";
 import {
   Modal,
@@ -65,10 +64,8 @@ const CreateProductModal = ({
         description: "Se agregó correctamente a la base de datos.",
         status: "success",
       });
-
       onClose();
 
-      // Resetear formulario
       setNewProduct({
         code: "",
         name: "",

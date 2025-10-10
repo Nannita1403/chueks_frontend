@@ -1,6 +1,5 @@
 export function getDefaultAddress(user) {
 if (!user?.addresses?.length) return null;
-  // Busca el default, si no hay ninguno devuelve el primero
   const defaultAddr = user.addresses.find(addr => addr.default === true);
   return defaultAddr || user.addresses[0];
 }

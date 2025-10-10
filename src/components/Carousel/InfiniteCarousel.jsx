@@ -25,13 +25,12 @@ export default function InfiniteCarousel({
   const tail = useMemo(() => items.slice(-perView), [items, perView]);
   const trackItems = useMemo(() => [...tail, ...items, ...head], [tail, items, head]);
 
-  const trackIndex = perView + idx; // compensar clones iniciales
+  const trackIndex = perView + idx;
 
   useEffect(() => {
     if (!autoPlay || items.length <= perView) return;
     const id = setInterval(() => goNext(), autoPlayMs);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPlay, autoPlayMs, items.length, perView, idx]);
 
   const goNext = () => {

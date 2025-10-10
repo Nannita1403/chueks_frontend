@@ -1,21 +1,10 @@
-// src/pages/Profile/modals/EditNameModal.jsx
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Input,
-  Button,
-} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
+  ModalBody, ModalFooter, Input, Button } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 
 export default function EditNameModal({ isOpen, onClose, onSave, initialValue }) {
   const [name, setName] = useState("");
 
-  // Cuando se abra el modal, inicializamos el input con el valor actual
   useEffect(() => {
     if (isOpen) {
       setName(initialValue || "");

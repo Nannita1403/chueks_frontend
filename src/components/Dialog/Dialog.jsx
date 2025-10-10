@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import {
   Modal,
@@ -16,7 +14,6 @@ const Dialog = ({ children, open, onOpenChange }) => {
     isOpen: open,
     onClose: () => onOpenChange?.(false),
   })
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       {children}

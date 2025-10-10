@@ -1,4 +1,3 @@
-// src/components/LogoutButton.jsx
 import { useRef, useState } from "react";
 import {
   Button,
@@ -13,31 +12,21 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../../Hooks/useToast.jsx";
 
 export default function LogoutButton({
-  variant = "solid",
-  size = "md",
-  children,
-}) {
+  variant = "solid", size = "md", children}) {
   const [isOpen, setIsOpen] = useState(false);
   const cancelRef = useRef();
   const navigate = useNavigate();
   const { toast } = useToast(); // ✅ usar siempre el hook
-
   const onClose = () => setIsOpen(false);
 
   const handleLogout = () => {
-    // 🔴 Borra TODO lo que haya en localStorage
     localStorage.clear();
-
-    // ✅ Notificación con nuestro hook
     toast({
       title: "Sesión cerrada",
       description: "Has cerrado sesión correctamente.",
       status: "info",
     });
-
     onClose();
-
-    // 🔴 Redirige siempre al login correcto
     navigate("/auth", { replace: true });
   };
 
