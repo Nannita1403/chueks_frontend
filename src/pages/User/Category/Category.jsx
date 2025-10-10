@@ -1,23 +1,17 @@
-// src/pages/Category/CategoryPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Box, Container, HStack, SimpleGrid, Spinner, Text, Button, Select,
-  useColorModeValue, Icon, Wrap, WrapItem
-} from "@chakra-ui/react";
+import { Box, Container, HStack, SimpleGrid, Spinner, Text, Button, Select,
+  useColorModeValue, Icon, Wrap, WrapItem } from "@chakra-ui/react";
 import { FiFilter } from "react-icons/fi";
-
 import ApiService from "../../../reducers/api/Api.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import CategoryFiltersDrawer from "../../../components/Category/CategoryFiltersDrawer.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
-
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 
-/* ---------- helpers ---------- */
 const normalize = (p) => ({
   ...p,
   imgPrimary: p?.imgPrimary?.url || p?.imgPrimary || (Array.isArray(p?.images) ? p.images[0] : p?.image) || "/placeholder.svg",
@@ -30,7 +24,7 @@ const titleCase = (s = "") => s.replace(/[-_]/g, " ").replace(/\b\w/g, (m) => m.
 const slugToEnum = {
   mochilas: "Mochila",
   carteras: "Cartera",
-  rinoneras: "Riñonera",
+  riñoneras: "Riñonera",
   bolsos: "Bolso",
   accesorios: "Accesorios",
   neceseres: "Neceser",
@@ -41,10 +35,8 @@ const categoryMatches = (product, target) => {
   return cats.some((c) => removeAccents(String(c)).toLowerCase() === target);
 };
 
-// Paleta simple para los botones de categorías
 const categoryColors = ["pink.400", "teal.400", "blue.400", "orange.400", "purple.400", "green.400"];
 
-// Opciones de filtros
 const filterOptions = {
   colors: ["lila","verde","animal print","suela","nude","blanca","beige","gris","negro tramado","rose gold",
            "negro","glitter dorada","dorada","borgoña","naranja","amarillo","habano","cobre","peltre",
@@ -57,11 +49,10 @@ const filterOptions = {
 };
 
 export default function CategoryPage() {
-  const { id } = useParams(); // slug o "all"
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const { user, toggleFavorite, refreshCart } = useAuth();
   const { toast } = useToast();
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -78,27 +69,22 @@ export default function CategoryPage() {
   const allCategories = Object.values(slugToEnum);
   const categoryButtons = allCategories.filter((c) => c !== enumCategory);
 
-  /* ----------- carga productos ----------- */
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
         let list = [];
         if (!enumCategory) {
-          // Todos los productos
           const resp = await ApiService.get("/products");
           list = normalizeList(resp);
         } else {
-          // Filtrar por categoría
           let resp = await ApiService.get(`/products?category=${encodeURIComponent(enumCategory)}`);
           list = normalizeList(resp);
-
           if (!list.length && /ñ/i.test(enumCategory)) {
             const alt = enumCategory.replace(/ñ/gi, "n");
             resp = await ApiService.get(`/products?category=${encodeURIComponent(alt)}`);
             list = normalizeList(resp);
           }
-
           if (!list.length) {
             const allResp = await ApiService.get("/products");
             const all = normalizeList(allResp);
@@ -109,7 +95,6 @@ export default function CategoryPage() {
 
         let normalized = list.map(normalize);
 
-        // Filtros locales
         if (filters.colors.length) {
           const setColors = new Set(filters.colors);
           normalized = normalized.filter((p) =>
@@ -127,7 +112,6 @@ export default function CategoryPage() {
             return st.some((s) => setStyles.has(s));
           });
         }
-
         if (sortBy === "price_asc") normalized.sort((a, b) => (a.priceMin || 0) - (b.priceMin || 0));
         if (sortBy === "price_desc") normalized.sort((a, b) => (b.priceMin || 0) - (a.priceMin || 0));
 
@@ -181,7 +165,6 @@ export default function CategoryPage() {
   return (
     <Box minH="100vh">
       <AppHeader />
-
       <Box bg={bannerBg} color="white" py={3}>
         <Container maxW="container.xl">
           <HStack justify="space-between">
@@ -191,7 +174,6 @@ export default function CategoryPage() {
           </HStack>
         </Container>
       </Box>
-
       <Container maxW="container.xl" py={4}>
         <Wrap spacing={2} justify="center">
           <WrapItem>
@@ -219,7 +201,6 @@ export default function CategoryPage() {
           ))}
         </Wrap>
       </Container>
-
       <Container maxW="container.xl" py={6}>
         <HStack justify="space-between" mb={4}>
           <Button leftIcon={<Icon as={FiFilter} />} variant="outline" onClick={() => setDrawerOpen(true)}>
@@ -234,7 +215,6 @@ export default function CategoryPage() {
             </Select>
           </HStack>
         </HStack>
-
         {products.length === 0 ? (
           <Box py={16} textAlign="center">
             <Text>No hay productos disponibles</Text>
@@ -252,7 +232,6 @@ export default function CategoryPage() {
           </SimpleGrid>
         )}
       </Container>
-
       <CategoryFiltersDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}

@@ -1,7 +1,6 @@
 import { useContext } from "react"
 import { ProductsContext } from "../../providers/ProductsProviders.jsx"
 
-// Hook para usar el contexto de productos
 export const useProducts = () => {
   const context = useContext(ProductsContext)
   if (!context) {
@@ -10,5 +9,4 @@ export const useProducts = () => {
   return context
 }
 
-// Re-exportar el contexto
 export { ProductsContext }

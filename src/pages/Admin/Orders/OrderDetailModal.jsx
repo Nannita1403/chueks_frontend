@@ -1,7 +1,5 @@
-import {
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton,
-  ModalBody, ModalFooter, Button, Grid, GridItem, Text, HStack, Checkbox,
-  Select, VStack, Image, Box } from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, 
+  Grid, GridItem, Text, HStack, Checkbox, Select, VStack, Image, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ApiService from "../../../reducers/api/Api.jsx";
 
@@ -44,7 +42,6 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
       console.error("Error al marcar item como armado:", err);
     }
   };
-
   if (!order) return null;
 
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
@@ -57,15 +54,12 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
         <ModalCloseButton />
         <ModalBody>
           {error && <Text color="red.500">{error}</Text>}
-
-          {/* Cliente y estado */}
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             <GridItem>
               <Text fontWeight="bold">Información del Cliente</Text>
               <Text>Nombre: {order.user?.name ?? "—"}</Text>
               <Text>Email: {order.user?.email ?? "—"}</Text>
             </GridItem>
-
             <GridItem>
               <Text fontWeight="bold">Estado del Pedido</Text>
               <Select
@@ -79,8 +73,6 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
               </Select>
             </GridItem>
           </Grid>
-
-          {/* Items */}
           <VStack mt={6} spacing={4} align="stretch">
             {(order.items ?? []).map((item, idx,) => {
               const displayName = item.name ?? "Artículo";
@@ -89,10 +81,8 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
               return (
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4} flexDir={{ base: "column", md: "row" }}>
-                     {item.image && (
-                    <Image src={item.image}  boxSize={{ base: "100%", md: "100px" }} objectFit="cover" borderRadius="md" />
-                  )}
-                    <VStack align="start" spacing={1} flex="1" w="full">
+                    <Box as="img" src={item.imgPrimary} alt={p.name} boxSize={{ base: "100%", md: "100px" }} objectFit="cover" borderTopRadius="md"/>
+                     <VStack align="start" spacing={1} flex="1" w="full">
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
                       <Text fontSize="sm" color="gray.500">Código: {item.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
@@ -112,8 +102,6 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
               );
             })}
           </VStack>
-
-          {/* Totales */}
           <VStack mt={6} spacing={1} align="flex-end">
             <Text>Subtotal: ${formatNumber(order.subtotal)}</Text>
             <Text>Envío: ${formatNumber(order.shipping)}</Text>

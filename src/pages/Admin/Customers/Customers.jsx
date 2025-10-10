@@ -1,35 +1,9 @@
-"use client"
-
 import { useState } from "react"
-import {
-  Box,
-  Card,
-  CardBody,
-  Heading,
-  Text,
-  Button,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Select,
-  Badge,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Avatar,
-  Flex,
-  Grid,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
+import { Box, Card, CardBody, Heading, Text, Button, Input, InputGroup, InputLeftElement, Select,
+  Badge, Table, Thead, Tbody, Tr, Th, Td, Avatar, Flex, Grid, Stat, StatLabel, StatNumber, StatHelpText,
 } from "@chakra-ui/react"
 import { FiSearch, FiFilter, FiEye, FiDownload, FiUsers, FiUserPlus, FiUserCheck } from "react-icons/fi"
 
-// Datos de ejemplo para clientes
 const customers = [
   {
     id: 1,
@@ -106,7 +80,6 @@ export default function CustomersPage() {
         </Button>
       </Flex>
 
-      {/* Estadísticas */}
       <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={6} mb={6}>
         <Card>
           <CardBody>
@@ -154,7 +127,6 @@ export default function CustomersPage() {
         </Card>
       </Grid>
 
-      {/* Filtros */}
       <Flex justify="space-between" align="center" mb={6} gap={4}>
         <InputGroup maxW="md">
           <InputLeftElement pointerEvents="none">
@@ -180,7 +152,6 @@ export default function CustomersPage() {
         </Flex>
       </Flex>
 
-      {/* Tabla de clientes */}
       <Card>
         <CardBody p={0}>
           <Table variant="simple">

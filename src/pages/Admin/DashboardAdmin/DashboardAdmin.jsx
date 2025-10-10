@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  Box, Flex, HStack, Text, Heading, Button, Card, CardBody, CardHeader, Grid,
-  Table, Thead, Tbody, Tr, Th, Td, Badge, Container, VStack, GridItem, Tooltip, WrapItem, Wrap,
-} from "@chakra-ui/react";
-import {
-  FiPackage, FiShoppingCart, FiUsers, FiDollarSign,
-  FiTrendingUp, FiTrendingDown,
-} from "react-icons/fi";
+import { Box, Flex, HStack, Text, Heading, Button, Card, CardBody, CardHeader, Grid, Table, Thead,
+Tbody, Tr, Th, Td, Badge, Container, VStack, GridItem, Tooltip, WrapItem, Wrap } from "@chakra-ui/react";
+import {  FiPackage, FiShoppingCart, FiUsers, FiDollarSign,
+  FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import Loading from "../../../components/Loading/Loading.jsx";
 import ApiService from "../../../reducers/api/Api.jsx";
@@ -54,7 +50,6 @@ const AdminDashboard = () => {
             percentage: "+5%",
           },
         ]);
-
         setRecentOrders(data.recentOrders || []);
         setLowStockProducts(data.lowStockProducts || []);
       } catch (error) {
@@ -63,7 +58,6 @@ const AdminDashboard = () => {
         setIsLoading(false);
       }
     };
-
     loadData();
   }, []);
 
@@ -282,7 +276,6 @@ function OrderStatusBadge({ status }) {
   return <Badge colorScheme={config.colorScheme} variant="subtle">{config.label}</Badge>;
 }
 
-// 🔸 Mostrar solo primera categoría del pedido
 function CategorySummary({ items }) {
   const firstCategory = items[0]?.product?.category || "Sin categoría";
   const quantity = items.reduce((acc, item) => acc + item.quantity, 0);

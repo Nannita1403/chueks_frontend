@@ -1,15 +1,10 @@
-// src/pages/Admin/Orders/AdminOrders.jsx
 import { useEffect, useMemo, useState } from "react";
-import {
-  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement,
-  Tabs, TabList, TabPanels, Tab, TabPanel, Card, CardBody,
-  Table, Thead, Tbody, Tr, Th, Td, Badge, useDisclosure,
-} from "@chakra-ui/react";
+import {  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement, Tabs, TabList, TabPanels, Tab, 
+  TabPanel, Card, CardBody, Table, Thead, Tbody, Tr, Th, Td, Badge, useDisclosure} from "@chakra-ui/react";
 import { FiSearch, FiEye, FiDownload } from "react-icons/fi";
 import ApiService from "../../../reducers/api/Api.jsx";
 import OrderDetailModal from "./OrderDetailModal.jsx";
 
-/* ================= helpers ================= */
 const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
@@ -28,7 +23,6 @@ const OrderStatusBadge = ({ status }) => {
 const codeOrId = (o) => o?.code || (o?._id ? `#${String(o._id).slice(-6).toUpperCase()}` : "—");
 const when = (o) => new Date(o?.createdAt || o?.date || Date.now()).toLocaleString();
 
-/* ================= page ================= */
 export default function AdminOrders() {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
@@ -64,14 +58,12 @@ export default function AdminOrders() {
     });
   }, [orders, search]);
 
-  /* Mensaje común de estado */
   const StatusMessage = ({ text }) => (
     <Box p={4}><Text color="gray.500">{text}</Text></Box>
   );
 
   return (
     <Box px={{ base: 2, md: 6 }} py={{ base: 4, md: 6 }}>
-      {/* Header */}
       <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "start", md: "center" }} mb={6} gap={4}>
         <Box>
           <Heading size="lg">Pedidos</Heading>
@@ -79,8 +71,6 @@ export default function AdminOrders() {
         </Box>
         <Button leftIcon={<FiDownload />} variant="outline" size="sm">Exportar</Button>
       </Flex>
-
-      {/* Tabs por estado */}
       <Tabs index={tab} onChange={setTab} variant="soft-rounded" colorScheme="blue" mb={4}>
         <TabList flexWrap="wrap">
           <Tab flex="1" minW="90px">Todos</Tab>
@@ -90,7 +80,6 @@ export default function AdminOrders() {
         </TabList>
         <TabPanels>
           <TabPanel p={0}>
-                {/* Search */}
             <InputGroup mb={4}>
               <InputLeftElement pointerEvents="none"><FiSearch color="gray" /></InputLeftElement>
               <Input
@@ -99,10 +88,8 @@ export default function AdminOrders() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </InputGroup>
-
             <Card>
               <CardBody p={0}>
-                {/* Desktop: tabla */}
                 <Box display={{ base: "none", md: "block" }}>
                   <Table variant="simple" size="sm">
                     <Thead>
@@ -145,10 +132,7 @@ export default function AdminOrders() {
                     </Tbody>
                   </Table>
                 </Box>
-
-
-              {/* Mobile Cards */}
-              <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={3}>
+                <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={3}>
                 {!loading && filtered.map(o => (
                   <Card key={o._id} size="sm" p={3} shadow="sm">
                     <Text fontWeight="bold">{codeOrId(o)}</Text>
@@ -164,19 +148,15 @@ export default function AdminOrders() {
                 ))}
                 {loading && <StatusMessage text="Cargando…" />}
                 {!loading && filtered.length === 0 && <StatusMessage text="Sin resultados" />}
-              </Box>
+                </Box>
               </CardBody>
             </Card>
           </TabPanel>
-
-          {/* Tabs vacíos: reutilizamos el mismo panel mediante 'tab' */}
           <TabPanel p={0} />
           <TabPanel p={0} />
           <TabPanel p={0} />
         </TabPanels>
       </Tabs>
-
-      {/* Modal de detalle */}
       <OrderDetailModal
         orderId={current?.code || current?._id}
         isOpen={modal.isOpen}

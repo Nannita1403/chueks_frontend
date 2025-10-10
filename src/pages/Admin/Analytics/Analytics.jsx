@@ -1,39 +1,10 @@
 import { useState } from "react"
-import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Heading,
-  Text,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Select,
-  Grid,
-  Flex,
-  Stat,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
+import { Box, Card, CardBody, CardHeader, Heading, Text, Tabs, TabList, TabPanels,
+  Tab, TabPanel, Select, Grid, Flex, Stat, StatNumber, StatHelpText, StatArrow,
 } from "@chakra-ui/react"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend } from "recharts"
 
-// Datos de ejemplo para análisis
 const productAnalytics = {
   mostViewed: [
     { name: "Cartera Milano", value: 1245 },

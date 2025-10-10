@@ -75,7 +75,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [logout]);
 
-  // 🔁 Inicializar sesión
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
@@ -157,7 +156,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", tokenToUse);
     }
   } else {
-    // Solo borra si user es null o undefined
     ApiService.setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");

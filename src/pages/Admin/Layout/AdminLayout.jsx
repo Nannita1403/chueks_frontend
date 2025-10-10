@@ -1,19 +1,6 @@
 import LogoutButton from "../../../components/LogoutButton/LogoutButton.jsx";
-import {
-  Box,
-  Flex,
-  VStack,
-  Divider,
-  Image,
-  IconButton,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  DrawerBody,
-  useDisclosure,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import {  Box, Flex, VStack, Divider, Image, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton,
+  DrawerBody, useDisclosure, useColorModeValue } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router-dom";
 import { FiMenu } from "react-icons/fi";
 
@@ -63,7 +50,6 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
 
   return (
     <Flex h="100vh" bg={bgColor}>
-      {/* Sidebar Desktop */}
       <Box
         w="280px"
         bg="gray.900"
@@ -76,16 +62,13 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
         <Box textAlign="center" bgColor="white" borderRadius="md" p={2} mb={8}>
           <Image src={logoSrc2} alt="Logo" mx="auto" />
         </Box>
-
         {MenuContent}
-
         <Box mt={8}>
           <Divider mb={4} />
           <LogoutButton w="full">Salir</LogoutButton>
         </Box>
       </Box>
 
-      {/* Sidebar Mobile */}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent bg="gray.900" color="white">
@@ -94,9 +77,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
             <Box textAlign="center" bgColor="white" borderRadius="md" p={2} mb={8}>
               <Image src={logoSrc2} alt="Logo" mx="auto" />
             </Box>
-
             {MenuContent}
-
             <Box mt={8}>
               <Divider mb={4} />
               <LogoutButton w="full">Salir</LogoutButton>
@@ -105,9 +86,7 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
         </DrawerContent>
       </Drawer>
 
-      {/* Contenido */}
       <Flex flex="1" direction="column">
-        {/* Top bar para móviles */}
         <Flex
           display={{ base: "flex", md: "none" }}
           bg="gray.900"
@@ -124,7 +103,6 @@ const AdminLayout = ({ logoSrc2 = "/logoChueks.png" }) => {
           />
           <Image src={logoSrc2} alt="Logo" h={8} />
         </Flex>
-
         <Box  flex="1" p={{ base: 4, md: 8 }} maxW="100%" mx="auto" w="full" overflowY="auto">
           <Outlet />
         </Box>

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  Box, Flex, VStack, Heading, Button, Table, Thead, Tbody, Tr, Th, Td,
-  IconButton, Input, useColorModeValue, Container
-} from "@chakra-ui/react";
+import {  Box, Flex, VStack, Heading, Button, Table, Thead, Tbody, Tr, Th, Td,
+  IconButton, Input, useColorModeValue, Container } from "@chakra-ui/react";
 import { FiPlus, FiTrash2, FiEdit } from "react-icons/fi";
-import api from "../../../reducers/api/Api"; // Ajusta la ruta según tu estructura
+import api from "../../../reducers/api/Api"; 
 import { useToast } from "../../../Hooks/useToast.jsx";
 
 const AdminCategories = () => {
@@ -17,7 +15,6 @@ const AdminCategories = () => {
  const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // 🔹 Cargar categorías desde el back
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -43,7 +40,6 @@ const AdminCategories = () => {
     fetchCategories();
   }, []);
 
-  // 🔹 Crear nueva categoría
   const handleCreate = async () => {
     if (!newCategory.trim()) return;
     try {
@@ -57,7 +53,6 @@ const AdminCategories = () => {
     }
   };
 
-  // 🔹 Eliminar categoría
   const handleDelete = async (id) => {
     try {
       await api.delete(`/products/categories/${id}`);
@@ -69,7 +64,6 @@ const AdminCategories = () => {
     }
   };
 
-  // 🔹 Guardar edición
   const handleEditSave = async (id) => {
     try {
       await api.put(`/products/categories/${id}`, { name: editValue });

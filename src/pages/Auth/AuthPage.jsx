@@ -1,37 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logoRedondo from "/logoRedondo.png";
-import {
-  Box,
-  Container,
-  VStack,
-  Text,
-  Input,
-  Button,
-  Image,
-  FormControl,
-  FormLabel,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Card,
-  CardBody,
-  HStack,
-  Flex,
-  useColorModeValue,
-  Heading,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-} from "@chakra-ui/react";
+import { Box, Container, VStack, Text, Input, Button, Image, FormControl, FormLabel, Tabs, TabList, TabPanels,
+  Tab, TabPanel, Card, CardBody, HStack, Flex, useColorModeValue, Heading, Alert, AlertIcon, AlertTitle,
+  AlertDescription, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,} from "@chakra-ui/react";
 import Loading from "../../components/Loading/Loading.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
@@ -45,7 +17,6 @@ export default function AuthPage() {
   const { toast } = useToast();
   const { login, registerUser } = useAuth();
 
-  // --- LOGIN ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -56,7 +27,6 @@ export default function AuthPage() {
       email: formData.get("email"),
       password: formData.get("password"),
     };
-
     try {
       const result = await login(credentials);
 
@@ -98,11 +68,9 @@ export default function AuthPage() {
     }
   };
 
-  // --- REGISTER ---
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
     const formData = new FormData(e.target);
     const registrationData = {
       name: formData.get("name"),
@@ -135,11 +103,9 @@ export default function AuthPage() {
     }
   };
 
-  // --- VERIFICACIÓN desde backend ---
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const verified = params.get("verified");
-
     if (verified === "1") {
       toast({
         title: "✅ Cuenta verificada",
@@ -155,14 +121,12 @@ export default function AuthPage() {
       });
     }
   }, [location, toast]);
-
   if (isLoading) {
     return <Loading />;
   }
 
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // 🔹 Bloque de descripción (reutilizado en escritorio y acordeón en móvil)
   const descriptionBlock = (
     <Box maxW="md">
       <VStack spacing={6} align="start">
@@ -226,7 +190,6 @@ export default function AuthPage() {
 
   return (
     <Flex minH="100vh" bg={bgColor} flexDir={{ base: "column", md: "row" }}>
-      {/* Form Section */}
       <Flex
         w={{ base: "100%", md: "50%" }}
         align="center"
@@ -325,7 +288,6 @@ export default function AuthPage() {
               </CardBody>
             </Card>
 
-            {/* 🔹 Acordeón solo visible en móvil */}
             <Box w="full" display={{ base: "block", md: "none" }}>
               <Accordion allowToggle>
                 <AccordionItem>
@@ -350,8 +312,6 @@ export default function AuthPage() {
           </VStack>
         </Container>
       </Flex>
-
-      {/* Description Section (solo escritorio) */}
       <Flex
         w={{ base: "100%", md: "50%" }}
         bg="black"

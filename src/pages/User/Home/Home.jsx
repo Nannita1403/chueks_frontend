@@ -1,4 +1,3 @@
-// src/pages/User/Home/Home.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Box, Container, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import ApiService from "../../../reducers/api/Api.jsx";
@@ -19,7 +18,6 @@ export default function Home() {
   const { user, cartItems, favorites, refreshCart, toggleFavorite } = useAuth();
   const muted = useColorModeValue("gray.600", "gray.400");
 
-  // 📌 Categorías
   const categories = useMemo(
     () => [
       { id: "mochilas", name: "Mochilas", color: "pink.400" },
@@ -32,7 +30,6 @@ export default function Home() {
     []
   );
 
-  // 📌 Normalización de productos
   const normalize = (p) => ({
     ...p,
     imgPrimary:
@@ -43,7 +40,6 @@ export default function Home() {
     priceMin: p?.priceMin ?? p?.price ?? 0,
   });
 
-  // 📌 Cargar productos
   useEffect(() => {
     (async () => {
       try {
@@ -59,7 +55,6 @@ export default function Home() {
     })();
   }, []);
 
-  // 📌 Selección de destacados
   const featuredCodes = ["RI002", "BOL002", "BOL008A", "MO004", "NEC002", "TAR002"];
   const featuredProducts = useMemo(() => {
     const arr = Array.isArray(products) ? products : [];
@@ -67,10 +62,8 @@ export default function Home() {
     return featured.length ? featured : arr.slice(0, 9);
   }, [products]);
 
-  // 📌 Abrir detalle
   const openDetail = (p) => setSelectedProduct(p);
 
-  // 📌 Agregar al carrito
   const addToCartHandler = async (product, qty, color) => {
     try {
       await ApiService.post("/cart/add", {
@@ -86,7 +79,6 @@ export default function Home() {
     }
   };
 
-  // 📌 Loader
   if (loading) {
     return (
       <Box maxW="container.xl" mx="auto" px={4} py={8}>
@@ -98,7 +90,6 @@ export default function Home() {
     );
   }
 
-  // 📌 Render principal
   return (
     <Box minH="100vh">
       <AppHeader

@@ -1,9 +1,5 @@
-// Hooks/useToast.jsx
 import { useToast as useChakraToast } from "@chakra-ui/react";
 
-/**
- * Hook personalizado que envuelve el toast de Chakra.
- */
 function useToast() {
   const chakraToast = useChakraToast();
 

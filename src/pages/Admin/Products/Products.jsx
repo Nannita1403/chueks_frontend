@@ -1,9 +1,6 @@
-// src/pages/Admin/AdminProducts.jsx
 import { useState, useEffect } from "react";
-import {
-  Box, Flex, VStack, Heading, Button, IconButton,
-  useColorModeValue, Container, Select, SimpleGrid, Card, Badge
-} from "@chakra-ui/react";
+import { Box, Flex, VStack, Heading, Button, IconButton, useColorModeValue, Container, Select, 
+  SimpleGrid, Card, Badge } from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import axios from "axios";
 import { useToast } from "../../../Hooks/useToast.jsx";
@@ -17,13 +14,7 @@ import {
 } from "@chakra-ui/react";
 
 const AdminProducts = () => {
-  const {
-    products,
-    getProducts,
-    deleteProduct,
-    updateProduct
-  } = useProducts();
-
+  const { products, getProducts, deleteProduct, updateProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(true);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
@@ -49,7 +40,6 @@ const AdminProducts = () => {
 const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // cargar productos al montar
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
@@ -69,7 +59,6 @@ const { toast } = useToast();
     load();
   }, []);
 
-  // cargar opciones dinámicas
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -125,10 +114,8 @@ const { toast } = useToast();
       toast({ title: "Error al cambiar estado", status: "error", duration: 3000 });
     }
   };
-
   if (isLoading) return <Loading />;
 
-  // Filtrado
   let filteredProducts = products || [];
   if (filterCategory) filteredProducts = filteredProducts.filter(p => p.category?.includes(filterCategory));
   if (filterStatus) filteredProducts = filteredProducts.filter(p => p.status === filterStatus);
@@ -145,7 +132,6 @@ const { toast } = useToast();
               Nuevo Producto
             </Button>
           </Flex>
-
           <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
             <Select placeholder="Filtrar por categoría" mr={2} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
               {productOptions.categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
@@ -155,14 +141,11 @@ const { toast } = useToast();
               <option value="inactivo">Inactivo</option>
             </Select>
           </Flex>
-
-          {/* Tarjetas de productos */}
           <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6} w="full">
             {filteredProducts.length > 0 ? (
               filteredProducts.map(p => (
                 <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
                   <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
-
                   <Box p={{ base: 3, md: 4 }}>
                     <Heading size="md" mb={2}>{p.name}</Heading>
                     <Box fontSize="sm" color="gray.600" mb={1}>
@@ -171,7 +154,6 @@ const { toast } = useToast();
                     <Box fontSize="sm" color="gray.600" mb={1}>
                       <b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}
                     </Box>
-
                     <Box fontSize="sm" color="gray.600" mb={1}>
                       <b>Stock:</b>
                       <Flex wrap="wrap" gap={2} mt={1}>
@@ -192,7 +174,6 @@ const { toast } = useToast();
                         )}
                       </Flex>
                     </Box>
-
                     <Box fontSize="sm" color="gray.600" mb={3}>
                       <b>Estado:</b>{" "}
                       <Select
@@ -206,7 +187,6 @@ const { toast } = useToast();
                         <option value="inactivo">Inactivo</option>
                       </Select>
                     </Box>
-
                     <Flex justify="flex-end" gap={2} wrap="wrap">
                       <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
                       <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
@@ -225,8 +205,6 @@ const { toast } = useToast();
           </SimpleGrid>
         </VStack>
       </Container>
-
-      {/* Modal de creación */}
       <CreateProductModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -234,8 +212,6 @@ const { toast } = useToast();
         setNewProduct={setNewProduct}
         productOptions={productOptions}
       />
-
-      {/* Modal de edición */}
       <EditProductModal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
@@ -244,8 +220,6 @@ const { toast } = useToast();
         productOptions={productOptions}
         onSave={handleUpdate}
       />
-
-      {/* Modal de eliminación */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} isCentered>
         <ModalOverlay />
         <ModalContent>
