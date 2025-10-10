@@ -14,7 +14,6 @@ const ProductDetail = () => {
   const { dispatch } = useProducts();
   const { user, token, toggleFavorite } = useAuth();
   const { toast } = useToast();
-
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,18 +51,11 @@ const handleToggleLike = async () => {
 
   try {
     setLikeLoading(true);
-
-    // 1. Toggle global en productos (contador de likes)
     const updatedProduct = await ProductsActions.toggleLike(product._id, !isLiked);
     dispatch({ type: "TOGGLE_LIKE", payload: updatedProduct });
-
-    // 2. Toggle en favoritos de usuario
     await toggleFavorite(product._id);
     await refreshFavorites();
-
-    // 3. Actualizar estado local
     setProduct(updatedProduct);
-
     toast({ title: updatedProduct.isFavorite ? "Agregado a favoritos" : "Quitado de favoritos", status: "success" });
   } catch (err) {
     toast({ title: "Error al actualizar favoritos", status: "error" });
@@ -77,18 +69,14 @@ const handleToggleLike = async () => {
 
   return (
     <Box p={6}>
-      {/* Header con botón atrás */}
       <Flex justify="space-between" align="center" mb={6}>
         <Heading size="lg">{product.name}</Heading>
         <Button colorScheme="teal" onClick={() => navigate(-1)}>⬅ Volver</Button>
       </Flex>
-
       <Image src={product.imgPrimary || "/placeholder.svg"} alt={product.name} mb={4} borderRadius="md" />
       <Text mb={2}>{product.description}</Text>
       <Text mb={2}><strong>Precio Unitario:</strong> ${product.priceMin}</Text>
       <Text mb={2}><strong>Precio Mayorista:</strong> ${product.priceMay}</Text>
-
-      {/* Botón de favorito */}
       <Flex align="center" gap={2} mb={4}>
         <CustomButton
           onClick={handleToggleLike}
