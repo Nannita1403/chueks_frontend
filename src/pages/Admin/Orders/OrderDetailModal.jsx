@@ -95,13 +95,14 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
           <VStack mt={6} spacing={4} align="stretch">
             {(order.items ?? []).map((item, idx,) => {
               const displayName = item.name ?? "Artículo";
-              const productId = item.productId ?? item.product?._id ?? "—";
-
+              const productId = item.productId ?? item.product?._id ?? "—"
+              const imageSrc = item.imgPrimary || item.product?.imgPrimary || null;
+              
               return (
                 <Box key={item.productId || idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4} flexDir={{ base: "column", md: "row" }}>
-                    {item.imgPrimary ? (
-                    <Image src={item.imgPrimary} alt={item.name} boxSize={{ base: "100%", md: "100px" }} objectFit="cover" borderTopRadius="md"
+                    {imageSrc ? (
+                    <Image src={imageSrc} alt={item.name} boxSize={{ base: "100%", md: "100px" }} objectFit="cover" borderTopRadius="md"
                       /> 
                       ) : ( 
                       <Box boxSize={{ base: "100%", md: "100px" }} bg="gray.200" borderRadius="md" display="flex" alignItems="center"
@@ -112,7 +113,9 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
                       <Text fontWeight="bold" fontSize="lg">{displayName}</Text>
                       <Text fontSize="sm" color="gray.500">Código: {item.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
-                      <Text fontSize="sm" color="gray.500">Category: {item.category}</Text>
+                      <Text fontSize="sm" color="gray.500">
+                        Categoría: {Array.isArray(item.category) ? item.category.join(", ") : item.category ?? "—"}
+                      </Text>
                       <Text>Color: {item.color ?? "—"}</Text>
                       <Text>Precio Unitario: ${formatNumber(item.unitPrice)}</Text>
                       <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
