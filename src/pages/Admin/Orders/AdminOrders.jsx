@@ -8,11 +8,12 @@ import OrderDetailModal from "./OrderDetailModal.jsx";
 const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-const TAB_TO_API = ["all", "pending", "processing", "completed"];
+const TAB_TO_API = ["all", "pending", "processing", "completed", "cancelled"];
 const STATUS_BADGE = {
   pending: { scheme: "yellow", label: "Pendiente" },
   processing: { scheme: "blue", label: "En proceso" },
   completed: { scheme: "green", label: "Completado" },
+  cancelled: {scheme: "red", label: "Cancelado"},
 };
 
 const OrderStatusBadge = ({ status }) => {
