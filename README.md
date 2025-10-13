@@ -3,6 +3,10 @@
 **Chueks** es una aplicación web de e-commerce moderna desarrollada con **React + Vite**, que permite a los usuarios registrarse, iniciar sesión, gestionar su perfil, direcciones, teléfonos, favoritos y realizar pedidos.  
 Está conectada al backend desplegado en **Vercel**, construido con **Node.js, Express y MongoDB**.
 
+### 📌 Login
+![Login General](./public/Auth.png)
+
+
 🌐 **Demo en producción:**  
 👉 [https://chueks-frontend.vercel.app/auth](https://chueks-frontend.vercel.app/auth)
 
