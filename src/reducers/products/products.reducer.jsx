@@ -56,7 +56,6 @@ export const productsReducer = (state, action) => {
         loading: false,
       };
 
-    // 🚨 Falta el DELETE_PRODUCT
     case "DELETE_PRODUCT":
       return {
         ...state,

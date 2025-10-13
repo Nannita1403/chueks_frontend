@@ -1,4 +1,3 @@
-// ProductsProviders.jsx
 import productsActions from "../../src/reducers/products/products.actions.jsx";
 import {
   INITIAL_PRODUCTS_STATE,
@@ -11,7 +10,6 @@ export const ProductsContext = createContext();
 const ProductsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productsReducer, INITIAL_PRODUCTS_STATE);
 
-  // Obtener todos los productos
   const getProducts = useCallback(async () => {
     dispatch({ type: "LOADING" });
     try {
@@ -24,7 +22,6 @@ const ProductsProvider = ({ children }) => {
     }
   }, []);
 
-  // Obtener un producto
   const getProduct = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
@@ -35,7 +32,6 @@ const ProductsProvider = ({ children }) => {
     }
   }, []);
 
-  // Crear producto
   const createProduct = useCallback(async (data) => {
     dispatch({ type: "LOADING" });
     try {
@@ -46,7 +42,6 @@ const ProductsProvider = ({ children }) => {
     }
   }, []);
 
-  // Actualizar producto
   const updateProduct = useCallback(async (id, data) => {
     dispatch({ type: "LOADING" });
     try {
@@ -57,12 +52,11 @@ const ProductsProvider = ({ children }) => {
     }
   }, []);
 
-  // Eliminar producto
   const deleteProduct = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
       await productsActions.deleteProduct(id);
-      dispatch({ type: "DELETE_PRODUCT", payload: id }); // ✅ ahora usa el reducer
+      dispatch({ type: "DELETE_PRODUCT", payload: id }); 
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }

@@ -8,7 +8,6 @@ const CategoriesProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 🔹 Obtener todas las categorías
   const fetchCategories = async () => {
     try {
       const res = await api.get("/products/categories");
@@ -21,7 +20,6 @@ const CategoriesProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Crear categoría
   const createCategory = async (data) => {
     try {
       const res = await api.post("/products/categories", data);
@@ -31,7 +29,6 @@ const CategoriesProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Actualizar categoría
   const updateCategory = async (id, data) => {
     try {
       const res = await api.put(`/products/categories/${id}`, data);
@@ -43,7 +40,6 @@ const CategoriesProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Eliminar categoría
   const deleteCategory = async (id) => {
     try {
       await api.delete(`/products/categories/${id}`);

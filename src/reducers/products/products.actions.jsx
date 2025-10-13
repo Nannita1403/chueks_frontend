@@ -1,9 +1,7 @@
-// reducers/products/products.actions.jsx
 import axios from "axios";
 import apiService from "../api/Api.jsx";
 
 class ProductsActions {
-  // ✅ Obtener todos los productos
   async getProducts() {
     try {
       const response = await apiService.get("/products");
@@ -22,7 +20,6 @@ class ProductsActions {
     }
   }
 
-  // ✅ Obtener un producto por ID
   async getProduct(id) {
     try {
       const response = await apiService.get(`/products/${id}`);
@@ -34,7 +31,6 @@ class ProductsActions {
     }
   }
 
-  // ✅ Crear un producto (admin)
   async createProduct(productData) {
     try {
       const formData = this.buildFormData(productData);
@@ -49,7 +45,6 @@ class ProductsActions {
     }
   }
 
-  // ✅ Actualizar un producto (admin)
   async updateProduct(id, productData) {
     try {
       const formData = this.buildFormData(productData);
@@ -64,7 +59,6 @@ class ProductsActions {
     }
   }
 
-  // ✅ Eliminar un producto (admin)
   async deleteProduct(id) {
     try {
       const response = await apiService.delete(`/products/${id}`);
@@ -76,7 +70,6 @@ class ProductsActions {
     }
   }
 
-  // ✅ Alternar "like" de un producto
   async toggleLike(productId, addLike) {
     try {
       const res = await axios.put(
@@ -94,13 +87,12 @@ class ProductsActions {
     }
   }
 
-  // 🔧 Construir FormData para creación/actualización
   buildFormData(data) {
     const formData = new FormData();
 
     Object.keys(data).forEach((key) => {
       const value = data[key];
-      if (!value && value !== 0) return; // ignora null/undefined excepto 0
+      if (!value && value !== 0) return; 
 
       if (key === "imgPrimary" || key === "imgSecondary") {
         if (value instanceof File) {

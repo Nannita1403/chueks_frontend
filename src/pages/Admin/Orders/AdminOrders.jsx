@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Box, Flex, Heading, Text, Button, Input, InputGroup,
-  InputLeftElement, Tabs, TabList, TabPanels, Tab, TabPanel,
-  Card, CardBody, Table, Thead, Tbody, Tr, Th, Td, Badge, useDisclosure
-} from "@chakra-ui/react";
+import {  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement, Tabs, TabList, TabPanels, Tab, TabPanel,
+  Card, CardBody, Table, Thead, Tbody, Tr, Th, Td, Badge, useDisclosure } from "@chakra-ui/react";
 import { FiSearch, FiEye, FiDownload } from "react-icons/fi";
 import ApiService from "../../../reducers/api/Api.jsx";
 import OrderDetailModal from "./OrderDetailModal.jsx";

@@ -3,7 +3,6 @@ import {  Box, Grid, GridItem, Text, HStack, VStack, Image, Divider, IconButton,
   Alert, AlertIcon, useColorModeValue, Container} from "@chakra-ui/react";
 import { CloseIcon, AddIcon, MinusIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
-
 import ApiService from "../../../reducers/api/Api.jsx";
 import CustomButton from "../../../components/Button/Button.jsx";
 import {  CustomCard as Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription
@@ -380,7 +379,7 @@ export default function Cart() {
         onClose={() => setIsAddressModalOpen(false)}
         onConfirm={() => {
           setIsAddressModalOpen(false);
-          onCheckout(); // volver a intentar checkout luego de guardar
+          onCheckout();
         }}
       />
 

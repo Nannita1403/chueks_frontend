@@ -81,8 +81,7 @@ const App = () => {
           <ProtectedRoute>
             <UserLayout />
           </ProtectedRoute>
-        }
-      >
+        }>
         <Route index element={<ProfileDashboard />} />
         <Route path="orders" element={<OrdersPageUser />} />
       </Route>

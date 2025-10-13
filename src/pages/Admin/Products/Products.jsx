@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box, Flex, VStack, Heading, Button, IconButton, useColorModeValue, Container, Select, 
-  SimpleGrid, Card, Badge } from "@chakra-ui/react";
+  SimpleGrid, Card, Badge, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import axios from "axios";
 import { useToast } from "../../../Hooks/useToast.jsx";
@@ -9,9 +9,6 @@ import Loading from "../../../components/Loading/Loading.jsx";
 import CreateProductModal from "../../../components/CreateProductModal/CreateProductModal.jsx";
 import EditProductModal from "../../../components/EditProductModal/EditProductModal.jsx";
 
-import {
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter
-} from "@chakra-ui/react";
 
 const AdminProducts = () => {
   const { products, getProducts, deleteProduct, updateProduct } = useProducts();
@@ -32,12 +29,10 @@ const AdminProducts = () => {
 
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
-const { toast } = useToast();
+  const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
   useEffect(() => {

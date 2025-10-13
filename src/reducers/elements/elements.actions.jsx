@@ -1,6 +1,5 @@
 import apiService from "../api/Api.jsx"
 class ElementsActions {
-  // Get all elements
   async getElements() {
     try {
       const response = await apiService.get("/elements")
@@ -10,7 +9,6 @@ class ElementsActions {
     }
   }
 
-  // Get single element
   async getElement(id) {
     try {
       const response = await apiService.get(`/elements/${id}`)
@@ -20,12 +18,9 @@ class ElementsActions {
     }
   }
 
-  // Create new element (admin only)
   async createElement(elementData) {
     try {
       const formData = new FormData()
-
-      // Add text fields
       Object.keys(elementData).forEach((key) => {
         if (key !== "logo") {
           if (Array.isArray(elementData[key])) {
@@ -36,7 +31,6 @@ class ElementsActions {
         }
       })
 
-      // Add logo file
       if (elementData.logo) {
         formData.append("logo", elementData.logo)
       }
@@ -48,12 +42,9 @@ class ElementsActions {
     }
   }
 
-  // Update element (admin only)
   async updateElement(id, elementData) {
     try {
       const formData = new FormData()
-
-      // Add text fields
       Object.keys(elementData).forEach((key) => {
         if (key !== "logo") {
           if (Array.isArray(elementData[key])) {
@@ -63,8 +54,6 @@ class ElementsActions {
           }
         }
       })
-
-      // Add logo file if provided
       if (elementData.logo) {
         formData.append("logo", elementData.logo)
       }
@@ -76,7 +65,6 @@ class ElementsActions {
     }
   }
 
-  // Delete element (admin only)
   async deleteElement(id) {
     try {
       const response = await apiService.delete(`/elements/${id}`)

@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Heading,
-  Text,
-  VStack,
-  Spinner,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import {   Box, Heading, Text, VStack, Spinner, useColorModeValue} from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "@chakra-ui/react";
@@ -33,9 +26,8 @@ export default function Profile() {
 
   const muted = useColorModeValue("gray.600", "gray.400");
   const toast = useToast();
-  // 📌 Cargar órdenes
     useEffect(() => {
-      if (token === undefined) return; // ⚠️ Espera a que el token esté definido (aunque sea null)
+      if (token === undefined) return; 
       if (!token) {
         logout();
         return;
@@ -85,7 +77,6 @@ export default function Profile() {
 
         <VStack align="stretch" spacing={10}>
 
-          {/* Pedidos */}
           <Box>
             <Box bg="gray.100" px={4} py={2} borderRadius="md">
               <Text fontWeight="bold">Mis Pedidos</Text>
@@ -123,7 +114,6 @@ export default function Profile() {
           </Box>
         </VStack>
 
-        {/* Modal detalle pedido */}
         <OrderModal
           isOpen={!!selectedOrder}
           onClose={() => setSelectedOrder(null)}

@@ -13,10 +13,10 @@ export const themeSystem = extendTheme({
       200: "#fbcfe8",
       300: "#f9a8d4",
       400: "#f472b6",
-      500: "#ec4899", // fuchsia-500
-      600: "#db2777", // fuchsia-600
-      700: "#be185d", // fuchsia-700
-      800: "#9d174d", // fuchsia-800
+      500: "#ec4899", 
+      600: "#db2777", 
+      700: "#be185d", 
+      800: "#9d174d", 
       900: "#831843",
     },
     cyan: {

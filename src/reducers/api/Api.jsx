@@ -1,5 +1,5 @@
 const localUrl = 'http://localhost:3000/api/v1';
-const vercelUrl = 'https://chueks-backend.vercel.app/api/v1'; // Cambia a tu URL de producción
+const vercelUrl = 'https://chueks-backend.vercel.app/api/v1'; 
 
 export const DEFAULT_BASE = vercelUrl;
 const API_BASE_URL =
@@ -12,7 +12,7 @@ const API_BASE_URL =
 class ApiService {
     constructor() {
       this.baseURL = API_BASE_URL;
-      this.token = localStorage.getItem("token"); // ✅ Añadido
+      this.token = localStorage.getItem("token"); 
       console.log("🔧 ApiService inicializado con URL:", this.baseURL);
     }
 
@@ -29,7 +29,7 @@ class ApiService {
 
   getHeaders(isFormData = false) {
   const headers = {};
-  const token = this.token || localStorage.getItem("token"); // 🧠 usa la versión de memoria primero
+  const token = this.token || localStorage.getItem("token"); 
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
@@ -74,8 +74,7 @@ class ApiService {
 
       console.log("✅ Petición exitosa:", data);
 
-      // 🔄 Normalización
-      if (data?.data) return data.data;
+       if (data?.data) return data.data;
       if (data?.products) return data.products;
       if (Array.isArray(data)) return data;
       return data;
@@ -89,7 +88,6 @@ class ApiService {
     }
   }
 
-  // Métodos HTTP estándar
   get(endpoint) {
     return this.request(endpoint, { method: "GET" });
   }
@@ -119,7 +117,6 @@ class ApiService {
     return this.request(endpoint, { method: "DELETE" });
   }
 
-  // 🚨 Métodos especiales para multipart/form-data
   postFormData(endpoint, formData) {
     return this.request(endpoint, { method: "POST", body: formData }, true);
   }

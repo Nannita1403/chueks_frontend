@@ -1,4 +1,3 @@
-// providers/ElementsProviders.jsx
 import ElementsActions from "../../src/reducers/elements/elements.actions.jsx";
 import {
   elementsReducer,
@@ -11,12 +10,10 @@ export const ElementsContext = createContext();
 const ElementsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(elementsReducer, INITIAL_ELEMENTS_STATE);
 
-  // Obtener todos los elementos
   const getElements = useCallback(async () => {
     dispatch({ type: "LOADING" });
     try {
       const res = await ElementsActions.getElements();
-      // La API puede responder con distintos formatos
       const list = Array.isArray(res?.data)
         ? res.data
         : res?.data?.elements || res?.elements || [];
@@ -28,7 +25,6 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Obtener un elemento
   const getElement = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
@@ -39,7 +35,6 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Crear elemento
   const createElement = useCallback(async (data) => {
     dispatch({ type: "LOADING" });
     try {
@@ -50,7 +45,6 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Actualizar elemento
   const updateElement = useCallback(async (id, data) => {
     dispatch({ type: "LOADING" });
     try {
@@ -61,12 +55,11 @@ const ElementsProvider = ({ children }) => {
     }
   }, []);
 
-  // Eliminar elemento
   const deleteElement = useCallback(async (id) => {
     dispatch({ type: "LOADING" });
     try {
       await ElementsActions.deleteElement(id);
-      dispatch({ type: "DELETE_ELEMENT", payload: id }); // ✅ caso limpio en el reducer
+      dispatch({ type: "DELETE_ELEMENT", payload: id }); 
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }
@@ -77,7 +70,7 @@ const ElementsProvider = ({ children }) => {
   return (
     <ElementsContext.Provider
       value={{
-        elements: state.elements, // ✅ nunca undefined, al menos []
+        elements: state.elements, 
         element: state.element,
         loading: state.loading,
         error: state.error,

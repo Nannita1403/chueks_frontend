@@ -1,7 +1,6 @@
 import apiService from "../api/Api.jsx"
 
 class authService {
-  // Register new user
   async register(userData) {
     try {
       console.log("📡 Enviando registro a API:", userData)
@@ -14,13 +13,10 @@ class authService {
       throw error
     }
   }
-  // Login user
 
   async login(credentials) {
   try {
     console.log("📡 Enviando login a API:", credentials)
-
-    // Normalizar payload a lo que espera el backend
     const payload = {
       email: credentials.email || credentials.username, 
       password: credentials.password,
@@ -57,7 +53,6 @@ class authService {
   }
 }
 
-  // Verify account
   async verifyAccount(id) {
     try {
       console.log("📡 Verificando cuenta:", id)
@@ -77,7 +72,6 @@ class authService {
     }
   }
 
-  // Check session
   async checkSession() {
     try {
       console.log("📡 Verificando sesión...")
@@ -90,7 +84,6 @@ class authService {
     }
   }
 
-  // Logout user
   logout() {
     console.log("🚪 Cerrando sesión...")
     apiService.setToken(null)
@@ -99,13 +92,11 @@ class authService {
     console.log("✅ Sesión cerrada")
   }
 
-  // Get current user from localStorage
   getCurrentUser() {
     const user = localStorage.getItem("user")
     return user ? JSON.parse(user) : null
   }
 
-  // Check if user is authenticated
   isAuthenticated() {
     const token = localStorage.getItem("token")
     const user = localStorage.getItem("user")
@@ -114,7 +105,6 @@ class authService {
     return isAuth
   }
 
-  // Check if user is admin
   isAdmin() {
     const user = this.getCurrentUser()
     const isAdmin = user && user.rol === "admin"

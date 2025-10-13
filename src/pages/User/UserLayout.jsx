@@ -1,21 +1,5 @@
-import {
-  Box,
-  Flex,
-  VStack,
-  Button,
-  Text,
-  Divider,
-  Image,
-  IconButton,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-  useDisclosure,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, Flex, VStack, Button, Text, Divider, Image, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerHeader,
+  DrawerBody, DrawerFooter, useDisclosure, useColorModeValue} from "@chakra-ui/react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
@@ -29,19 +13,10 @@ const menuItems = [
   { label: "Teléfonos", path: "/profile/phones", color: "yellow.400", type: "modal" },
 ];
 
-const SidebarContent = ({
-  onClose,
-  onOpenAddresses,
-  onOpenPhones,
-  logoSrc,
-  handleLogout,
-  handleClick,
-  location,
-  navigate,
-}) => (
+const SidebarContent = ({  onClose, onOpenAddresses, onOpenPhones, logoSrc, handleLogout, handleClick,
+  location, navigate}) => (
   <Flex direction="column" h="100%" justify="space-between" bg="gray.900" color="white" p={4} w="250px">
     <VStack spacing={6} align="stretch">
-      {/* Logo */}
       <Box textAlign="center" bg="white" borderRadius="md" p={2}>
         <Image src={logoSrc} alt="Logo" mx="auto" mb={2} maxH="60px" />
         <Text fontWeight="bold" fontSize="lg" color="gray.900">
@@ -49,7 +24,6 @@ const SidebarContent = ({
         </Text>
       </Box>
 
-      {/* Volver al Home */}
       <Button
         bg="white"
         color="gray.800"
@@ -64,7 +38,6 @@ const SidebarContent = ({
         Volver al Home
       </Button>
 
-      {/* Menú */}
       <Box>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -91,7 +64,6 @@ const SidebarContent = ({
       </Box>
     </VStack>
 
-    {/* Botón salir */}
     <Box mt={6}>
       <Divider mb={4} />
       <Button bg="red.500" color="white" w="full" _hover={{ bg: "red.600" }} onClick={handleLogout}>
@@ -114,7 +86,6 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
   } = useDisclosure();
   const { isOpen: isPhonesOpen, onOpen: onOpenPhones, onClose: onClosePhones } = useDisclosure();
 
-  // Aquí la función está dentro de UserLayout para tener acceso a navigate y modales
   const handleClick = (item) => {
     console.log("Navigating to", item.path);
     if (item.type === "modal") {
@@ -127,7 +98,6 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
 
   return (
     <Flex minH="100vh">
-      {/* Sidebar fijo desktop */}
       <Box display={{ base: "none", md: "block" }} position="fixed" h="100vh">
         <SidebarContent
           logoSrc={logoSrc}
@@ -140,7 +110,6 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
         />
       </Box>
 
-      {/* Botón hamburguesa mobile */}
       <IconButton
         aria-label="Abrir menú"
         icon={<HamburgerIcon />}
@@ -152,7 +121,6 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
         onClick={onOpen}
       />
 
-      {/* Drawer mobile */}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
@@ -175,12 +143,10 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
         </DrawerContent>
       </Drawer>
 
-      {/* Main content */}
       <Box flex="1" p={6} ml={{ base: 0, md: "250px" }} bg={useColorModeValue("gray.50", "gray.900")}>
         <Outlet />
       </Box>
 
-      {/* Modals globales */}
       <AddressModal isOpen={isAddressesOpen} onClose={onCloseAddresses} />
       <PhoneModal isOpen={isPhonesOpen} onClose={onClosePhones} />
     </Flex>

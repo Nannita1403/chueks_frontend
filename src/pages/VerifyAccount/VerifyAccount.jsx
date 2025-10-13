@@ -6,7 +6,7 @@ import ApiService from "../../reducers/api/Api.jsx";
 const VerifyAccount = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState("loading"); // "loading" | "success" | "error"
+  const [status, setStatus] = useState("loading"); 
 
   useEffect(() => {
     const verify = async () => {
@@ -19,7 +19,6 @@ const VerifyAccount = () => {
         setStatus("error");
       }
     };
-
     if (id) {
       verify();
     }

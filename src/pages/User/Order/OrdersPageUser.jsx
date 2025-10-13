@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  Box, Heading, Text, Divider, Spinner, VStack, HStack, Image,
-  SimpleGrid, useColorModeValue, Modal, ModalOverlay,
-  ModalContent, ModalHeader, ModalBody, ModalCloseButton,
-  ModalFooter, Button, Badge, Select, Checkbox
+import {  Box, Heading, Text, Divider, Spinner, VStack, HStack, Image, SimpleGrid, useColorModeValue, Modal, ModalOverlay,
+  ModalContent, ModalHeader, ModalBody, ModalCloseButton, ModalFooter, Button, Badge, Select, Checkbox
 } from "@chakra-ui/react";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
@@ -12,19 +9,16 @@ import ApiService from "../../../reducers/api/Api.jsx";
 export default function OrdersPageUser() {
   const { token } = useAuth();
   const { toast } = useToast();
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
   const muted = useColorModeValue("gray.600", "gray.400");
   const cardBg = useColorModeValue("gray.50", "gray.700");
 
-  // 📌 Cargar pedidos del usuario
+
   const fetchOrders = async () => {
     try {
       const res = await ApiService.get("/orders/my-orders");
-      // El servicio normaliza: puede venir en res.orders o res.data o res directamente
       setOrders(res.orders || res.data || res || []);
       console.log(res);
     } catch (err) {
@@ -41,18 +35,15 @@ export default function OrdersPageUser() {
 
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
-  // 📌 Cambiar estado del pedido
   const updateStatus = async (orderId, status) => {
     try {
       await ApiService.patch(`/orders/${orderId}/status`, { status });
-      await fetchOrders(); // refrescar lista
+      await fetchOrders();
     } catch (err) {
       console.error(err);
       toast({ title: "Error al actualizar estado", status: "error" });
     }
   };
-
-
   if (loading) return (
     <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
       <Spinner />
@@ -64,9 +55,7 @@ export default function OrdersPageUser() {
     <Box maxW="container.xl" mx="auto" py={8}>
       <Heading size="lg" mb={6}>Historial de Pedidos</Heading>
       <Divider mb={6} />
-
       {orders.length === 0 && <Text color={muted}>No tienes pedidos todavía.</Text>}
-
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
         {orders.map(order => (
           <Box
@@ -91,7 +80,6 @@ export default function OrdersPageUser() {
         ))}
       </SimpleGrid>
 
-      {/* Modal Detalle */}
       <Modal isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} size="4xl" scrollBehavior="inside">
         <ModalOverlay />
         <ModalContent>
@@ -138,7 +126,6 @@ export default function OrdersPageUser() {
               <Text>Envío: ${formatNumber(selectedOrder?.shipping)}</Text>
               <Text fontWeight="bold">Total: ${formatNumber(selectedOrder?.total)}</Text>
 
-              {/* Estado */}
               <HStack mt={2} spacing={2} align="center">
                 <Text>Estado:</Text>
                 <Badge colorScheme={

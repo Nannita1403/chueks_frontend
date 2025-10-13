@@ -1,8 +1,6 @@
 // src/pages/User/Wishlist/Favorites.jsx
 import { useEffect, useState, useMemo } from "react";
-import {
-  Box, Container, Heading, Text, SimpleGrid, VStack, HStack, Divider, Spinner
-} from "@chakra-ui/react";
+import {Box, Container, Heading, Text, SimpleGrid, VStack, HStack, Divider, Spinner } from "@chakra-ui/react";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
@@ -15,14 +13,13 @@ export default function Favorites() {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Carga inicial de favoritos
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
-    setLoading(false); // favoritos ya están en contexto
-  }, [user]);
+    setLoading(false); 
+    }, [user]);
 
   const subtotal = useMemo(() => {
     return (favorites || []).reduce((acc, p) => acc + (p.priceMin || 0), 0);
@@ -32,7 +29,6 @@ export default function Favorites() {
     try {
       const ApiService = (await import("../../../reducers/api/Api.jsx")).default;
       await ApiService.post("/cart/add", { productId: product._id, quantity: 1 });
-      // Eliminar de favoritos después de mover al carrito
       await toggleFavorite(product._id);
     } catch (err) {
       console.error("Error al mover al carrito:", err);
@@ -76,7 +72,6 @@ export default function Favorites() {
 
       <Container maxW="container.xl" py={6}>
         <HStack align="start" spacing={6} w="full">
-          {/* LISTA DE FAVORITOS */}
           <Box flex={1}>
             <Heading size="lg" mb={6}>Mis Favoritos ❤️</Heading>
             {!favorites || favorites.length === 0 ? (
@@ -129,10 +124,8 @@ export default function Favorites() {
             )}
           </Box>
 
-          {/* RESUMEN LATERAL */}
           {favorites && favorites.length > 0 && (
           <>
-            {/* Mobile (acordeón arriba) */}
             <Box
               display={{ base: "block", lg: "none" }}
               position="sticky"
@@ -150,8 +143,6 @@ export default function Favorites() {
                 <Text mb={1}>Subtotal: ${subtotal}</Text>
               </Box>
             </Box>
-
-            {/* Desktop (panel lateral) */}
             <Box
               display={{ base: "none", lg: "block" }}
               w="280px"

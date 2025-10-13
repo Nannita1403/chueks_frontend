@@ -1,25 +1,16 @@
 import { useEffect, useState } from "react";
-import {
-  Box, VStack, Text, HStack, Button, Spinner, useDisclosure, Badge
+import {  Box, VStack, Text, HStack, Button, Spinner, useDisclosure, Badge
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import ApiService from "../../../reducers/api/Api.jsx";
-
 import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
-
 import CompleteProfileModal from "../../../components/Profile/CompleteProfileModal.jsx";
 
-import {
-  getDefaultAddress,
-  getDefaultPhone,
-  formatAddress,
-  formatPhone,
-  formatPrice
-} from "../../../components/Profile/UserUtils.jsx";
+import { getDefaultAddress, getDefaultPhone,  formatAddress, formatPhone, formatPrice } from "../../../components/Profile/UserUtils.jsx";
 
 export default function ProfileDashboard() {
   const { user, setUser } = useAuth();
@@ -35,11 +26,13 @@ export default function ProfileDashboard() {
     onOpen: onOpenName,
     onClose: onCloseName
   } = useDisclosure();
+
   const {
     isOpen: isAddressesOpen,
     onOpen: onOpenAddresses,
     onClose: onCloseAddresses
   } = useDisclosure();
+
   const {
     isOpen: isPhonesOpen,
     onOpen: onOpenPhones,
@@ -111,11 +104,9 @@ export default function ProfileDashboard() {
       if (data.name?.trim()) {
         await handleUpdateProfile({ name: data.name });
       }
-
       if (data.phone?.trim()) {
         await handleAddPhone({ number: data.phone });
       }
-
       if (data.street?.trim() && data.city?.trim() && data.zip?.trim()) {
         await handleAddAddress({
           street: data.street,
@@ -127,11 +118,9 @@ export default function ProfileDashboard() {
       setShowCompleteModal(false);
     };
 
-    // Reusable address/phone validation
   const isValidAddress = ({ street, city, zip }) => street?.trim() && city?.trim() && zip?.trim();
   const isValidPhone = ({ number }) => number?.trim();
 
-  // ---- Address handlers
   const handleAddAddress = async (address) => {
     if (!isValidAddress(address)) {
       return toast({ title: "Completa todos los campos", status: "warning" });
@@ -140,11 +129,9 @@ export default function ProfileDashboard() {
     const exists = user.addresses?.some(a =>
       a.street === address.street && a.city === address.city && a.zip === address.zip
     );
-
     if (exists) {
       return toast({ title: "Esta dirección ya existe", status: "warning" });
     }
-
     try {
       const res = await ApiService.post("/users/addresses", address);
       updateUser({ addresses: res.user?.addresses || res.addresses });
@@ -157,7 +144,6 @@ export default function ProfileDashboard() {
     if (!isValidAddress(address)) {
       return toast({ title: "Completa todos los campos", status: "warning" });
     }
-
     try {
       const res = await ApiService.put(`/users/addresses/${id}`, address);
       updateUser({ addresses: res.user?.addresses || res.addresses });
@@ -175,18 +161,14 @@ export default function ProfileDashboard() {
     }
   };
 
-  // ---- Phone handlers
   const handleAddPhone = async (phone) => {
     if (!isValidPhone(phone)) {
       return toast({ title: "Ingresa un número válido", status: "warning" });
     }
-
     const exists = user.phones?.some(p => p.number === phone.number);
-
     if (exists) {
       return toast({ title: "Este número ya existe", status: "warning" });
     }
-
     try {
       const res = await ApiService.post("/users/phones", phone);
       updateUser({ phones: res.user?.phones || res.phones });
@@ -199,7 +181,6 @@ export default function ProfileDashboard() {
     if (!isValidPhone(phone)) {
       return toast({ title: "Ingresa un número válido", status: "warning" });
     }
-
     try {
       const res = await ApiService.put(`/users/phones/${id}`, phone);
       updateUser({ phones: res.user?.phones || res.phones });
@@ -225,23 +206,18 @@ export default function ProfileDashboard() {
   return (
     <VStack align="stretch" spacing={6}>
       <Text fontSize="2xl" fontWeight="bold">Mi Perfil</Text>
-
-      {/* Nombre */}
       <Section label="Nombre" onEdit={onOpenName}>
         <Text>{user.name || "Sin nombre"}</Text>
       </Section>
 
-      {/* Dirección */}
       <Section label="Dirección" onEdit={onOpenAddresses}>
         <Text>{formatAddress(defaultAddress) || "No disponible. Carga una nueva dirección"}</Text>
       </Section>
 
-      {/* Teléfono */}
       <Section label="Teléfono" onEdit={onOpenPhones}>
         <Text>{formatPhone(defaultPhone) || "No disponible. Carga un nuevo teléfono"}</Text>
       </Section>
 
-      {/* Pedidos */}
       <Box>
         <Box bg="gray.100" px={4} py={2} borderRadius="md">
           <Text fontWeight="bold">Mis Pedidos</Text>
@@ -253,9 +229,9 @@ export default function ProfileDashboard() {
               <>
                 <VStack spacing={4} align="stretch">
                   {orders
-                    .slice() // hacemos copia para no mutar el array original
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ordenar descendente por fecha
-                    .slice(0, 3) // tomar solo los últimos 3
+                    .slice() 
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) 
+                    .slice(0, 3)
                     .map(order => (
                       <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
                         <HStack justify="space-between" mb={2}>
@@ -294,7 +270,6 @@ export default function ProfileDashboard() {
         </Box>
       </Box>
 
-      {/* Modales */}
       <EditNameModal
         isOpen={isNameOpen}
         onClose={onCloseName}
@@ -325,7 +300,6 @@ export default function ProfileDashboard() {
   );
 }
 
-// Reusable layout section
 function Section({ label, onEdit, children }) {
   return (
     <Box>
