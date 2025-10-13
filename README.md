@@ -4,7 +4,7 @@
 Está conectada al backend desplegado en **Vercel**, construido con **Node.js, Express y MongoDB**.
 
 ### 📌 Login
-![Login General](./public/Auth.png)
+![Auth General](./public/Auth.png)
 
 
 🌐 **Demo en producción:**  
