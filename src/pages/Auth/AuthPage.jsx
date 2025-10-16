@@ -17,6 +17,27 @@ export default function AuthPage() {
   const { toast } = useToast();
   const { login, registerUser } = useAuth();
 
+  const parseAuthError = (error) => {
+    if (!error) return "Error desconocido. Intenta nuevamente.";
+
+    if (error.response) {
+      const { status, data } = error.response;
+
+      if (status === 400) return data.message || "Datos inválidos. Revisa el formulario.";
+      if (status === 401) return "Email o contraseña incorrectos.";
+      if (status === 403) return "Tu cuenta no tiene permisos para acceder.";
+      if (status === 409) return "El correo ya está registrado. Inicia sesión.";
+      if (status === 500) return "Error interno del servidor. Intenta más tarde.";
+
+      return data?.message || "Ocurrió un error inesperado en el servidor.";
+    }
+
+    if (error.code === "ERR_NETWORK")
+      return "No se pudo conectar con el servidor. Revisa tu conexión a Internet.";
+
+    return error.message || "Error inesperado. Intenta nuevamente.";
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -43,7 +64,15 @@ export default function AuthPage() {
           navigate("/home", { replace: true });
         }
       }, 100);
-    } catch (error) {
+   } catch (error) {
+      console.group("🔴 Error en login", "color:red; font-weight:bold;");
+      console.error("Mensaje:", error?.message);
+      console.error("Stack:", error?.stack);
+      console.error("Objeto completo:", error);
+      console.groupEnd();
+
+      const friendlyMessage = parseAuthError(error);
+
       if (error.isVerificationError) {
         setVerificationError({
           email: credentials.email,
@@ -58,12 +87,13 @@ export default function AuthPage() {
       } else {
         toast({
           title: "Error al iniciar sesión",
-          description: error.message || "Credenciales incorrectas",
+          description: friendlyMessage,
           status: "error",
-          duration: 3000,
+          duration: 4000,
         });
-      }
-    } finally {
+      navigate("/auth", { replace: true });
+            }
+       } finally {
       setIsLoading(false);
     }
   };
@@ -92,12 +122,21 @@ export default function AuthPage() {
 
       navigate("/auth", { replace: true });
     } catch (error) {
+      console.group("🔴 Error en registro", "color:red; font-weight:bold;");
+      console.error("Mensaje:", error?.message);
+      console.error("Stack:", error?.stack);
+      console.error("Objeto completo:", error);
+      console.groupEnd();
+
+      const friendlyMessage = parseAuthError(error);
+
       toast({
         title: "Error al registrarse",
-        description: error.message || "Error en el registro",
+        description: friendlyMessage,
         status: "error",
-        duration: 3000,
+        duration: 4000,
       });
+    navigate("/auth", { replace: true });
     } finally {
       setIsLoading(false);
     }

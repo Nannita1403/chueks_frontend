@@ -1,72 +1,100 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { Box, Grid, Text, useBreakpointValue } from '@chakra-ui/react'
+import React, { useEffect, useMemo, useState } from "react";
+import { Box, Grid, Text, useBreakpointValue, VStack } from "@chakra-ui/react";
 
 export default function Loading() {
   const textSet = useMemo(
     () => [
-      'Bendita',
-      'Bonnie',
-      'Berta',
-      'Madrid',
-      'Toledo',
-      'Lisboa',
-      'Paris',
-      'Mini Cleo',
-      'Alice',
-      'Revel',
-      'Venus',
-      'Avril',
+      "Bendita",
+      "Bonnie",
+      "Berta",
+      "Madrid",
+      "Toledo",
+      "Lisboa",
+      "Paris",
+      "Mini Cleo",
+      "Alice",
+      "Revel",
+      "Venus",
+      "Avril",
     ],
     []
-  )
+  );
 
-  const textSize = useBreakpointValue({
-    base: '4xl', sm: '6xl', md: '8xl'})
+  const textSize = useBreakpointValue({ base: "4xl", sm: "6xl", md: "8xl" });
+
   return (
-    <Box w="full" h="50vh" as={Grid} placeContent="center" fontSize={textSize}>
-      <TypewriterTextEffect textSet={textSet} speed={200} />
-    </Box>
-  )
+    <VStack
+      w="full"
+      h="100vh"
+      justify="center"
+      spacing={8}
+      position="relative"
+      bg="white"
+    >
+      //Texto de los nombres de los productos 
+      <Box as={Grid} placeContent="center" fontSize={textSize}>
+        <TypewriterTextEffect textSet={textSet} speed={200} />
+      </Box>
+
+      //Texto fijo debajo
+      <Text
+        position="absolute"
+        bottom="4"
+        fontSize="lg"
+        color="gray.600"
+        fontWeight="medium"
+      >
+        Cargando... por favor espera
+      </Text>
+    </VStack>
+  );
 }
 
-export const TypewriterTextEffect = ({ textSet = ['An a lonely type writer'], speed = 200, ...props }) => {
-  const [activeText, setActiveText] = useState('')
-  const [showCursor, setShowCursor] = useState(true)
+export const TypewriterTextEffect = ({
+  textSet = ["An a lonely type writer"],
+  speed = 200,
+  ...props
+}) => {
+  const [activeText, setActiveText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
 
   useEffect(() => {
-    let placeholderTextIndex = 0
-    let textIndex = 0
-    let isBackward = false
+    let placeholderTextIndex = 0;
+    let textIndex = 0;
+    let isBackward = false;
+
     const textInterval = setInterval(() => {
-      const text = `  ${textSet[placeholderTextIndex]}  `
+      const text = `  ${textSet[placeholderTextIndex]}  `;
       if (textIndex === text.length) {
-        isBackward = true
+        isBackward = true;
       } else if (textIndex === 0) {
-        isBackward = false
+        isBackward = false;
       }
+
       if (isBackward) {
-        textIndex--
+        textIndex--;
         if (textIndex === 0) {
-          placeholderTextIndex++
+          placeholderTextIndex++;
           if (placeholderTextIndex === textSet.length) {
-            placeholderTextIndex = 0
+            placeholderTextIndex = 0;
           }
         }
       } else {
-        textIndex++
+        textIndex++;
       }
 
-      setActiveText(text.slice(0, textIndex).trim())
-    }, speed)
+      setActiveText(text.slice(0, textIndex).trim());
+    }, speed);
 
     const cursorInterval = setInterval(() => {
-      setShowCursor((show) => !show)
-    }, speed)
+      setShowCursor((show) => !show);
+    }, speed);
+
     return () => {
-      clearInterval(textInterval)
-      clearInterval(cursorInterval)
-    }
-  }, [textSet, speed])
+      clearInterval(textInterval);
+      clearInterval(cursorInterval);
+    };
+  }, [textSet, speed]);
 
   return (
     <Text {...props}>
@@ -79,5 +107,5 @@ export const TypewriterTextEffect = ({ textSet = ['An a lonely type writer'], sp
         _
       </Text>
     </Text>
-  )
-}
+  );
+};
