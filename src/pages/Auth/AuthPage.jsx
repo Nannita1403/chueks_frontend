@@ -11,6 +11,8 @@ import { useToast } from "../../Hooks/useToast.jsx";
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationError, setVerificationError] = useState(null);
+  const [loginErrors, setLoginErrors] = useState({});
+  const [registerErrors, setRegisterErrors] = useState({});
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,6 +44,7 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     setVerificationError(null);
+    setLoginErrors({});
 
     const formData = new FormData(e.target);
     const credentials = {
@@ -64,84 +67,78 @@ export default function AuthPage() {
           navigate("/home", { replace: true });
         }
       }, 100);
-   } catch (error) {
+    } catch (error) {
+      console.error(error);
+   
+    if (error.response?.data?.errors) {
       console.group("🔴 Error en login", "color:red; font-weight:bold;");
       console.error("Mensaje:", error?.message);
       console.error("Stack:", error?.stack);
       console.error("Objeto completo:", error);
       console.groupEnd();
 
-      const friendlyMessage = parseAuthError(error);
-
-      if (error.isVerificationError) {
-        setVerificationError({
-          email: credentials.email,
-          message: error.message,
-        });
-        toast({
-          title: "Verificación requerida",
-          description: error.message,
-          status: "warning",
-          duration: 5000,
-        });
-      } else {
+      setLoginErrors(error.response.data.errors);
+    } else {
         toast({
           title: "Error al iniciar sesión",
-          description: friendlyMessage,
+          description: parseAuthError(error),
           status: "error",
           duration: 4000,
         });
-      navigate("/auth", { replace: true });
-            }
-       } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const formData = new FormData(e.target);
-    const registrationData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-      telephone: formData.get("telephone"),
-    };
-
-    try {
-      await registerUser(registrationData);
-
-      toast({
-        title: "Registro exitoso",
-        description:
-          "Revisa tu correo para verificar tu cuenta antes de iniciar sesión.",
-        status: "success",
-        duration: 5000,
-      });
-
-      navigate("/auth", { replace: true });
-    } catch (error) {
-      console.group("🔴 Error en registro", "color:red; font-weight:bold;");
-      console.error("Mensaje:", error?.message);
-      console.error("Stack:", error?.stack);
-      console.error("Objeto completo:", error);
-      console.groupEnd();
-
-      const friendlyMessage = parseAuthError(error);
-
-      toast({
-        title: "Error al registrarse",
-        description: friendlyMessage,
-        status: "error",
-        duration: 4000,
-      });
-    navigate("/auth", { replace: true });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+ const handleRegister = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setRegisterErrors({});
+
+  const formData = new FormData(e.target);
+  const registrationData = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    telephone: formData.get("telephone"),
+  };
+
+  try {
+    await registerUser(registrationData);
+
+    toast({
+      title: "Registro exitoso",
+      description:
+        "Revisa tu correo para verificar tu cuenta antes de iniciar sesión.",
+      status: "success",
+      duration: 5000,
+    });
+
+    navigate("/auth", { replace: true });
+  } catch (error) {
+    console.group("🔴 Error en registro", "color:red; font-weight:bold;");
+    console.error("Mensaje:", error?.message);
+    console.error("Stack:", error?.stack);
+    console.error("Objeto completo:", error);
+    console.groupEnd();
+
+    if (error.response?.data?.errors) {
+      setRegisterErrors(error.response.data.errors);
+    } else {
+      toast({
+        title: "Error al registrarse",
+        description: parseAuthError(error),
+        status: "error",
+        duration: 4000,
+      });
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+      
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const verified = params.get("verified");
@@ -273,13 +270,15 @@ export default function AuthPage() {
                     <TabPanel>
                       <form onSubmit={handleLogin}>
                         <VStack spacing={4}>
-                          <FormControl>
+                          <FormControl isInvalid={!!loginErrors.email}>
                             <FormLabel>Email</FormLabel>
                             <Input name="email" type="email" required />
+                            <FormErrorMessage>{loginErrors.email}</FormErrorMessage>
                           </FormControl>
-                          <FormControl>
+                          <FormControl isInvalid={!!loginErrors.password}>
                             <FormLabel>Contraseña</FormLabel>
                             <Input name="password" type="password" required />
+                            <FormErrorMessage>{loginErrors.password}</FormErrorMessage>
                           </FormControl>
                           <Button
                             type="submit"
@@ -295,22 +294,29 @@ export default function AuthPage() {
                     <TabPanel>
                       <form onSubmit={handleRegister}>
                         <VStack spacing={4}>
-                          <FormControl>
-                            <FormLabel>Nombre</FormLabel>
-                            <Input name="name" type="text" required />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>Telefono</FormLabel>
-                            <Input name="telephone" type="tel" required />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>Email</FormLabel>
-                            <Input name="email" type="email" required />
-                          </FormControl>
-                          <FormControl>
-                            <FormLabel>Contraseña</FormLabel>
-                            <Input name="password" type="password" required />
-                          </FormControl>
+                        <FormControl isInvalid={!!registerErrors.name}>
+                          <FormLabel>Nombre</FormLabel>
+                          <Input name="name" type="text" required />
+                          <FormErrorMessage>{registerErrors.name}</FormErrorMessage>
+                        </FormControl>
+
+                        <FormControl isInvalid={!!registerErrors.telephone}>
+                          <FormLabel>Telefono</FormLabel>
+                          <Input name="telephone" type="tel" required />
+                          <FormErrorMessage>{registerErrors.telephone}</FormErrorMessage>
+                        </FormControl>
+
+                        <FormControl isInvalid={!!registerErrors.email}>
+                          <FormLabel>Email</FormLabel>
+                          <Input name="email" type="email" required />
+                          <FormErrorMessage>{registerErrors.email}</FormErrorMessage>
+                        </FormControl>
+
+                        <FormControl isInvalid={!!registerErrors.password}>
+                          <FormLabel>Contraseña</FormLabel>
+                          <Input name="password" type="password" required />
+                          <FormErrorMessage>{registerErrors.password}</FormErrorMessage>
+                        </FormControl>
                           <Button
                             type="submit"
                             colorScheme="cyan"
