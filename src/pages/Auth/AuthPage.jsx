@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import logoRedondo from "/logoRedondo.png";
 import { Box, Container, VStack, Text, Input, Button, Image, FormControl, FormLabel, Tabs, TabList, TabPanels,
   Tab, TabPanel, Card, CardBody, HStack, Flex, useColorModeValue, Heading, Alert, AlertIcon, AlertTitle,
-  AlertDescription, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,} from "@chakra-ui/react";
+  AlertDescription, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
+  FormErrorMessage,} from "@chakra-ui/react";
 import Loading from "../../components/Loading/Loading.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
