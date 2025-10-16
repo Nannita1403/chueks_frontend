@@ -111,8 +111,10 @@ const App = () => {
           <Route path="orders" element={<AdminOrders />} />
         </Route>
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/home" replace />} />
+        {/* Default redirect y Que si escribe cualquier cosa va a auth*/}
+        <Route path="/" element={<Navigate to="/auth" replace />} />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+
       </Routes>
     </Box>
   );

@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [authLoading, setAuthLoading] = useState(true);
 
+  // Logout
   const logout = useCallback(() => {
     try { authService.logout?.(); } catch (e) { console.warn("⚠️ authService.logout no definido:", e); }
     localStorage.removeItem("token");
@@ -51,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     navigate("/auth", { replace: true });
   }, [navigate]);
 
+  // Refresh cart
   const refreshCart = useCallback(async () => {
     try {
       const data = await ApiService.get("/cart");
@@ -63,6 +65,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [logout]);
 
+  // Refresh favorites
   const refreshFavorites = useCallback(async () => {
     try {
       const data = await ApiService.get("/users/favorites");
@@ -75,6 +78,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [logout]);
 
+  // Inicialización de sesión
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
@@ -86,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       ApiService.setToken(token);
 
       try {
-        const res = await ApiService.get("/users/checksession"); // <--- cambio
+        const res = await ApiService.get("/users/checksession");
         dispatch({ type: "LOGIN_SUCCESS", payload: { user: res.user, token } });
       } catch (err) {
         console.warn("Token inválido o expirado", err);
@@ -99,6 +103,14 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, [logout]);
 
+  // Redirección automática si no hay sesión
+  useEffect(() => {
+    if (!authLoading && !state.isAuthenticated) {
+      navigate("/auth", { replace: true });
+    }
+  }, [authLoading, state.isAuthenticated, navigate]);
+
+  // Refrescar datos cuando hay usuario
   useEffect(() => {
     if (state.isAuthenticated) {
       refreshCart();
@@ -109,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [state.isAuthenticated, refreshCart, refreshFavorites]);
 
+  // Login
   const login = async (credentials) => {
     dispatch({ type: "LOGIN_START" });
     try {
@@ -130,6 +143,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Registro
   const registerUser = async (userData) => {
     dispatch({ type: "LOGIN_START" });
     try {
@@ -144,24 +158,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Set user manual
   const setUser = useCallback((user) => {
     const currentToken = localStorage.getItem("token");
     dispatch({ type: "SET_USER", payload: user });
     if (user) {
-    // Usa el token que venga del user o el que ya tenías
-    const tokenToUse = user.token || currentToken;
-    ApiService.setToken(tokenToUse);
-    localStorage.setItem("user", JSON.stringify(user));
-    if (tokenToUse) {
-      localStorage.setItem("token", tokenToUse);
+      const tokenToUse = user.token || currentToken;
+      ApiService.setToken(tokenToUse);
+      localStorage.setItem("user", JSON.stringify(user));
+      if (tokenToUse) localStorage.setItem("token", tokenToUse);
+    } else {
+      ApiService.setToken(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
     }
-  } else {
-    ApiService.setToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-  }
-}, []);
+  }, []);
 
+  // Toggle favorites
   const toggleFavorite = useCallback(async (productId) => {
     try {
       const data = await ApiService.put(`/users/favorites/${productId}/toggle`);
