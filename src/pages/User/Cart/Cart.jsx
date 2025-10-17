@@ -26,8 +26,8 @@ const money = (n) =>
     maximumFractionDigits: 0
   }).format(n);
 
-function normalizeItem(it) {
-  const it = it.product || {};
+/*function normalizeItem(it) {
+  const p = it.product || {};
 
     return {
     id: it.id, 
@@ -39,7 +39,7 @@ function normalizeItem(it) {
     image: it.imgPrimary
   };
 }
-
+*/
 export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({ items: [], shipping: 0 });
@@ -207,7 +207,7 @@ export default function Cart() {
               </Card>
             ) : (
               <VStack spacing={3} align="stretch">
-                {items.map((it) => (
+                {items?.map((it) => (
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
