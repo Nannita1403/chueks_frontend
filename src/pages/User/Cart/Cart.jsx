@@ -84,7 +84,7 @@ export default function Cart() {
     return () => { mounted = false; };
   }, [apiFetchCart]);
 
-  const items = useMemo(() => (cart.items || []).map(normalizeItem), [cart.items]);
+  const items = useMemo(() => (cart.items || []).map(items), [cart.items]);
   const itemCount = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items]);
   const subtotal = useMemo(() => items.reduce((acc, it) => acc + it.price * it.quantity, 0), [items]);
   const missing = Math.max(0, MIN_ITEMS - itemCount);
