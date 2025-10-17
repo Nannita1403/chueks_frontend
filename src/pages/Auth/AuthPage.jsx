@@ -69,28 +69,34 @@ export default function AuthPage() {
         }
       }, 100);
     } catch (error) {
-      console.error(error);
-   
+    console.error("❌ Error en login:", error.message);
     if (error.response?.data?.errors) {
-      console.group("🔴 Error en login", "color:red; font-weight:bold;");
-      console.error("Mensaje:", error?.message);
-      console.error("Stack:", error?.stack);
-      console.error("Objeto completo:", error);
+      console.group("🔴 Errores en Login", "color:red; font-weight:bold;");
+      console.error("Detalles:", error.response.data.errors);
       console.groupEnd();
 
       setLoginErrors(error.response.data.errors);
-    } else {
-        toast({
-          title: "Error al iniciar sesión",
-          description: parseAuthError(error),
-          status: "error",
-          duration: 4000,
-        });
+
+      Object.keys(error.response.data.errors).forEach((key) => {
+            toast({
+              title: `Error en el campo: ${key}`,
+              description: error.response.data.errors[key],
+              status: "error",
+              duration: 4000,
+            });
+          });
+        } else {
+          toast({
+            title: "Error al iniciar sesión",
+            description: parseAuthError(error),
+            status: "error",
+            duration: 4000,
+          });
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
  const handleRegister = async (e) => {
   e.preventDefault();
@@ -125,19 +131,32 @@ export default function AuthPage() {
     console.groupEnd();
 
     if (error.response?.data?.errors) {
-      setRegisterErrors(error.response.data.errors);
-    } else {
-      toast({
-        title: "Error al registrarse",
-        description: parseAuthError(error),
-        status: "error",
-        duration: 4000,
+      console.group("Errores del servidor", "color:red;");
+      Object.entries(error.response.data.errors).forEach(([field, message]) => {
+        console.error(`Campo: ${field} - Error: ${message}`);
       });
-    }
-  } finally {
-    setIsLoading(false);
-  }
-};
+      console.groupEnd();
+      sObject.keys(error.response.data.errors).forEach((key) => {
+        toast({
+          title: `Error en el campo: ${key}`,
+          description: error.response.data.errors[key],
+          status: "error",
+          duration: 4000,
+        });
+      });
+      setRegisterErrors(error.response.data.errors);
+        } else {
+          toast({
+            title: "Error al registrarse",
+            description: parseAuthError(error),
+            status: "error",
+            duration: 4000,
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
       
   useEffect(() => {
