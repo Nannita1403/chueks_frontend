@@ -216,7 +216,14 @@ export default function Cart() {
                           onClick={() => openProductDetail(it.productId)}
                           mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
                         >
-                         <Image src={it?.imgPrimary || "/placeholder.svg"} alt={it?.name} objectFit="cover" w="100%" mb={4} borderRadius="md" />
+                         <Image
+                          src={it?.imgPrimary ? it.imgPrimary : "/placeholder.svg"}
+                          alt={it?.name || "Producto"}
+                          objectFit="cover"
+                          w="100%"
+                          mb={4}
+                          borderRadius="md"
+                        />
                        </Box>                      
                      
                         {/* Info */}
