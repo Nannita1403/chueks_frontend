@@ -28,7 +28,9 @@ const money = (n) =>
 
 function normalizeItem(it) {
   const p = it.product || {};
-  const image = it.image || p?.imgPrimary?.url || p?.image || (Array.isArray(p?.images) && p.images[0]) || "";
+  const image = p?.imgPrimary?.url || p?.imgPrimary || (Array.isArray(p?.images) ? p.images[0] : p?.image) || "/placeholder.svg";
+  console.log(it.images);
+  
   return {
     id: it.id, 
     productId: it.productId,
@@ -211,13 +213,14 @@ export default function Cart() {
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
-                        {/* Imagen */}
-                        <Box
+                         {/* Imagen */}
+                        /*<Box
                           w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg}
                           onClick={() => openProductDetail(it.productId)}
                           mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
                         >
-                          {!!it.image && <Image src={it.image} alt={it.name} w="100%" h="100%" objectFit="cover" />}
+                          {!!it.image && 
+                          <Image src={it.image} alt={it.name} w="100%" h="100%" objectFit="cover" />}
                         </Box>
 
                         {/* Info */}

@@ -3,7 +3,7 @@ import {  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement,
   Card, CardBody, Table, Thead, Tbody, Tr, Th, Td, Badge, useDisclosure } from "@chakra-ui/react";
 import { FiSearch, FiEye, FiDownload } from "react-icons/fi";
 import ApiService from "../../../reducers/api/Api.jsx";
-import OrderDetailModal from "./OrderDetailModal.jsx";
+import OrderDetailModalAdmin from "./OrderDetailModalAdmin.jsx";
 
 const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
@@ -158,12 +158,11 @@ export default function AdminOrders() {
           </TabPanel>
         </TabPanels>
       </Tabs>
-      <OrderDetailModal
-        orderId={current?.code || current?._id}
-        isOpen={modal.isOpen}
-        onClose={() => { modal.onClose(); setCurrent(null); }}
-        onUpdated={load}
-      />
+      <OrderDetailModalAdmin 
+      orderId={current?._id} 
+      isOpen={modal.isOpen} 
+      onClose={() => { modal.onClose(); 
+      setCurrent(null); }} onUpdated={load} />
     </Box>
   );
 }

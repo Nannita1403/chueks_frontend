@@ -1,8 +1,6 @@
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, 
   Grid, GridItem, Text, HStack, Checkbox, Select, VStack, Image, Box, 
-  Alert,
-  AlertIcon,
-  AlertDescription} from "@chakra-ui/react";
+  Alert,  AlertIcon,  AlertDescription} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ApiService from "../../../reducers/api/Api.jsx";
 import { useToast } from "@chakra-ui/react";
@@ -98,8 +96,7 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
             {(order.items ?? []).map((item, idx,) => {
               const displayName = item.name ?? "Artículo";
               const productId = item.product?._id ?? "—";
-              const imageSrc = item.imgPrimary || item.product?.imgPrimary || null;
-              
+              const imageSrc = item.imgPrimary || item.product?.imgPrimary || item?.imgPrimary?.url || item?.imgPrimary || (Array.isArray(item?.images) ? item.images[0] : item?.image) || "/placeholder.svg";
               return (
                 <Box key={productId || idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4} flexDir={{ base: "column", md: "row" }}>
