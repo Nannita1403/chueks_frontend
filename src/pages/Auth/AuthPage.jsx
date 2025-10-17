@@ -56,8 +56,19 @@ export default function AuthPage() {
       email: formData.get("email"),
       password: formData.get("password"),
     };
+    console.log("📩 Email recibido (login):", credentials.email);
+    console.log("🔐 Password recibido (login):", credentials.password);
+
     try {
       const result = await login(credentials);
+
+      if (!result.user?.verified) {
+    setVerificationError({
+      message: "Debes verificar tu correo antes de ingresar.",
+      email: credentials.email,
+    });
+    return;
+  }
 
       toast({
         title: "Inicio de sesión exitoso",
@@ -115,6 +126,11 @@ export default function AuthPage() {
     telephone: formData.get("telephone"),
   };
 
+  console.log("🧑‍💼 Nombre recibido:", registrationData.name);
+  console.log("📞 Teléfono recibido:", registrationData.telephone);
+  console.log("📩 Email recibido (registro):", registrationData.email);
+  console.log("🔐 Password recibido (registro):", registrationData.password);
+  
   try {
     await registerUser(registrationData);
 
@@ -334,7 +350,7 @@ export default function AuthPage() {
 
                         <FormControl isInvalid={!!registerErrors.telephone}>
                           <FormLabel>Telefono</FormLabel>
-                          <Input name="telephone" type="tel" placeholder="Ej: 112345679" pattern="[0-9]" title="Debe ser un número válido" required />
+                          <Input name="telephone" type="tel" placeholder="Ej: 1123456789" pattern="^[0-9]{9,15}$" title="Debe contener entre 9 y 15 dígitos, sin espacios ni símbolos" required />
                           <FormErrorMessage>{registerErrors.telephone}</FormErrorMessage>
                         </FormControl>
 
