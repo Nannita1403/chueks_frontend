@@ -214,14 +214,15 @@ export default function Cart() {
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
                          {/* Imagen */}
-                        /*<Box
+                         {/*<Box
                           w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg}
                           onClick={() => openProductDetail(it.productId)}
                           mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
                         >
                           {!!it.image && 
-                          <Image src={it.image} alt={it.name} w="100%" h="100%" objectFit="cover" />}
-                        </Box>
+                             </Box>*/}
+                          <Image src={it.image} alt={it.name}  w="72px" h="72px" mb={4} borderRadius="md" />
+                     
 
                         {/* Info */}
                         <VStack align="stretch" spacing={1} mb={{ base: 2, md: 0 }}>
