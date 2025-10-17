@@ -334,7 +334,7 @@ export default function AuthPage() {
 
                         <FormControl isInvalid={!!registerErrors.telephone}>
                           <FormLabel>Telefono</FormLabel>
-                          <Input name="telephone" type="tel" placeholder="Ej: 1123456789" pattern="[0-9]{10,15}" title="Debe ser un número válido" required />
+                          <Input name="telephone" type="tel" placeholder="Ej: 112345679" pattern="[0-9]" title="Debe ser un número válido" required />
                           <FormErrorMessage>{registerErrors.telephone}</FormErrorMessage>
                         </FormControl>
 
