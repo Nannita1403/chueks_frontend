@@ -28,7 +28,6 @@ const money = (n) =>
 
 function normalizeItem(it) {
   const p = it.product || {};
-  console.log(it.images);
   
   return {
     id: it.id, 
@@ -37,7 +36,7 @@ function normalizeItem(it) {
     color: it.color?.toLowerCase(),
     price: it.price ?? 0,
     quantity: Math.max(1, it.quantity || 1),
-    image,
+    image: it.imgPrimary
   };
 }
 
