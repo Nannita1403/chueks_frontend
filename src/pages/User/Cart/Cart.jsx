@@ -27,9 +27,9 @@ const money = (n) =>
   }).format(n);
 
 function normalizeItem(it) {
-  const p = it.product || {};
-  
-  return {
+  const it = it.product || {};
+
+    return {
     id: it.id, 
     productId: it.productId,
     name: it.name || "Producto",
