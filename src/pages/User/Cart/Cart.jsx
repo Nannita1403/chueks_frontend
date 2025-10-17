@@ -216,6 +216,7 @@ export default function Cart() {
                           onClick={() => openProductDetail(it.productId)}
                           mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
                         >
+                           {console.log(it.imgPrimary)}  
                          <Image
                           src={it?.imgPrimary ? it.imgPrimary : "/placeholder.svg"}
                           alt={it?.name || "Producto"}
