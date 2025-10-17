@@ -4,17 +4,20 @@ import logoRedondo from "/logoRedondo.png";
 import { Box, Container, VStack, Text, Input, Button, Image, FormControl, FormLabel, Tabs, TabList, TabPanels,
   Tab, TabPanel, Card, CardBody, HStack, Flex, useColorModeValue, Heading, Alert, AlertIcon, AlertTitle,
   AlertDescription, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
-  FormErrorMessage,} from "@chakra-ui/react";
+  FormErrorMessage,
+  InputGroup,} from "@chakra-ui/react";
 import Loading from "../../components/Loading/Loading.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationError, setVerificationError] = useState(null);
   const [loginErrors, setLoginErrors] = useState({});
   const [registerErrors, setRegisterErrors] = useState({});
-
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -136,7 +139,7 @@ export default function AuthPage() {
         console.error(`Campo: ${field} - Error: ${message}`);
       });
       console.groupEnd();
-      sObject.keys(error.response.data.errors).forEach((key) => {
+      Object.keys(error.response.data.errors).forEach((key) => {
         toast({
           title: `Error en el campo: ${key}`,
           description: error.response.data.errors[key],
@@ -297,9 +300,17 @@ export default function AuthPage() {
                           </FormControl>
                           <FormControl isInvalid={!!loginErrors.password}>
                             <FormLabel>Contraseña</FormLabel>
-                            <Input name="password" type="password" required />
+                            <InputGroup>
+                              <Input  name="password" type={showLoginPassword ? "text" : "password"} placeholder="Ingresa tu contraseña" required />
+                              <InputRightElement h="full">
+                                <Button  variant="ghost" size="sm" onClick={() => setShowPassword(!showLoginPassword)} >
+                                  {showLoginPassword ? <ViewOffIcon /> : <ViewIcon />}
+                                </Button>
+                              </InputRightElement>
+                            </InputGroup>
                             <FormErrorMessage>{loginErrors.password}</FormErrorMessage>
                           </FormControl>
+
                           <Button
                             type="submit"
                             colorScheme="pink"
@@ -322,19 +333,26 @@ export default function AuthPage() {
 
                         <FormControl isInvalid={!!registerErrors.telephone}>
                           <FormLabel>Telefono</FormLabel>
-                          <Input name="telephone" type="tel" required />
+                          <Input name="telephone" type="tel" placeholder="Ej: 1123456789" pattern="[0-9]{10,15}" title="Debe ser un número válido" required />
                           <FormErrorMessage>{registerErrors.telephone}</FormErrorMessage>
                         </FormControl>
 
                         <FormControl isInvalid={!!registerErrors.email}>
                           <FormLabel>Email</FormLabel>
-                          <Input name="email" type="email" required />
+                          <Input name="email" type="email" placeholder="ejemplo@correo.com" title="Ingresa un email válido (ej: usuario@dominio.com)" required/>
                           <FormErrorMessage>{registerErrors.email}</FormErrorMessage>
                         </FormControl>
 
                         <FormControl isInvalid={!!registerErrors.password}>
                           <FormLabel>Contraseña</FormLabel>
-                          <Input name="password" type="password" required />
+                          <InputGroup>
+                            <Input name="password" type={showRegisterPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres" title="La contraseña debe tener al menos 6 caracteres" minLength={6} required />                          
+                            <InputRightElement h="full">
+                              <Button variant="ghost" size="sm" onClick={() => setShowPassword(!showRegisterPassword)} >
+                                {showRegisterPassword ? <ViewOffIcon /> : <ViewIcon />}
+                              </Button>
+                            </InputRightElement>
+                          </InputGroup>
                           <FormErrorMessage>{registerErrors.password}</FormErrorMessage>
                         </FormControl>
                           <Button
