@@ -5,7 +5,8 @@ import { Box, Container, VStack, Text, Input, Button, Image, FormControl, FormLa
   Tab, TabPanel, Card, CardBody, HStack, Flex, useColorModeValue, Heading, Alert, AlertIcon, AlertTitle,
   AlertDescription, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon,
   FormErrorMessage,
-  InputGroup,} from "@chakra-ui/react";
+  InputGroup,
+  InputRightElement,} from "@chakra-ui/react";
 import Loading from "../../components/Loading/Loading.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
@@ -303,7 +304,7 @@ export default function AuthPage() {
                             <InputGroup>
                               <Input  name="password" type={showLoginPassword ? "text" : "password"} placeholder="Ingresa tu contraseña" required />
                               <InputRightElement h="full">
-                                <Button  variant="ghost" size="sm" onClick={() => setShowPassword(!showLoginPassword)} >
+                                <Button  variant="ghost" size="sm" onClick={() => setShowLoginPassword(!showLoginPassword)} >
                                   {showLoginPassword ? <ViewOffIcon /> : <ViewIcon />}
                                 </Button>
                               </InputRightElement>
@@ -348,7 +349,7 @@ export default function AuthPage() {
                           <InputGroup>
                             <Input name="password" type={showRegisterPassword ? "text" : "password"} placeholder="Mínimo 6 caracteres" title="La contraseña debe tener al menos 6 caracteres" minLength={6} required />                          
                             <InputRightElement h="full">
-                              <Button variant="ghost" size="sm" onClick={() => setShowPassword(!showRegisterPassword)} >
+                              <Button variant="ghost" size="sm" onClick={() => setShowRegisterPassword(!showRegisterPassword)} >
                                 {showRegisterPassword ? <ViewOffIcon /> : <ViewIcon />}
                               </Button>
                             </InputRightElement>
