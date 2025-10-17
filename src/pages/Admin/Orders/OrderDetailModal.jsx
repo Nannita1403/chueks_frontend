@@ -76,8 +76,10 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
               <Text fontWeight="bold">Información del Cliente</Text>
               <Text>Nombre: {order.user?.name ?? "—"}</Text>
               <Text>Email: {order.user?.email ?? "—"}</Text>
-              <Text>Dirección: {order.user?.address ?? "—"}</Text>
-              <Text>Teléfono: {order.user?.phone ?? "—"}</Text>
+              <Text>
+                Dirección: {order.shippingAddress?.street}, {order.shippingAddress?.city}, {order.shippingAddress?.state}, {order.shippingAddress?.zip}, {order.shippingAddress?.country}
+              </Text>
+              <Text>Teléfono: {order.telephone ?? "—"}</Text>
             </GridItem>
             <GridItem>
               <Text fontWeight="bold">Estado del Pedido</Text>
@@ -95,11 +97,11 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
           <VStack mt={6} spacing={4} align="stretch">
             {(order.items ?? []).map((item, idx,) => {
               const displayName = item.name ?? "Artículo";
-              const productId = item.productId ?? item.product?._id ?? "—"
+              const productId = item.product?._id ?? "—";
               const imageSrc = item.imgPrimary || item.product?.imgPrimary || null;
               
               return (
-                <Box key={item.productId || idx} border="1px solid #eee" borderRadius="md" p={4}>
+                <Box key={productId || idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack align="start" spacing={4} flexDir={{ base: "column", md: "row" }}>
                     {imageSrc ? (
                     <Image src={imageSrc} alt={item.name} boxSize={{ base: "100%", md: "100px" }} objectFit="cover" borderTopRadius="md"
@@ -114,12 +116,11 @@ export default function OrderDetailModalAdmin({ orderId, isOpen, onClose, onUpda
                       <Text fontSize="sm" color="gray.500">Código: {item.code}</Text>
                       <Text fontSize="sm" color="gray.500">ID: {productId}</Text>
                       <Text fontSize="sm" color="gray.500">
-                        Categoría: {Array.isArray(item.category) ? item.category.join(", ") : item.category ?? "—"}
-                      </Text>
+                        Categoría: {Array.isArray(item.product?.category) ? item.product.category.join(", ") : item.product?.category ?? "—"}                      </Text>
                       <Text>Color: {item.color ?? "—"}</Text>
-                      <Text>Precio Unitario: ${formatNumber(item.unitPrice)}</Text>
-                      <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
-                      <Checkbox
+                      <Text>Precio Unitario: ${formatNumber(item.price)}</Text>
+                      <Text fontWeight="bold">Total: ${formatNumber(item.price * item.quantity)}</Text>
+                       <Checkbox
                         isChecked={item.picked ?? false}
                         onChange={(e) => togglePicked(idx, e.target.checked)}
                       >
