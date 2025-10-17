@@ -3,7 +3,7 @@ import {  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement,
   Card, CardBody, Table, Thead, Tbody, Tr, Th, Td, Badge, useDisclosure } from "@chakra-ui/react";
 import { FiSearch, FiEye, FiDownload } from "react-icons/fi";
 import ApiService from "../../../reducers/api/Api.jsx";
-import OrderDetailModalAdmin from "./OrderDetailModalAdmin.jsx";
+import OrderDetailModalAdmin from "../../Admin/Orders/OrderDetailModal.jsx";
 
 const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
