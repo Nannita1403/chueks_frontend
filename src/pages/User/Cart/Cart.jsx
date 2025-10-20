@@ -212,11 +212,11 @@ export default function Cart() {
                           mb={{ base: 2, md: 0 }}
                         >
                           <Image
-                            src={it?.imgPrimary || "/placeholder.svg"} // URL real o placeholder
+                            src={it?.imgPrimary || it?.image || it?.imageUrl || "/placeholder.svg"}
                             alt={it?.name || "Producto"}
                             objectFit="cover"
                             w="100%"
-                            mb={4}
+                            h="100%"
                             borderRadius="md"
                           />
                         </Box>                
