@@ -51,6 +51,8 @@ export default function OrdersPageUser() {
     </Box>
   );
 
+  {selectedOrder?.items?.map((item, idx) => {
+  console.log("🖼️ Imagen del item:", item.image, "item completo:", item);
   return (
     <Box maxW="container.xl" mx="auto" py={8}>
       <Heading size="lg" mb={6}>Historial de Pedidos</Heading>
@@ -90,8 +92,19 @@ export default function OrdersPageUser() {
               {selectedOrder?.items?.map((item, idx) => (
                 <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack spacing={4} align="start">
-                    {item.image && (
-                      <Image src={item.image} boxSize="100px" objectFit="cover" borderRadius="md" />
+                    {(item.image || item.imgPrimary || item.product?.imgPrimary) && (
+                      <Image
+                        src={
+                          item.image?.startsWith("http")
+                            ? item.image
+                            : `${ApiService.baseURL.replace("/api/v1", "")}/${item.image?.replace(/^\/+/, "")}`
+                        }
+                        boxSize="100px"
+                        objectFit="cover"
+                        borderRadius="md"
+                        fallbackSrc="/placeholder.svg"
+                        alt={item.name}
+                      />
                     )}
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">{item.name}</Text>
@@ -146,4 +159,4 @@ export default function OrdersPageUser() {
       </Modal>
     </Box>
   );
-}
+})}}
