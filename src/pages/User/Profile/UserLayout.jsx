@@ -2,9 +2,9 @@ import { Box, Flex, VStack, Button, Text, Divider, Image, IconButton, Drawer, Dr
   DrawerBody, DrawerFooter, useDisclosure, useColorModeValue} from "@chakra-ui/react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { HamburgerIcon } from "@chakra-ui/icons";
-import { useAuth } from "../../context/Auth/auth.context.jsx";
-import AddressModal from "../../components/Profile/AdressesModal.jsx";
-import PhoneModal from "../../components/Profile/PhoneModal.jsx";
+import { useAuth } from "../../../context/Auth/auth.context.jsx";
+import AddressModal from "../../../components/Profile/AdressesModal.jsx";
+import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 
 const menuItems = [
   { label: "Mis datos", path: "/profile", color: "purple.400", type: "link" },
@@ -31,7 +31,7 @@ const SidebarContent = ({  onClose, onOpenAddresses, onOpenPhones, logoSrc, hand
         mb={4}
         _hover={{ bg: "gray.200" }}
         onClick={() => {
-          navigate("/");
+          navigate("/home");
           onClose?.();
         }}
       >
@@ -112,7 +112,8 @@ const UserLayout = ({ logoSrc = "/logoChueks.png" }) => {
 
       <IconButton
         aria-label="Abrir menú"
-        icon={<HamburgerIcon />}
+        icon={<HamburgerIcon  w={5} h={5} />}
+        size="sm"
         display={{ base: "block", md: "none" }}
         position="fixed"
         top={4}

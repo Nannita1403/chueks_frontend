@@ -12,7 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute.jsx";
 import AdminLayout from "./pages/Admin/Layout/AdminLayout.jsx";
 import Cart from "./pages/User/Cart/Cart.jsx";
 import OrdersPageUser from "./pages/User/Order/OrdersPageUser.jsx";
-import UserLayout from "./pages/User/UserLayout.jsx";
+import UserLayout from "./pages/User/Profile/UserLayout.jsx";
 import ProfileDashboard from "./pages/User/Profile/ProfileDashboard.jsx";
 import Wishlist from "./pages/User/Wishlist/Wishlist.jsx";
 import OrderConfirm from "./pages/User/Order/OrderConfirm.jsx";
