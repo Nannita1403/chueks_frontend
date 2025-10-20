@@ -53,6 +53,7 @@ export default function OrdersPageUser() {
 
   {selectedOrder?.items?.map((item, idx) => {
   console.log("🖼️ Imagen del item:", item.image, "item completo:", item);
+  
   return (
     <Box maxW="container.xl" mx="auto" py={8}>
       <Heading size="lg" mb={6}>Historial de Pedidos</Heading>

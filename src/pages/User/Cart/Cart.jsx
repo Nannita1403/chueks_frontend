@@ -154,10 +154,7 @@ export default function Cart() {
     </Box>
   );
 
-  {items?.map((it) => {
-  console.log("🖼️ Imagen del item:", it.imgPrimary, "Item completo:", it);
-
-  return (
+    return (
     <Box minH="100vh" bg={pageBg}>
       <AppHeader />
       <Box bg={headerBg} color="white" py={3}>
@@ -197,7 +194,8 @@ export default function Cart() {
               </Card>
             ) : (
               <VStack spacing={3} align="stretch">
-                {items?.map((it) => (
+                  {items?.map((it) => {
+                  console.log("🖼️ Imagen:", it.imgPrimary || it.image || it.imageUrl, "🧩 item:", it);
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
@@ -273,7 +271,7 @@ export default function Cart() {
                       </Grid>
                     </CardContent>
                   </Card>
-                ))}
+              })}
               </VStack>
             )}
           </GridItem>
@@ -399,4 +397,4 @@ export default function Cart() {
       </Container>
     </Box>
   );
-})}}
+}
