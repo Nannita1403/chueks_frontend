@@ -196,6 +196,7 @@ export default function Cart() {
               <VStack spacing={3} align="stretch">
                   {items?.map((it) => {
                   console.log("🖼️ Imagen:", it.imgPrimary || it.image || it.imageUrl, "🧩 item:", it);
+                  return (
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
@@ -271,6 +272,7 @@ export default function Cart() {
                       </Grid>
                     </CardContent>
                   </Card>
+                  );
               })}
               </VStack>
             )}
