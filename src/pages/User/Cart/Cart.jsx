@@ -26,20 +26,7 @@ const money = (n) =>
     maximumFractionDigits: 0
   }).format(n);
 
-/*function normalizeItem(it) {
-  const p = it.product || {};
 
-    return {
-    id: it.id, 
-    productId: it.productId,
-    name: it.name || "Producto",
-    color: it.color?.toLowerCase(),
-    price: it.price ?? 0,
-    quantity: Math.max(1, it.quantity || 1),
-    image: it.imgPrimary
-  };
-}
-*/
 export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({ items: [], shipping: 0 });
@@ -167,6 +154,9 @@ export default function Cart() {
     </Box>
   );
 
+  {items?.map((it) => {
+  console.log("🖼️ Imagen del item:", it.imgPrimary, "Item completo:", it);
+
   return (
     <Box minH="100vh" bg={pageBg}>
       <AppHeader />
@@ -211,28 +201,37 @@ export default function Cart() {
                   <Card key={it.id} bg={panelBg} borderColor={borderColor}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
-                         {/* Imagen */}
-                       <Box w="72px" h="72px" rounded="md" overflow="hidden" bg={thumbBg}
+                        {/* Imagen */}
+                        <Box
+                          w="72px"
+                          h="72px"
+                          rounded="md"
+                          overflow="hidden"
+                          bg={thumbBg}
                           onClick={() => openProductDetail(it.productId)}
-                          mx={{ base: "auto", md: "0" }} mb={{ base: 2, md: 0 }}
+                          mx={{ base: "auto", md: "0" }}
+                          mb={{ base: 2, md: 0 }}
                         >
-                           {console.log(it.imgPrimary)}  
-                         <Image
-                          src={it?.imgPrimary ? it.imgPrimary : "/placeholder.svg"}
-                          alt={it?.name || "Producto"}
-                          objectFit="cover"
-                          w="100%"
-                          mb={4}
-                          borderRadius="md"
-                        />
-                       </Box>                      
+                          <Image
+                            src={it?.imgPrimary || "/placeholder.svg"} // URL real o placeholder
+                            alt={it?.name || "Producto"}
+                            objectFit="cover"
+                            w="100%"
+                            mb={4}
+                            borderRadius="md"
+                          />
+                        </Box>                
                      
                         {/* Info */}
                         <VStack align="stretch" spacing={1} mb={{ base: 2, md: 0 }}>
                           <HStack justify="space-between" align="start">
                             <Box>
-                              <Text fontWeight="semibold" noOfLines={1} cursor="pointer"
-                                onClick={() => openProductDetail(it.productId)}>
+                              <Text
+                                fontWeight="semibold"
+                                noOfLines={1}
+                                cursor="pointer"
+                                onClick={() => openProductDetail(it.productId)}
+                              >
                                 {it.name}
                               </Text>
                               {!!it.color && <Text fontSize="xs" color={muted}>Color: {it.color}</Text>}
@@ -241,7 +240,8 @@ export default function Cart() {
                             <IconButton
                               aria-label="Eliminar"
                               icon={<CloseIcon boxSize={3} />}
-                              size="sm" variant="ghost"
+                              size="sm"
+                              variant="ghost"
                               color={muted}
                               onClick={() => onRemoveLine(it.id)}
                             />
@@ -251,14 +251,20 @@ export default function Cart() {
                         {/* Cantidad + total */}
                         <VStack align={{ base: "stretch", md: "end" }} spacing={2}>
                           <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
-                            <IconButton aria-label="Restar" icon={<MinusIcon boxSize={3} />}
-                              size="sm" variant="ghost"
+                            <IconButton
+                              aria-label="Restar"
+                              icon={<MinusIcon boxSize={3} />}
+                              size="sm"
+                              variant="ghost"
                               onClick={() => onChangeQtyLine(it.id, -1)}
                               isDisabled={it.quantity <= 1}
                             />
                             <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
-                            <IconButton aria-label="Sumar" icon={<AddIcon boxSize={3} />}
-                              size="sm" variant="ghost"
+                            <IconButton
+                              aria-label="Sumar"
+                              icon={<AddIcon boxSize={3} />}
+                              size="sm"
+                              variant="ghost"
                               onClick={() => onChangeQtyLine(it.id, +1)}
                             />
                           </HStack>
@@ -393,4 +399,4 @@ export default function Cart() {
       </Container>
     </Box>
   );
-}
+})}}
