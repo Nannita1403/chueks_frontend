@@ -126,20 +126,34 @@ export default function OrdersPageUser() {
                 {selectedOrder.items?.map((item, idx) => (
                   <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
                   <HStack spacing={4} align="start">
-                    <Image
-                      src={
-                        item?.imgPrimary ||
-                        item?.imageUrl ||
-                        item?.image ||
-                        item?.product?.imgPrimary ||
-                        "/placeholder.svg"
-                      }
-                      alt={item?.name || "Producto"}
-                      boxSize="100px"
-                      objectFit="cover"
-                      borderRadius="md"
-                      fallbackSrc="/placeholder.svg"
-                    />
+                  <Image
+                    src={
+                      (() => {
+                        const base = ApiService.baseURL?.replace("/api/v1", "");
+                        const img =
+                          item?.imgPrimary ||
+                          item?.imageUrl ||
+                          item?.image ||
+                          item?.product?.imgPrimary;
+
+                        // Si la imagen ya es absoluta (http/https), la dejamos igual.
+                        if (img?.startsWith("http")) return img;
+
+                        // Si es relativa, la concatenamos con la base del servidor
+                        if (img) return `${base}/${img.replace(/^\/+/, "")}`;
+
+                        // Si no hay imagen, devolvemos el placeholder
+                        return "/placeholder.svg";
+                      })()
+                    }
+                    alt={item?.name || "Producto"}
+                    boxSize="100px"
+                    objectFit="cover"
+                    borderRadius="md"
+                    fallbackSrc="/placeholder.svg"
+                  />
+
+
 
                     <VStack align="start" spacing={1} flex="1">
                       <Text fontWeight="bold" fontSize="lg">
