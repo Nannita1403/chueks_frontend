@@ -109,7 +109,7 @@ export default function Cart() {
       try {
         const res = await ApiService.post("/orders/checkout", {
           addressId: defaultAddress._id,
-          phoneId: defaultPhone._id,
+          telephoneId: defaultPhone._id,
         });
         await refreshCart();
         navigate(`/order/confirm?orderId=${res.order._id}`);
