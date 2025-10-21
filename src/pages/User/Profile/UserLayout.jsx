@@ -10,7 +10,7 @@ const menuItems = [
   { label: "Mis datos", path: "/profile", color: "purple.400", type: "link" },
   { label: "Pedidos", path: "/profile/orders", color: "cyan.400", type: "link" },
   { label: "Direcciones", path: "/profile/addresses", color: "pink.400", type: "modal" },
-  { label: "Teléfonos", path: "/profile/phones", color: "yellow.400", type: "modal" },
+  { label: "Teléfonos", path: "/profile/telephones", color: "yellow.400", type: "modal" },
 ];
 
 const SidebarContent = ({  onClose, onOpenAddresses, onOpenPhones, logoSrc, handleLogout, handleClick,

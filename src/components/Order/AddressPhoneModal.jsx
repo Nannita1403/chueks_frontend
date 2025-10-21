@@ -1,8 +1,4 @@
-import {
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalCloseButton, ModalBody, ModalFooter,
-  Input, Button, FormControl, FormLabel, useToast,
-} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Input, Button, FormControl, FormLabel, useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import ApiService from "../../reducers/api/Api.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
@@ -11,51 +7,38 @@ export default function AddressPhoneModal({ isOpen, onClose, onConfirm }) {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
+  const [telephone, setTelephone] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setAddress(user?.address || "");
-      setPhone(user?.phone || "");
+      setAddress(user.address || "");
+      setTelephone(user.telephones?.[0]?.number || "");
     }
   }, [user]);
 
-  useEffect(() => {
-  if (isOpen) {
-    console.log("Modal abierto");
-  }
-}, [isOpen]);
+  const handleSave = async () => {
+    if (!address || !telephone) {
+      toast({ title: "Campos requeridos", description: "Debes completar ambos campos.", status: "error", duration: 3000, isClosable: true });
+      return;
+    }
 
-const handleSave = async () => {
-  if (!address || !phone) {
-    toast({
-      title: "Campos requeridos",
-      description: "Debes completar ambos campos.",
-      status: "error",
-      duration: 3000,
-      isClosable: true,
-    });
-    return;
-  }
-
-  try {
-    setLoading(true);
-    await ApiService.patch("/users/profile", { address, phone });
-    await refreshUser?.();
-    toast({ title: "Datos actualizados", status: "success" });
-    onClose();
-    onConfirm();
-  } catch (err) {
-    toast({
-      title: "Error al guardar",
-      description: err?.response?.data?.message || err.message,
-      status: "error",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      await ApiService.patch("/users/profile", {
+        address,
+        telephones: [{ number: telephone, label: "personal" }]
+      });
+      await refreshUser?.();
+      toast({ title: "Datos actualizados", status: "success" });
+      onClose();
+      onConfirm();
+    } catch (err) {
+      toast({ title: "Error al guardar", description: err?.response?.data?.message || err.message, status: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -70,13 +53,11 @@ const handleSave = async () => {
           </FormControl>
           <FormControl isRequired>
             <FormLabel>Teléfono</FormLabel>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input value={telephone} onChange={(e) => setTelephone(e.target.value)} />
           </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="pink" onClick={handleSave} isLoading={loading} mr={3}>
-            Confirmar y continuar
-          </Button>
+          <Button colorScheme="pink" onClick={handleSave} isLoading={loading} mr={3}>Confirmar y continuar</Button>
           <Button variant="ghost" onClick={onClose}>Cancelar</Button>
         </ModalFooter>
       </ModalContent>

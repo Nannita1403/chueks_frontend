@@ -1,13 +1,11 @@
 export function getDefaultAddress(user) {
-if (!user?.addresses?.length) return null;
-  const defaultAddr = user.addresses.find(addr => addr.default === true);
-  return defaultAddr || user.addresses[0];
+  if (!user?.addresses?.length) return null;
+  return user.addresses.find(addr => addr.default) || user.addresses[0];
 }
 
 export function getDefaultPhone(user) {
-  if (!user?.phones?.length) return null;
-  const defaultPhone = user.phones.find(phone => phone.default === true);
-  return defaultPhone || user.phones[0];
+  if (!user?.telephones?.length) return null;
+  return user.telephones.find(tel => tel.default) || user.telephones[0];
 }
 
 export function formatAddress(address) {
@@ -16,15 +14,13 @@ export function formatAddress(address) {
     address.street || "",
     address.city || "",
     address.zip ? `(${address.zip})` : "",
-    address.country ? `[${address.country}]` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    address.country ? `[${address.country}]` : ""
+  ].filter(Boolean).join(" ");
 }
 
-export function formatPhone(phone) {
-  if (!phone) return null;
-  return `${phone.number}${phone.label ? ` (${phone.label})` : ""}`;
+export function formatPhone(telephone) {
+  if (!telephone) return null;
+  return `${telephone.number}${telephone.label ? ` (${telephone.label})` : ""}`;
 }
 
 export function formatPrice(amount) {

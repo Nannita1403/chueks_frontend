@@ -58,7 +58,7 @@ export default function ProfileDashboard() {
     useEffect(() => {
       if (user) {
         const needsName = !user.name?.trim();
-        const needsPhone = !user.phones || user.phones.length === 0;
+        const needsPhone = !user.telephones || user.telephones.length === 0;
         const needsAddress = !user.addresses || user.addresses.length === 0;
 
         if (needsName || needsPhone || needsAddress) {
@@ -100,24 +100,23 @@ export default function ProfileDashboard() {
     }
   };
 
-      const handleCompleteProfile = async (data) => {
-      if (data.name?.trim()) {
-        await handleUpdateProfile({ name: data.name });
-      }
-      if (data.phone?.trim()) {
-        await handleAddPhone({ number: data.phone });
-      }
-      if (data.street?.trim() && data.city?.trim() && data.zip?.trim()) {
-        await handleAddAddress({
-          street: data.street,
-          city: data.city,
-          zip: data.zip,
-        });
-      }
+const handleCompleteProfile = async (data) => {
+  if (data.name?.trim()) {
+    await handleUpdateProfile({ name: data.name });
+  }
+  if (data.telephone?.trim()) {
+    await handleAddPhone({ number: data.telephone, label: "personal" });
+  }
+  if (isValidAddress(data)) {
+    await handleAddAddress({
+      street: data.street,
+      city: data.city,
+      zip: data.zip
+    });
+  }
 
-      setShowCompleteModal(false);
-    };
-
+  setShowCompleteModal(false);
+};
   const isValidAddress = ({ street, city, zip }) => street?.trim() && city?.trim() && zip?.trim();
   const isValidPhone = ({ number }) => number?.trim();
 
@@ -161,29 +160,27 @@ export default function ProfileDashboard() {
     }
   };
 
-  const handleAddPhone = async (phone) => {
-    if (!isValidPhone(phone)) {
-      return toast({ title: "Ingresa un número válido", status: "warning" });
-    }
-    const exists = user.phones?.some(p => p.number === phone.number);
-    if (exists) {
-      return toast({ title: "Este número ya existe", status: "warning" });
-    }
-    try {
-      const res = await ApiService.post("/users/phones", phone);
-      updateUser({ phones: res.user?.phones || res.phones });
-    } catch (error) {
-      toast({ title: "Error al añadir teléfono", status: "error" });
-    }
-  };
+  const handleAddPhone = async (telephone) => {
+  if (!telephone.number?.trim()) return toast({ title: "Ingresa un número válido", status: "warning" });
+  if (user.telephones?.some(p => p.number === telephone.number)) {
+    return toast({ title: "Este número ya existe", status: "warning" });
+  }
 
-  const handleUpdatePhone = async (id, phone) => {
-    if (!isValidPhone(phone)) {
+  try {
+    const res = await ApiService.post("/users/telephones", telephone);
+    updateUser({ telephones: res.user?.telephones || res.telephones });
+  } catch (error) {
+    toast({ title: "Error al añadir teléfono", status: "error" });
+  }
+};
+
+  const handleUpdatePhone = async (id, telephone) => {
+    if (!isValidPhone(telephone)) {
       return toast({ title: "Ingresa un número válido", status: "warning" });
     }
     try {
-      const res = await ApiService.put(`/users/phones/${id}`, phone);
-      updateUser({ phones: res.user?.phones || res.phones });
+      const res = await ApiService.put(`/users/telephones/${id}`, telephone);
+      updateUser({ telephones: res.user?.telephones || res.telephones });
     } catch (error) {
       toast({ title: "Error al actualizar teléfono", status: "error" });
     }
@@ -191,8 +188,8 @@ export default function ProfileDashboard() {
 
   const handleDeletePhone = async (id) => {
     try {
-      const res = await ApiService.delete(`/users/phones/${id}`);
-      updateUser({ phones: res.user?.phones || user.phones.filter(p => p._id !== id) }, "Teléfono eliminado");
+      const res = await ApiService.delete(`/users/telephones/${id}`);
+      updateUser({ telephones: res.user?.telephones || user.telephones.filter(p => p._id !== id) }, "Teléfono eliminado");
     } catch (error) {
       toast({ title: "Error al eliminar teléfono", status: "error" });
     }
@@ -250,7 +247,7 @@ export default function ProfileDashboard() {
                         </Box>
                         <Box mb={2}>
                           <Text fontWeight="medium">Teléfono:</Text>
-                          <Text fontSize="sm">{formatPhone(order.phone) || "No disponible"}</Text>
+                          <Text fontSize="sm">{formatPhone(order.telephone) || "No disponible"}</Text>
                         </Box>
                       </Box>
                   ))}
@@ -286,7 +283,7 @@ export default function ProfileDashboard() {
       <PhoneModal
         isOpen={isPhonesOpen}
         onClose={onClosePhones}
-        initialValue={user?.phones || []}
+        initialValue={user?.telephones || []}
         onSave={handleAddPhone}
         onUpdate={handleUpdatePhone}
         deletePhone={handleDeletePhone}
