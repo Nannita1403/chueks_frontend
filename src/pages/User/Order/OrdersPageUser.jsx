@@ -122,40 +122,47 @@ export default function OrdersPageUser() {
             <ModalHeader>Pedido: {selectedOrder.code}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <VStack spacing={4} align="stretch">
-                {selectedOrder.items?.map((item, idx) => (
-                  <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
-                  <HStack spacing={4} align="start">
-                  <Image
-                    src={
-                      (() => {
-                        const base = ApiService.baseURL?.replace("/api/v1", "");
-                        const img =
-                          item?.imgPrimary ||
-                          item?.imageUrl ||
-                          item?.image ||
-                          item?.product?.imgPrimary;
+            <VStack spacing={4} align="stretch">
+            {selectedOrder.items?.map((item, idx) => {
+              // Determinar URL de imagen
+              const base = ApiService.baseURL?.replace("/api/v1", "");
+              const img =
+                item?.imgPrimary ||
+                item?.imageUrl ||
+                item?.image ||
+                item?.product?.imgPrimary;
 
-                        // Si la imagen ya es absoluta (http/https), la dejamos igual.
-                        if (img?.startsWith("http")) return img;
+              const imageUrl = img?.startsWith("http")
+                ? img
+                : img
+                ? `${base}/${img.replace(/^\/+/, "")}`
+                : "/placeholder.svg";
 
-                        // Si es relativa, la concatenamos con la base del servidor
-                        if (img) return `${base}/${img.replace(/^\/+/, "")}`;
+              // Log para depuración
+              console.log("Imagen del item:", {
+                name: item.name,
+                imgOriginal: img,
+                imgFinal: imageUrl,
+              });
 
-                        // Si no hay imagen, devolvemos el placeholder
-                        return "/placeholder.svg";
-                      })()
-                    }
-                    alt={item?.name || "Producto"}
-                    boxSize="100px"
-                    objectFit="cover"
-                    borderRadius="md"
-                    fallbackSrc="/placeholder.svg"
-                  />
+              return (
+                <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
+                  <HStack
+                    spacing={4}
+                    align="start"
+                    flexDirection={{ base: "column", md: "row" }}
+                  >
+                    <Image
+                      src={imageUrl}
+                      alt={item?.name || "Producto"}
+                      boxSize={{ base: "100%", md: "100px" }}
+                      maxH="120px"
+                      objectFit="cover"
+                      borderRadius="md"
+                      fallbackSrc="/placeholder.svg"
+                    />
 
-
-
-                    <VStack align="start" spacing={1} flex="1">
+                    <VStack align="start" spacing={1} flex="1" w="100%">
                       <Text fontWeight="bold" fontSize="lg">
                         {item.name}
                       </Text>
@@ -167,21 +174,24 @@ export default function OrdersPageUser() {
                           {item.description}
                         </Text>
                       )}
-                      <HStack spacing={4} mt={1}>
+                      <HStack spacing={4} mt={1} wrap="wrap">
                         <Text>Color: {item.color ?? "—"}</Text>
                         <Text>Cantidad: {item.quantity}</Text>
                         <Text>Unitario: ${formatNumber(item.unitPrice)}</Text>
-                        {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
-                        <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
+                        {item.priceMay && (
+                          <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>
+                        )}
+                        <Text fontWeight="bold">
+                          Total: ${formatNumber(item.totalPrice)}
+                        </Text>
                       </HStack>
-                      <Text fontSize="sm" color="gray.500">
-                        Stock: {item.stock}
-                      </Text>
                     </VStack>
                   </HStack>
                 </Box>
-                ))}
-              </VStack>
+              );
+            })}
+            </VStack>
+
 
               <Divider my={4} />
 
