@@ -54,16 +54,6 @@ export default function OrdersPageUser() {
 
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
-  const togglePicked = async (orderId, itemIndex, checked) => {
-    try {
-      await ApiService.patch(`/orders/${orderId}/items/${itemIndex}/picked`, { picked: checked });
-      await fetchOrders();
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Error al actualizar armado", status: "error" });
-    }
-  };
-
   if (loading)
     return (
       <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
@@ -86,6 +76,7 @@ export default function OrdersPageUser() {
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
           {orders.map((order) => (
+            
             <Box
               key={order._id}
               borderRadius="md"
@@ -96,6 +87,7 @@ export default function OrdersPageUser() {
               onClick={() => setSelectedOrder(order)}
             >
               <HStack justify="space-between">
+                
                 <Text fontWeight="bold">Pedido: {order.code}</Text>
                 <Badge
                   colorScheme={
@@ -133,52 +125,47 @@ export default function OrdersPageUser() {
               <VStack spacing={4} align="stretch">
                 {selectedOrder.items?.map((item, idx) => (
                   <Box key={idx} border="1px solid #eee" borderRadius="md" p={4}>
-                    <HStack spacing={4} align="start">
-                      {(item.image || item.imgPrimary || item.product?.imgPrimary) && (
-                        <Image
-                          src={
-                            item.image?.startsWith("http")
-                              ? item.image
-                              : `${ApiService.baseURL.replace("/api/v1", "")}/${item.image?.replace(/^\/+/, "")}`
-                          }
-                          boxSize="100px"
-                          objectFit="cover"
-                          borderRadius="md"
-                          fallbackSrc="/placeholder.svg"
-                          alt={item.name}
-                        />
+                  <HStack spacing={4} align="start">
+                    <Image
+                      src={
+                        item?.imgPrimary ||
+                        item?.imageUrl ||
+                        item?.image ||
+                        item?.product?.imgPrimary ||
+                        "/placeholder.svg"
+                      }
+                      alt={item?.name || "Producto"}
+                      boxSize="100px"
+                      objectFit="cover"
+                      borderRadius="md"
+                      fallbackSrc="/placeholder.svg"
+                    />
+
+                    <VStack align="start" spacing={1} flex="1">
+                      <Text fontWeight="bold" fontSize="lg">
+                        {item.name}
+                      </Text>
+                      <Text fontSize="sm" color="gray.500">
+                        Código: {item.code}
+                      </Text>
+                      {item.description && (
+                        <Text fontSize="sm" color={muted} noOfLines={3}>
+                          {item.description}
+                        </Text>
                       )}
-                      <VStack align="start" spacing={1} flex="1">
-                        <Text fontWeight="bold" fontSize="lg">
-                          {item.name}
-                        </Text>
-                        <Text fontSize="sm" color="gray.500">
-                          Código: {item.code}
-                        </Text>
-                        {item.description && (
-                          <Text fontSize="sm" color={muted} noOfLines={3}>
-                            {item.description}
-                          </Text>
-                        )}
-                        <HStack spacing={4} mt={1}>
-                          <Text>Color: {item.color ?? "—"}</Text>
-                          <Text>Cantidad: {item.quantity}</Text>
-                          <Text>Unitario: ${formatNumber(item.unitPrice)}</Text>
-                          {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
-                          <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
-                        </HStack>
-                        <Text fontSize="sm" color="gray.500">
-                          Stock: {item.stock}
-                        </Text>
-                        <Checkbox
-                          isChecked={item.picked ?? false}
-                          onChange={(e) => togglePicked(selectedOrder._id, idx, e.target.checked)}
-                        >
-                          Armado
-                        </Checkbox>
-                      </VStack>
-                    </HStack>
-                  </Box>
+                      <HStack spacing={4} mt={1}>
+                        <Text>Color: {item.color ?? "—"}</Text>
+                        <Text>Cantidad: {item.quantity}</Text>
+                        <Text>Unitario: ${formatNumber(item.unitPrice)}</Text>
+                        {item.priceMay && <Text>Mayorista: ${formatNumber(item.priceMay)}</Text>}
+                        <Text fontWeight="bold">Total: ${formatNumber(item.totalPrice)}</Text>
+                      </HStack>
+                      <Text fontSize="sm" color="gray.500">
+                        Stock: {item.stock}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </Box>
                 ))}
               </VStack>
 
