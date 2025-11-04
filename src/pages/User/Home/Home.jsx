@@ -8,7 +8,7 @@ import InfiniteCarousel from "../../../components/Carousel/InfiniteCarousel.jsx"
 import CategoriesGrid from "../../../components/Category/CategoriesGrid.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
-import { ProductCardSkeleton } from "../../../components/common/LoadingSkeletons.jsx";
+import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx"
 import Loading from "../../../components/Loading/Loading.jsx";
 
 

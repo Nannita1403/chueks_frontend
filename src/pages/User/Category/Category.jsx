@@ -11,7 +11,7 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
-import { ProductCardSkeleton } from "../../../components/common/LoadingSkeletons.jsx"; // ✅ agrega este import
+import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx"
 
 
 const normalize = (p) => ({
