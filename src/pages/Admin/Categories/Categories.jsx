@@ -4,7 +4,8 @@ import {  Box, Flex, VStack, Heading, Button, Table, Thead, Tbody, Tr, Th, Td,
 import { FiPlus, FiTrash2, FiEdit } from "react-icons/fi";
 import api from "../../../reducers/api/Api"; 
 import { useToast } from "../../../Hooks/useToast.jsx";
-import { TableSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx "; 
+import { TableSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton";
+ 
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -100,7 +101,7 @@ const AdminCategories = () => {
           </Flex>
 
           {isLoading ? (
-            <TableSkeleton rows={6} columns={2} /> // 👈 Skeleton de tabla
+            <TableSkeleton rows={6} columns={2} />
           ) : (
           <Table variant="striped" colorScheme="gray" bg={bgColor}>
             <Thead>
