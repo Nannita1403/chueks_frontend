@@ -4,8 +4,7 @@ import {  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement,
 import { FiSearch, FiEye, FiDownload } from "react-icons/fi";
 import ApiService from "../../../reducers/api/Api.jsx";
 import OrderDetailModalAdmin from "../../Admin/Orders/OrderDetailModal.jsx";
-import { TableSkeleton } from "../../../components/common/LoadingSkeletons.jsx"; // ✅ Asegúrate de importar correctamente
-
+import { TableSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
 
 const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
