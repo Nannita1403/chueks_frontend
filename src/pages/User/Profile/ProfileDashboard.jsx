@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import {  Box, VStack, Text, HStack, Button, Spinner, useDisclosure, Badge
-} from "@chakra-ui/react";
+import {  Box, VStack, Text, HStack, Button, useDisclosure, Badge, Center} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
@@ -9,8 +8,11 @@ import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 import CompleteProfileModal from "../../../components/Profile/CompleteProfileModal.jsx";
+import { Loading } from "../../../components/Loading/Loading.jsx"; 
+import { OrderCardSkeleton } from "@/components/Loading-Skeleton/loading-skeleton.jsx";
 
 import { getDefaultAddress, getDefaultPhone,  formatAddress, formatPhone, formatPrice } from "../../../components/Profile/UserUtils.jsx";
+
 
 export default function ProfileDashboard() {
   const { user, setUser } = useAuth();
@@ -100,7 +102,7 @@ export default function ProfileDashboard() {
     }
   };
 
-const handleCompleteProfile = async (data) => {
+/*const handleCompleteProfile = async (data) => {
   if (data.name?.trim()) {
     await handleUpdateProfile({ name: data.name });
   }
@@ -116,7 +118,8 @@ const handleCompleteProfile = async (data) => {
   }
 
   setShowCompleteModal(false);
-};
+};*/
+
   const isValidAddress = ({ street, city, zip }) => street?.trim() && city?.trim() && zip?.trim();
   const isValidPhone = ({ number }) => number?.trim();
 
@@ -126,7 +129,9 @@ const handleCompleteProfile = async (data) => {
     }
 
     const exists = user.addresses?.some(a =>
-      a.street === address.street && a.city === address.city && a.zip === address.zip
+      a.street === address.street && 
+      a.city === address.city && 
+      a.zip === address.zip
     );
     if (exists) {
       return toast({ title: "Esta dirección ya existe", status: "warning" });
@@ -136,18 +141,6 @@ const handleCompleteProfile = async (data) => {
       updateUser({ addresses: res.user?.addresses || res.addresses });
     } catch (error) {
       toast({ title: "Error al añadir dirección", status: "error" });
-    }
-  };
-
-  const handleUpdateAddress = async (id, address) => {
-    if (!isValidAddress(address)) {
-      return toast({ title: "Completa todos los campos", status: "warning" });
-    }
-    try {
-      const res = await ApiService.put(`/users/addresses/${id}`, address);
-      updateUser({ addresses: res.user?.addresses || res.addresses });
-    } catch (error) {
-      toast({ title: "Error al actualizar dirección", status: "error" });
     }
   };
 
@@ -162,7 +155,7 @@ const handleCompleteProfile = async (data) => {
 
   const handleAddPhone = async (telephone) => {
   if (!telephone.number?.trim()) return toast({ title: "Ingresa un número válido", status: "warning" });
-  if (user.telephones?.some(p => p.number === telephone.number)) {
+  if (user.telephones?.some(phone => phone.number === telephone.number)) {
     return toast({ title: "Este número ya existe", status: "warning" });
   }
 
@@ -173,18 +166,6 @@ const handleCompleteProfile = async (data) => {
     toast({ title: "Error al añadir teléfono", status: "error" });
   }
 };
-
-  const handleUpdatePhone = async (id, telephone) => {
-    if (!isValidPhone(telephone)) {
-      return toast({ title: "Ingresa un número válido", status: "warning" });
-    }
-    try {
-      const res = await ApiService.put(`/users/telephones/${id}`, telephone);
-      updateUser({ telephones: res.user?.telephones || res.telephones });
-    } catch (error) {
-      toast({ title: "Error al actualizar teléfono", status: "error" });
-    }
-  };
 
   const handleDeletePhone = async (id) => {
     try {
@@ -198,7 +179,12 @@ const handleCompleteProfile = async (data) => {
   const defaultAddress = getDefaultAddress(user);
   const defaultPhone = getDefaultPhone(user);
 
-  if (!user) return <Spinner />;
+  if (!user) 
+    return (
+      <Center minH="60vh">
+        <Loading />
+      </Center>
+    );
 
   return (
     <VStack align="stretch" spacing={6}>
@@ -221,7 +207,9 @@ const handleCompleteProfile = async (data) => {
         </Box>
         <Box px={4} py={2}>
           {loadingOrders ? (
-              <Spinner />
+            <Center py={6}>
+              <OrderCardSkeleton />
+            </Center>
             ) : orders.length > 0 ? (
               <>
                 <VStack spacing={4} align="stretch">
@@ -233,7 +221,9 @@ const handleCompleteProfile = async (data) => {
                       <Box key={order._id} borderWidth="1px" borderRadius="md" p={4} shadow="sm">
                         <HStack justify="space-between" mb={2}>
                           <Text fontWeight="bold">Pedido #{order.code || order._id}</Text>
-                          <Badge colorScheme={getStatusColor(order.status)}>{order.status}</Badge>
+                          <Badge colorScheme={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
                         </HStack>
                         <Text fontSize="sm" color="gray.500" mb={2}>
                           Fecha: {new Date(order.createdAt).toLocaleDateString()}
@@ -243,11 +233,15 @@ const handleCompleteProfile = async (data) => {
                         </Text>
                         <Box mb={2}>
                           <Text fontWeight="medium">Dirección:</Text>
-                          <Text fontSize="sm">{formatAddress(order.address) || "No disponible"}</Text>
+                          <Text fontSize="sm">
+                            {formatAddress(order.address) || "No disponible"}
+                          </Text>
                         </Box>
                         <Box mb={2}>
                           <Text fontWeight="medium">Teléfono:</Text>
-                          <Text fontSize="sm">{formatPhone(order.telephone) || "No disponible"}</Text>
+                          <Text fontSize="sm">
+                            {formatPhone(order.telephone) || "No disponible"}
+                          </Text>
                         </Box>
                       </Box>
                   ))}
@@ -277,7 +271,6 @@ const handleCompleteProfile = async (data) => {
         onClose={onCloseAddresses}
         initialValue={user?.addresses || []}
         onSave={handleAddAddress}
-        onUpdate={handleUpdateAddress}
         deleteAddress={handleDeleteAddress}
       />
       <PhoneModal
@@ -285,13 +278,12 @@ const handleCompleteProfile = async (data) => {
         onClose={onClosePhones}
         initialValue={user?.telephones || []}
         onSave={handleAddPhone}
-        onUpdate={handleUpdatePhone}
         deletePhone={handleDeletePhone}
       />
       <CompleteProfileModal
         isOpen={isCompleteOpen}
         onClose={onCloseComplete}
-        onSave={handleCompleteProfile}
+        onSave={() => setShowCompleteModal(false)}
       />
     </VStack>
   );

@@ -4,6 +4,8 @@ import {  Box, Flex, Heading, Text, Button, Input, InputGroup, InputLeftElement,
 import { FiSearch, FiEye, FiDownload } from "react-icons/fi";
 import ApiService from "../../../reducers/api/Api.jsx";
 import OrderDetailModalAdmin from "../../Admin/Orders/OrderDetailModal.jsx";
+import { TableSkeleton } from "../../../components/common/LoadingSkeletons.jsx"; // ✅ Asegúrate de importar correctamente
+
 
 const money = (n = 0) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
@@ -78,6 +80,14 @@ export default function AdminOrders() {
             </Tr>
           </Thead>
           <Tbody>
+            {loading && (
+              <Tr>
+                <Td colSpan={6}>
+                  <TableSkeleton rows={5} columns={6} />
+                </Td>
+              </Tr>
+            )}
+
             {!loading && filtered.map(o => (
               <Tr key={o._id}>
                 <Td fontWeight="medium">{codeOrId(o)}</Td>
@@ -102,12 +112,17 @@ export default function AdminOrders() {
                 </Td>
               </Tr>
             ))}
-            {loading && <Tr><Td colSpan={6}><StatusMessage text="Cargando…" /></Td></Tr>}
-            {!loading && filtered.length === 0 && <Tr><Td colSpan={6}><StatusMessage text="Sin resultados" /></Td></Tr>}
+
+            {!loading && filtered.length === 0 && 
+            (<Tr><Td colSpan={6} textAlign="center">
+              <Text color="gray.500">Sin resultados</Text>
+              </Td></Tr>)}
           </Tbody>
         </Table>
       </Box>
+
       <Box display={{ base: "flex", md: "none" }} flexDir="column" gap={3}>
+        {loading && <TableSkeleton rows={4} columns={1} />}
         {!loading && filtered.map(o => (
           <Card key={o._id} size="sm" p={3} shadow="sm">
             <Text fontWeight="bold">{codeOrId(o)}</Text>
@@ -121,8 +136,8 @@ export default function AdminOrders() {
             </Button>
           </Card>
         ))}
-        {loading && <StatusMessage text="Cargando…" />}
-        {!loading && filtered.length === 0 && <StatusMessage text="Sin resultados" />}
+        {!loading && filtered.length === 0 &&  (<Text textAlign="center" color="gray.500">Sin resultados</Text>
+        )}
       </Box>
     </>
   );
@@ -154,15 +169,19 @@ export default function AdminOrders() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </InputGroup>
+
             <Card><CardBody p={0}>{renderOrders()}</CardBody></Card>
           </TabPanel>
         </TabPanels>
       </Tabs>
+      
       <OrderDetailModalAdmin 
       orderId={current?._id} 
       isOpen={modal.isOpen} 
-      onClose={() => { modal.onClose(); 
-      setCurrent(null); }} onUpdated={load} />
+      onClose={() => { 
+        modal.onClose(); 
+        setCurrent(null); }} 
+      onUpdated={load} />
     </Box>
   );
 }

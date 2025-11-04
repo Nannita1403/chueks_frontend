@@ -1,17 +1,20 @@
-// src/pages/User/Wishlist/Favorites.jsx
 import { useEffect, useState, useMemo } from "react";
-import {Box, Container, Heading, Text, SimpleGrid, VStack, HStack, Divider, Spinner } from "@chakra-ui/react";
+import {Box, Container, Heading, Text, SimpleGrid, VStack, HStack, Divider, useColorModeValue, } from "@chakra-ui/react";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
+import Loading from "../../../components/Loading/Loading.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 
 export default function Favorites() {
   const { user, favorites, toggleFavorite } = useAuth();
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const bg = useColorModeValue("gray.50", "gray.900");
+  const cardBg = useColorModeValue("white", "gray.800");
 
   useEffect(() => {
     if (!user) {
@@ -22,7 +25,7 @@ export default function Favorites() {
     }, [user]);
 
   const subtotal = useMemo(() => {
-    return (favorites || []).reduce((acc, p) => acc + (p.priceMin || 0), 0);
+    return (favorites || []).reduce((acc, product) => acc + (product.priceMin || 0), 0);
   }, [favorites]);
 
   const moveToCart = async (product) => {
@@ -37,33 +40,41 @@ export default function Favorites() {
 
   if (!user) {
     return (
-      <Box minH="100vh" p={6} textAlign="center">
+      <Box minH="100vh" p={6} bg={bg}>
         <AppHeader />
         <BackButton mb={4} />
-        <Text>Debes iniciar sesión para ver tus favoritos.</Text>
+        <VStack spacing={4} pt={10}>
+          <Text fontSize="lg" color="gray.600">
+            Debes iniciar sesión para ver tus favoritos 💔
+          </Text>
+        </VStack>
       </Box>
     );
   }
 
   if (loading) {
     return (
-      <Box minH="100vh" p={6}>
+      <Box minH="100vh" bg={bg}>
         <AppHeader />
-        <BackButton mb={4} />
-        <VStack spacing={6}>
-          <Spinner />
-          <Text>Cargando tus favoritos…</Text>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            {[...Array(3)].map((_, i) => <ProductCardSkeleton key={i} />)}
-          </SimpleGrid>
-        </VStack>
+        <Container maxW="container.xl" py={6}>
+          <BackButton mb={4} />
+          <VStack spacing={6}>
+            <Loading text="Cargando tus favoritos..." />
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+              {[...Array(6)].map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </SimpleGrid>
+          </VStack>
+        </Container>
       </Box>
     );
   }
 
   return (
-    <Box minH="100vh">
+    <Box minH="100vh" bg={bg}>
       <AppHeader />
+
       <Box bg="pink.500" color="white" py={3}>
         <Container maxW="container.xl">
           <BackButton color="white" variant="link" />
@@ -73,11 +84,13 @@ export default function Favorites() {
       <Container maxW="container.xl" py={6}>
         <HStack align="start" spacing={6} w="full">
           <Box flex={1}>
-            <Heading size="lg" mb={6}>Mis Favoritos ❤️</Heading>
+            <Heading size="lg" mb={6}>
+              Mis Favoritos ❤️
+            </Heading>
+
             {!favorites || favorites.length === 0 ? (
               <Box
-                bg="white"
-                _dark={{ bg: "gray.800" }}
+                bg={cardBg}
                 borderWidth={1}
                 borderColor="gray.200"
                 rounded="md"
@@ -107,12 +120,15 @@ export default function Favorites() {
                       showAddToCart
                     >
                       <HStack mt={2} spacing={2}>
-                        <Text fontSize="sm" fontWeight="semibold">${product.priceMin}</Text>
+                        <Text fontSize="sm" fontWeight="semibold">
+                          ${product.priceMin}
+                        </Text>
                         <Box flex={1} />
                         <Box
                           as="button"
                           onClick={() => moveToCart(product)}
-                          style={{ color: "#319795", fontWeight: "bold" }}
+                          color="teal.500"
+                          fontWeight="bold"
                         >
                           Mover al carrito
                         </Box>
@@ -125,40 +141,22 @@ export default function Favorites() {
           </Box>
 
           {favorites && favorites.length > 0 && (
-          <>
-            <Box
-              display={{ base: "block", lg: "none" }}
-              position="sticky"
-              top="0"
-              zIndex="10"
-              bg="pink.500"
-              color="white"
-              shadow="md"
-            >
-              <Box px={4} py={2} cursor="pointer" _hover={{ bg: "pink.600" }}>
-                <Text fontWeight="bold">Resumen ▾</Text>
-              </Box>
-              <Box px={4} py={2} bg="white" color="gray.800" display="none" _groupHover={{ display: "block" }}>
-                <Text mb={1}>Productos: {favorites.length}</Text>
-                <Text mb={1}>Subtotal: ${subtotal}</Text>
-              </Box>
-            </Box>
             <Box
               display={{ base: "none", lg: "block" }}
               w="280px"
               p={4}
-              bg="gray.50"
-              _dark={{ bg: "gray.800" }}
+              bg={cardBg}
               rounded="md"
               shadow="sm"
             >
-              <Heading size="md" mb={2}>Resumen</Heading>
+              <Heading size="md" mb={2}>
+                Resumen
+              </Heading>
               <Divider mb={2} />
               <Text mb={1}>Productos: {favorites.length}</Text>
               <Text mb={1}>Subtotal: ${subtotal}</Text>
             </Box>
-          </>
-        )}
+          )}
         </HStack>
       </Container>
     </Box>

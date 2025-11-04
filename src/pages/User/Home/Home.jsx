@@ -8,6 +8,9 @@ import InfiniteCarousel from "../../../components/Carousel/InfiniteCarousel.jsx"
 import CategoriesGrid from "../../../components/Category/CategoriesGrid.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import { ProductCardSkeleton } from "../../../components/common/LoadingSkeletons.jsx";
+import Loading from "../../../components/Loading/Loading.jsx";
+
 
 export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -80,15 +83,8 @@ export default function Home() {
   };
 
   if (loading) {
-    return (
-      <Box maxW="container.xl" mx="auto" px={4} py={8}>
-        <Spinner />
-        <Text ml={2} color={muted} display="inline-block">
-          Cargando productos…
-        </Text>
-      </Box>
-    );
-  }
+  return <Loading />;
+}
 
   return (
     <Box minH="100vh">
@@ -115,6 +111,15 @@ export default function Home() {
             />
             )}
           />
+          {!featuredProducts?.length && !loading && (
+            <Box display="flex" gap={4} justifyContent="center" mt={4}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Box key={i} w="250px">
+                  <ProductCardSkeleton />
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
       </Container>
 

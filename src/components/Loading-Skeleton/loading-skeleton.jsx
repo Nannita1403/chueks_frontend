@@ -29,3 +29,16 @@ export function TableSkeleton({ rows = 5, columns = 4 }) {
     </VStack>
   )
 }
+
+export const OrderCardSkeleton = () => (
+  <Box borderWidth="1px" borderRadius="md" p={4} bg="white" _dark={{ bg: "gray.800" }}>
+    <VStack align="start" spacing={2}>
+      <HStack justify="space-between" w="full">
+        <Skeleton height="20px" width="120px" />
+        <Skeleton height="20px" width="60px" />
+      </HStack>
+      <Skeleton height="16px" width="100px" />
+      <SkeletonText mt={2} noOfLines={2} spacing={2} />
+    </VStack>
+  </Box>
+);

@@ -4,6 +4,7 @@ import {  Box, Flex, VStack, Heading, Button, Table, Thead, Tbody, Tr, Th, Td,
 import { FiPlus, FiTrash2, FiEdit } from "react-icons/fi";
 import api from "../../../reducers/api/Api"; 
 import { useToast } from "../../../Hooks/useToast.jsx";
+import { TableSkeleton } from "../../Skeletons/ProductSkeletons.jsx"; 
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -19,8 +20,7 @@ const AdminCategories = () => {
     const fetchCategories = async () => {
       try {
         const res = await api.get("/products/categories"); 
-        // ✅ Suponiendo que el back devuelve { categories: [...] }
-        const normalized = (res.categories || []).map((c) =>
+         const normalized = (res.categories || []).map((c) =>
           typeof c === "string" ? { _id: c, name: c } : c
         );
 
@@ -99,6 +99,9 @@ const AdminCategories = () => {
             </Flex>
           </Flex>
 
+          {isLoading ? (
+            <TableSkeleton rows={6} columns={2} /> // 👈 Skeleton de tabla
+          ) : (
           <Table variant="striped" colorScheme="gray" bg={bgColor}>
             <Thead>
               <Tr>
@@ -150,13 +153,14 @@ const AdminCategories = () => {
                 ))
               ) : (
                 <Tr>
-                  <Td colSpan={2} textAlign="center">
-                    {isLoading ? "Cargando..." : "No hay categorías"}
-                  </Td>
+                 <Td colSpan={2} textAlign="center">
+                      No hay categorías
+                 </Td>
                 </Tr>
               )}
             </Tbody>
           </Table>
+        )}
         </VStack>
       </Container>
     </Box>

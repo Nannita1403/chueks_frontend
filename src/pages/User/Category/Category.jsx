@@ -11,6 +11,8 @@ import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
+import { ProductCardSkeleton } from "../../../components/common/LoadingSkeletons.jsx"; // ✅ agrega este import
+
 
 const normalize = (p) => ({
   ...p,
@@ -155,10 +157,14 @@ export default function CategoryPage() {
     }
   };
 
-  if (loading) return (
+  if (loading) 
+    return (
     <Box maxW="container.xl" mx="auto" px={4} py={8}>
-      <Spinner />
-      <Text ml={2} color={muted} display="inline-block">Cargando productos…</Text>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </SimpleGrid>
     </Box>
   );
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Grid, Text, useBreakpointValue, VStack } from "@chakra-ui/react";
+import { Box, Grid, Text, useBreakpointValue, VStack, keyframes  } from "@chakra-ui/react";
 
 export default function Loading() {
   const items = useMemo(
@@ -177,5 +177,27 @@ export const TypewriterTextEffectWithImage = ({
         </Text>
       </Text>
     </VStack>
+  );
+};
+
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+
+export const HeartLoading = ({ size = 20, color = "red" }) => {
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      animation={`${spin} 1s linear infinite`}
+      fontSize={`${size}px`}
+      color={color}
+      filter="drop-shadow(0 0 3px rgba(255,0,0,0.4))"
+      lineHeight="1"
+    >
+      ❤️
+    </Box>
   );
 };

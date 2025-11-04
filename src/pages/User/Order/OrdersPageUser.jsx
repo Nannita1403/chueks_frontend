@@ -24,6 +24,9 @@ import {
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import ApiService from "../../../reducers/api/Api.jsx";
+import Loading from "../../../components/Loading/Loading.jsx";
+import { OrderCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
+
 
 export default function OrdersPageUser() {
   const { token } = useAuth();
@@ -54,15 +57,9 @@ export default function OrdersPageUser() {
 
   const formatNumber = (num) => (num ?? 0).toLocaleString("es-AR");
 
-  if (loading)
-    return (
-      <Box maxW="container.xl" mx="auto" py={8} textAlign="center">
-        <Spinner />
-        <Text mt={2} color={muted}>
-          Cargando pedidos...
-        </Text>
-      </Box>
-    );
+  if (loading) {
+  return <Loading />;
+}
 
   return (
     <Box maxW="container.xl" mx="auto" py={8}>
@@ -71,8 +68,12 @@ export default function OrdersPageUser() {
       </Heading>
       <Divider mb={6} />
 
-      {orders.length === 0 ? (
-        <Text color={muted}>No tienes pedidos todavía.</Text>
+      {!orders?.length ? (
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mt={4}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <OrderCardSkeleton key={i} />
+          ))}
+        </SimpleGrid>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
           {orders.map((order) => (

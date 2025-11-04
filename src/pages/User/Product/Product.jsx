@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Box, Image, Heading, Text, Flex, Button } from "@chakra-ui/react";
+import { Box, Image, Heading, Text, Flex, Button, useColorModeValue, VStack } from "@chakra-ui/react";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import CustomButton from "../../../components/Button/Button.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
+import { HeartLoading } from "../../../components/Loading/Loading.jsx";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const ProductDetail = () => {
   const [likeLoading, setLikeLoading] = useState(false);
 
   const isLiked = !!product?.isFavorite;
+  const bgCard = useColorModeValue("gray.50", "gray.800");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -46,61 +48,106 @@ const ProductDetail = () => {
 
 const handleToggleLike = async () => {
   if (!user || !product) {
-    return toast({ title: "Debes iniciar sesión para dar like", status: "warning" });
+    return toast({
+      title: "Debes iniciar sesión para dar like",
+      status: "warning",
+    });
   }
 
   try {
     setLikeLoading(true);
-    const updatedProduct = await ProductsActions.toggleLike(product._id, !isLiked);
-    dispatch({ type: "TOGGLE_LIKE", payload: updatedProduct });
-    await toggleFavorite(product._id);
-    await refreshFavorites();
-    setProduct(updatedProduct);
-    toast({ title: updatedProduct.isFavorite ? "Agregado a favoritos" : "Quitado de favoritos", status: "success" });
+
+    const updated = await toggleFavorite(product._id);
+
+    setProduct((prev) => ({
+      ...prev,
+      isFavorite: updated?.isFavorite ?? !prev.isFavorite,
+      likes: updated?.likes ?? (prev.isFavorite ? prev.likes - 1 : prev.likes + 1),
+    }));
+
+    toast({
+      title: updated?.isFavorite
+        ? "Agregado a favoritos"
+        : "Quitado de favoritos",
+      status: "success",
+    });
   } catch (err) {
+    console.error(err);
     toast({ title: "Error al actualizar favoritos", status: "error" });
   } finally {
     setLikeLoading(false);
   }
 };
+
+  
   if (loading) return <ProductCardSkeleton />;
-  if (error) return <Box textAlign="center" p={6}><Text color="red.500">{error}</Text></Box>;
-  if (!product) return <Box textAlign="center" p={6}><Text>Producto no encontrado</Text></Box>;
+  if (error)
+  return (
+    <Box textAlign="center" p={6}> <Text color="red.500">{error}</Text>
+    </Box>
+  );
+
+if (!product)
+  return (
+    <Box textAlign="center" p={6}> <Text>Producto no encontrado</Text>
+    </Box>
+  );
 
   return (
     <Box p={6}>
       <Flex justify="space-between" align="center" mb={6}>
         <Heading size="lg">{product.name}</Heading>
-        <Button colorScheme="teal" onClick={() => navigate(-1)}>⬅ Volver</Button>
+        <Button colorScheme="teal" variant="outline" onClick={() => navigate(-1)}>⬅ Volver</Button>
       </Flex>
-      <Image src={product.imgPrimary || "/placeholder.svg"} alt={product.name} mb={4} borderRadius="md" />
-      <Text mb={2}>{product.description}</Text>
-      <Text mb={2}><strong>Precio Unitario:</strong> ${product.priceMin}</Text>
-      <Text mb={2}><strong>Precio Mayorista:</strong> ${product.priceMay}</Text>
+
+      <Box
+        bg={bgCard} borderRadius="lg" p={4} shadow="md" transition="all 0.2s ease"
+        _hover={{ shadow: "lg" }}>
+       <Image src={product.imgPrimary || "/placeholder.svg"} alt={product.name} mb={4} borderRadius="md" maxH="400px" w="100%" objectFit="contain"/>
+      
+       <VStack align="start" spacing={3}>
+      <Text>{product.description}</Text>
+      <Text><strong>Precio Unitario:</strong> ${product.priceMin}</Text>
+      <Text><strong>Precio Mayorista:</strong> ${product.priceMay}</Text>
+      
       <Flex align="center" gap={2} mb={4}>
         <CustomButton
           onClick={handleToggleLike}
           isDisabled={likeLoading || !user}
           size="sm"
+          colorScheme={isLiked ? "pink" : "gray"}
+          variant={isLiked ? "solid" : "outline"}
         >
-          {isLiked ? "❤️" : "🤍"} {product.likes || 0}
+         {likeLoading ? (
+           <HeartLoading size={18} />
+              ) : (
+           <>{isLiked ? "❤️" : "🤍"} {product.likes || 0}</>
+           )}
         </CustomButton>
-      </Flex>
+      </Flex>                                                                                                                                                                              
 
       <Text mb={1}><strong>Categoría:</strong> {product.category?.join(", ") || "N/A"}</Text>
       <Text mb={1}><strong>Estilos:</strong> {product.style?.join(", ") || "N/A"}</Text>
       <Text mb={1}><strong>Material:</strong> {product.material?.join(", ") || "N/A"}</Text>
-
+                             
       <Box>
         <Text fontWeight="bold">Colores disponibles:</Text>
-        {product.colors?.map((color, i) => (
+        {product.colors?.length ? (
+        product.colors?.map((color, i) => (
           <Text key={i} fontSize="sm">
             {Array.isArray(color.name) ? color.name.join(", ") : color.name} ({color.stock ?? 0})
-          </Text>
-        ))}
+          </Text>                    
+        ))
+        ) : (
+                      <Text fontSize="sm" color="gray.500">
+                        No hay colores registrados
+                      </Text>
+        )}
+      </Box>
+       </VStack>
       </Box>
     </Box>
   );
-};
+};               
 
 export default ProductDetail;

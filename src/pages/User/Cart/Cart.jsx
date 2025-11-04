@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {  Box, Grid, GridItem, Text, HStack, VStack, Image, Divider, IconButton,
-  Alert, AlertIcon, useColorModeValue, Container} from "@chakra-ui/react";
+  Alert, AlertIcon, useColorModeValue, Container,
+  Tooltip} from "@chakra-ui/react";
 import { CloseIcon, AddIcon, MinusIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../../reducers/api/Api.jsx";
@@ -16,6 +17,26 @@ import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { getDefaultAddress, getDefaultPhone } from "../../../components/Profile/UserUtils.jsx";
 import AddressPhoneModal from "../../../components/Order/AddressPhoneModal.jsx"
+
+const styles = {
+  cardHover: {
+    transition: "all 0.25s ease-in-out",
+    _hover: { transform: "scale(1.02)", shadow: "lg", borderColor: "pink.300" },
+  },
+  qtyBtn: {
+    size: "sm",
+    variant: "ghost",
+    _hover: { bg: "pink.50", color: "pink.500" },
+  },
+};
+
+const handleError = (toast, err, title = "Error") => {
+  toast({
+    title,
+    description: err?.response?.data?.message || err.message || "Ocurrió un error",
+    status: "error",
+  });
+};
 
 const MIN_ITEMS = 10;
 
@@ -36,6 +57,8 @@ export default function Cart() {
   const { toast } = useToast();
   const { refreshCart, user } = useAuth();
   const navigate = useNavigate();
+  const [lineLoading, setLineLoading] = useState({});
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const pageBg = useColorModeValue("gray.50", "gray.900");
   const headerBg = useColorModeValue("pink.500", "pink.400");
@@ -72,8 +95,8 @@ export default function Cart() {
   }, [apiFetchCart]);
 
   const items = useMemo(() => (cart.items || []).map((item) => item), [cart.items]);
-  const itemCount = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items]);
-  const subtotal = useMemo(() => items.reduce((acc, it) => acc + it.price * it.quantity, 0), [items]);
+  const itemCount = useMemo(() => items.reduce((acc, item) => acc + item.quantity, 0), [items]);
+  const subtotal = useMemo(() => items.reduce((acc, item) => acc + item.price * item.quantity, 0), [items]);
   const missing = Math.max(0, MIN_ITEMS - itemCount);
   const canCheckout = missing === 0 && items.length > 0;
 
@@ -81,52 +104,59 @@ export default function Cart() {
   const defaultPhone = getDefaultPhone(user);
 
   const onChangeQtyLine = async (lineId, delta) => {
+    setLineLoading((prev) => ({ ...prev, [lineId]: true }));
     try {
       const data = await apiPatchQtyByLine(lineId, delta);
       setCart(data);
       await refreshCart?.();
     } catch (e) {
-      toast({ title: "Cantidad no actualizada", description: e.message, status: "error" });
+      handleError(toast, e, "Cantidad no actualizada");
+    } finally {
+      setLineLoading((prev) => ({ ...prev, [lineId]: false }));
     }
   };
 
   const onRemoveLine = async (lineId) => {
+    const confirmed = window.confirm("¿Seguro que quieres eliminar este producto?");
+    if (!confirmed) return;
+
+    setLineLoading((prev) => ({ ...prev, [lineId]: true }));
     try {
       const data = await apiRemoveByLine(lineId);
       setCart(data);
       await refreshCart?.();
       toast({ title: "Producto eliminado", status: "success" });
     } catch (e) {
-      toast({ title: "No se pudo eliminar", description: e.message, status: "error" });
+      handleError(toast, e, "No se pudo eliminar");
+    } finally {
+      setLineLoading((prev) => ({ ...prev, [lineId]: false }));
     }
   };
 
   const onCheckout = async () => {
-      if (!defaultAddress || !defaultPhone) {
-        setIsAddressModalOpen(true);
-        return;
-      }
-      try {
-        const res = await ApiService.post("/orders/checkout", {
-          addressId: defaultAddress._id,
-          telephoneId: defaultPhone._id,
-        });
-        await refreshCart();
-        navigate(`/order/confirm?orderId=${res.order._id}`);
-      } catch (err) {
-        console.error("❌ Error en checkout:", err);
-        toast({
-          title: "Error al procesar el pedido",
-          description: err?.response?.data?.message || err.message || "Intenta nuevamente",
-          status: "error"
-        });
-      }
-    };
+    if (!defaultAddress || !defaultPhone) {
+      setIsAddressModalOpen(true);
+      return;
+    }
+    try {
+      setCheckoutLoading(true);
+      const res = await ApiService.post("/orders/checkout", {
+        addressId: defaultAddress._id,
+        telephoneId: defaultPhone._id,
+      });
+      await refreshCart();
+      navigate(`/order/confirm?orderId=${res.order._id}`);
+    } catch (err) {
+      handleError(toast, err, "Error al procesar el pedido");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
       
   const openProductDetail = async (productId) => {
     try {
-      const p = await ApiService.get(`/products/${productId}`);
-      setSelected(p?.product || p);
+      const product = await ApiService.get(`/products/${productId}`);
+      setSelected(product?.product || product);
     } catch {
       toast({ title: "No se pudo abrir el producto", status: "error" });
     }
@@ -194,10 +224,10 @@ export default function Cart() {
               </Card>
             ) : (
               <VStack spacing={3} align="stretch">
-                  {items?.map((it) => {
-                  console.log("🖼️ Imagen:", it.imgPrimary || it.image || it.imageUrl, "🧩 item:", it);
+                  {items?.map((item) => {
+                  console.log("🖼️ Imagen:", item.imgPrimary || item.image || item.imageUrl, "🧩 item:", item);
                   return (
-                  <Card key={it.id} bg={panelBg} borderColor={borderColor}>
+                  <Card  key={item.id} bg={panelBg} borderColor={borderColor} {...styles.cardHover}>
                     <CardContent>
                       <Grid templateColumns={{ base: "1fr", md: "72px 1fr 170px" }} gap={3} alignItems="center">
                         {/* Imagen */}
@@ -207,13 +237,13 @@ export default function Cart() {
                           rounded="md"
                           overflow="hidden"
                           bg={thumbBg}
-                          onClick={() => openProductDetail(it.productId)}
+                          onClick={() => openProductDetail(item.productId)}
                           mx={{ base: "auto", md: "0" }}
                           mb={{ base: 2, md: 0 }}
                         >
                           <Image
-                            src={it?.imgPrimary || it?.image || it?.imageUrl || "/placeholder.svg"}
-                            alt={it?.name || "Producto"}
+                            src={item?.imgPrimary || item?.image || item?.imageUrl || "/placeholder.svg"}
+                            alt={item?.name || "Producto"}
                             objectFit="cover"
                             w="100%"
                             h="100%"
@@ -229,45 +259,47 @@ export default function Cart() {
                                 fontWeight="semibold"
                                 noOfLines={1}
                                 cursor="pointer"
-                                onClick={() => openProductDetail(it.productId)}
+                                onClick={() => openProductDetail(item.productId)}
                               >
-                                {it.name}
+                                {item.name}
                               </Text>
-                              {!!it.color && <Text fontSize="xs" color={muted}>Color: {it.color}</Text>}
-                              <Text fontSize="xs" color={muted}>Unitario: {money(it.price)}</Text>
+                              {!!item.color && <Text fontSize="xs" color={muted}>Color: {item.color}</Text>}
+                              <Text fontSize="xs" color={muted}>Unitario: {money(item.price)}</Text>
                             </Box>
                             <IconButton
-                              aria-label="Eliminar"
-                              icon={<CloseIcon boxSize={3} />}
-                              size="sm"
-                              variant="ghost"
-                              color={muted}
-                              onClick={() => onRemoveLine(it.id)}
-                            />
+                                aria-label="Eliminar"
+                                icon={lineLoading[item.id] ? <Loading size="xs" /> : <CloseIcon boxSize={3} />}
+                                {...styles.qtyBtn}
+                                onClick={() => onRemoveLine(item.id)}
+                                isDisabled={lineLoading[item.id]}
+                              />
                           </HStack>
                         </VStack>
 
                         {/* Cantidad + total */}
                         <VStack align={{ base: "stretch", md: "end" }} spacing={2}>
                           <HStack spacing={0} border="1px" borderColor={borderColor} rounded="md" overflow="hidden">
+                            <Tooltip label="Quitar una unidad" hasArrow>
                             <IconButton
                               aria-label="Restar"
-                              icon={<MinusIcon boxSize={3} />}
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => onChangeQtyLine(it.id, -1)}
-                              isDisabled={it.quantity <= 1}
+                              icon={lineLoading[item.id] ? <Loading size="xs" /> : <MinusIcon boxSize={3} />}
+                              {...styles.qtyBtn}
+                              onClick={() => onChangeQtyLine(item.id, -1)}
+                              isDisabled={item.quantity <= 1 || lineLoading[item.id]}
                             />
-                            <Box px={3} minW="36px" textAlign="center">{it.quantity}</Box>
+                            </Tooltip>
+                            <Box px={3} minW="36px" textAlign="center">{item.quantity}</Box>
+                            <Tooltip label="Agregar una unidad" hasArrow>
                             <IconButton
                               aria-label="Sumar"
-                              icon={<AddIcon boxSize={3} />}
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => onChangeQtyLine(it.id, +1)}
+                              icon={lineLoading[item.id] ? <Loading size="xs" /> : <AddIcon boxSize={3} />}
+                              {...styles.qtyBtn}
+                              onClick={() => onChangeQtyLine(item.id, +1)}
+                              isDisabled={lineLoading[item.id]}
                             />
+                            </Tooltip>
                           </HStack>
-                          <Text fontWeight="semibold">{money(it.price * it.quantity)}</Text>
+                          <Text fontWeight="semibold">{money(item.price * item.quantity)}</Text>
                         </VStack>
                       </Grid>
                     </CardContent>
@@ -278,7 +310,7 @@ export default function Cart() {
             )}
           </GridItem>
           <GridItem display={{ base: "none", lg: "block" }}>
-            <Card position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
+            <Card  id="resumen-pedido" position="sticky" top={4} bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
                 <CardTitle>Resumen del Pedido</CardTitle>
                 <CardDescription>Revisa los totales antes de continuar</CardDescription>
@@ -306,15 +338,9 @@ export default function Cart() {
                   </Text>
                 )}
                 <CustomButton
-                  onClick={() => {
-                      console.log("defaultAddress:", defaultAddress, "defaultPhone:", defaultPhone);
-                    if (!defaultAddress || !defaultPhone) {
-                      setIsAddressModalOpen(true);
-                    } else {
-                      onCheckout();
-                    }
-                  }}
+                  onClick={onCheckout}
                   isDisabled={!canCheckout}
+                  isLoading={checkoutLoading}
                   size="lg"
                   w="100%"
                 >
@@ -324,7 +350,7 @@ export default function Cart() {
             </Card>
           </GridItem>
           <GridItem display={{ base: "block", lg: "none" }} mt={8}>
-            <Card bg={panelBg} borderColor={borderColor}>
+            <Card id="resumen-pedido" bg={panelBg} borderColor={borderColor}>
               <CardHeader pb={2}>
                 <CardTitle>Resumen del Pedido</CardTitle>
                 <CardDescription>Revisa los totales antes de continuar</CardDescription>
@@ -395,7 +421,30 @@ export default function Cart() {
           onCheckout();
         }}
       />
-
+        <Box
+          display={{ base: canCheckout ? "flex" : "none", lg: "none" }}
+          position="fixed"
+          bottom="20px"
+          left="50%"
+          transform="translateX(-50%)"
+          zIndex={10}
+          bg="pink.500"
+          color="white"
+          px={6}
+          py={3}
+          rounded="full"
+          shadow="lg"
+          cursor="pointer"
+          onClick={() => {
+            const el = document.getElementById("resumen-pedido");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          <HStack>
+            <Text fontWeight="bold">Ver resumen</Text>
+            <Text>({itemCount} {itemCount === 1 ? "item" : "items"})</Text>
+          </HStack>
+        </Box>
       </Container>
     </Box>
   );
