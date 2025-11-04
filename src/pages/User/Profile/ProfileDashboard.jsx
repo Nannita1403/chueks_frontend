@@ -8,7 +8,6 @@ import EditNameModal from "../../../components/Profile/EditNameModal.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
 import PhoneModal from "../../../components/Profile/PhoneModal.jsx";
 import CompleteProfileModal from "../../../components/Profile/CompleteProfileModal.jsx";
-import { Loading } from "../../../components/Loading/Loading.jsx"; 
 import { OrderCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
 
 import { getDefaultAddress, getDefaultPhone,  formatAddress, formatPhone, formatPrice } from "../../../components/Profile/UserUtils.jsx";
