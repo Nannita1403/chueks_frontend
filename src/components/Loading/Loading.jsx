@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Grid, Text, useBreakpointValue, VStack, keyframes  } from "@chakra-ui/react";
+import { Box, Grid, Text, useBreakpointValue, VStack} from "@chakra-ui/react";
+import { keyframes } from "@emotion/react";
 
 export default function Loading() {
   const items = useMemo(
