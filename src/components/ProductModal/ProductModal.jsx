@@ -48,13 +48,17 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
     if (!user) {
       return toast({ title: "Debes iniciar sesión", status: "warning" });
     }
+
     try {
-      setLikeLoading(true);
-      const data = await toggleFavorite(modalProduct._id);
-      setIsFavorite(data?.favorites?.some((f) => f._id === modalProduct._id));
-      await refreshFavorites();
+    setLikeLoading(true);
+    setIsFavorite((prev) => !prev);
+
+    await toggleFavorite(modalProduct._id);
+    await refreshFavorites(); 
+
     } catch (e) {
       console.error("Error al togglear favorito:", e);
+      setIsFavorite((prev) => !prev); 
       toast({ title: "No se pudo actualizar favoritos", status: "error" });
     } finally {
       setLikeLoading(false);

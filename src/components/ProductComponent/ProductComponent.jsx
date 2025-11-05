@@ -9,18 +9,27 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   const { favorites } = useAuth();
   const [likeLoading, setLikeLoading] = useState(false);
 
-  const isFavorite = favorites?.some(
-    (fav) => fav._id === product._id || fav === product._id
-  );
+
+  useEffect(() => {
+    const fav = favorites?.some(
+      (f) => f._id === product._id || f === product._id
+    );
+    setLocalFavorite(fav);
+  }, [favorites, product._id]);
+
+ 
 
   const handleToggleLike = async () => {
     try {
       setLikeLoading(true);
-      await onToggleLike(product._id);
+      setLocalFavorite((prev) => !prev); 
+      await onToggleLike(product._id); 
     } catch (error) {
       console.error("Error al cambiar favorito:", error);
+      setLocalFavorite((prev) => !prev);
     } finally {
-      setTimeout(() => setLikeLoading(false), 200);    }
+      setTimeout(() => setLikeLoading(false), 200);
+    }
   };
 
   const cardBg = useColorModeValue("white", "gray.800");
