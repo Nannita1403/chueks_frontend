@@ -8,7 +8,7 @@ import { HeartLoading } from "../../components/Loading/Loading.jsx";
 const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   const { favorites } = useAuth();
   const [likeLoading, setLikeLoading] = useState(false);
-
+  const [localFavorite, setLocalFavorite] = useState(false);
 
   useEffect(() => {
     const fav = favorites?.some(
@@ -23,10 +23,10 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
     try {
       setLikeLoading(true);
       setLocalFavorite((prev) => !prev); 
-      await onToggleLike(product._id); 
+      await onToggleLike(product._id);
     } catch (error) {
       console.error("Error al cambiar favorito:", error);
-      setLocalFavorite((prev) => !prev);
+      setLocalFavorite((prev) => !prev); 
     } finally {
       setTimeout(() => setLikeLoading(false), 200);
     }
