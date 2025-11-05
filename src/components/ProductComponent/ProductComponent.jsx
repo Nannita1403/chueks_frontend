@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {   Box, Text, Flex, IconButton, Image as ChakraImage, useColorModeValue} from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CustomButton from "../../components/Button/Button.jsx";
