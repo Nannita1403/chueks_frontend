@@ -35,12 +35,12 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   const modalBg = useColorModeValue("white", "gray.800");
 
   useEffect(() => {
-    if (!product) return;
-    setModalProduct(product);
-    setSelectedColor(colorItems?.[0] || null);
-    setQuantity(1);
-    setIsFavorite(Boolean(user?.favorites?.some?.((f) => f._id === product._id)));
-  }, [isOpen, product?._id, user]);
+  if (!product) return;
+  setModalProduct(product);
+  setSelectedColor(colorItems?.[0] || null);
+  setQuantity(1);
+  setIsFavorite(Boolean(user?.favorites?.some?.((f) => f._id === product._id)));
+}, [isOpen, product?._id, user?.favorites]);
 
   const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
