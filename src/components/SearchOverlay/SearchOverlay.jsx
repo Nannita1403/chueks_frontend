@@ -34,9 +34,11 @@ export default function SearchOverlay({ isOpen, onClose, allProducts = [] }) {
   }, [search, allProducts]);
 
   const handleSelect = (product) => {
-    onClose();
+  onClose();
+  setTimeout(() => {
     navigate(`/products/${product._id}`);
-  };
+  }, 200);
+};
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -83,12 +85,12 @@ export default function SearchOverlay({ isOpen, onClose, allProducts = [] }) {
                   onClick={() => handleSelect(p)}
                 >
                   <Image
-                    src={p.image || p.images?.[0]}
-                    alt={p.name}
+                    src={p?.imgPrimary?.url || p?.imgPrimary || p?.images?.[0] || "/placeholder.svg"}
+                    alt={p.name || "Producto"}
                     boxSize="50px"
                     objectFit="cover"
                     borderRadius="md"
-                  />
+                    />
                   <Box flex="1">
                     <Text fontWeight="medium">{p.name}</Text>
                     <Text fontSize="sm" color="gray.500" noOfLines={1}>
