@@ -1,6 +1,7 @@
-import { Box, Flex, VStack, Button, Text, Divider, Image, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerHeader,
+import { Box, Flex, VStack, Button, Text, Divider, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerHeader,
   DrawerBody, DrawerFooter, useDisclosure, useColorModeValue} from "@chakra-ui/react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Image as ChakraImage } from "@chakra-ui/react";
+  import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import AddressModal from "../../../components/Profile/AdressesModal.jsx";
@@ -18,7 +19,7 @@ const SidebarContent = ({  onClose, onOpenAddresses, onOpenPhones, logoSrc, hand
   <Flex direction="column" h="100%" justify="space-between" bg="gray.900" color="white" p={4} w="250px">
     <VStack spacing={6} align="stretch">
       <Box textAlign="center" bg="white" borderRadius="md" p={2}>
-        <Image src={logoSrc} alt="Logo" mx="auto" mb={2} maxH="60px" />
+        <ChakraImage src={logoSrc} alt="Logo" mx="auto" mb={2} maxH="60px" />
         <Text fontWeight="bold" fontSize="lg" color="gray.900">
           Mi Perfil
         </Text>

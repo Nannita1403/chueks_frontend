@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Grid, Text, useBreakpointValue, VStack} from "@chakra-ui/react";
+import { Box, Grid, Text, useBreakpointValue, VStack, Image as ChakraImage} from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 export default function Loading() {
@@ -162,7 +162,7 @@ export const TypewriterTextEffectWithImage = ({
           transform="translateY(0px)"
           _hover={{ transform: "translateY(-6px)", boxShadow: "0px 12px 30px rgba(0,0,0,0.3)" }}
         >
-          <Image src={activeImage} alt={activeText} objectFit="cover" w="100%" h="100%" />
+          <ChakraImage src={activeImage} alt={activeText} objectFit="cover" w="100%" h="100%" />
         </Box>
       )}
 

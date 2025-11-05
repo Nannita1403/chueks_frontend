@@ -7,7 +7,6 @@ import {
   Spinner,
   VStack,
   HStack,
-  Image,
   SimpleGrid,
   useColorModeValue,
   Modal,
@@ -19,8 +18,8 @@ import {
   ModalFooter,
   Button,
   Badge,
-  Checkbox,
 } from "@chakra-ui/react";
+import { Image as ChakraImage } from "@chakra-ui/react";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import ApiService from "../../../reducers/api/Api.jsx";
@@ -127,22 +126,22 @@ export default function OrdersPageUser() {
             {selectedOrder.items?.map((item, idx) => {
               // Determinar URL de imagen
               const base = ApiService.baseURL?.replace("/api/v1", "");
-              const img =
+              const image =
                 item?.imgPrimary ||
                 item?.imageUrl ||
                 item?.image ||
                 item?.product?.imgPrimary;
 
-              const imageUrl = img?.startsWith("http")
-                ? img
-                : img
+              const imageUrl = image?.startsWith("http")
+                ? image
+                : image
                 ? `${base}/${img.replace(/^\/+/, "")}`
                 : "/placeholder.svg";
 
               // Log para depuración
               console.log("Imagen del item:", {
                 name: item.name,
-                imgOriginal: img,
+                imgOriginal: image,
                 imgFinal: imageUrl,
               });
 
@@ -153,7 +152,7 @@ export default function OrdersPageUser() {
                     align="start"
                     flexDirection={{ base: "column", md: "row" }}
                   >
-                    <Image
+                    <ChakraImage 
                       src={imageUrl}
                       alt={item?.name || "Producto"}
                       boxSize={{ base: "100%", md: "100px" }}

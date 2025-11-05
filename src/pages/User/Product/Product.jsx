@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Box, Image, Heading, Text, Flex, Button, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Box, Heading, Text, Flex, Button, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Image as ChakraImage } from "@chakra-ui/react";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import { useAuth } from "../../../context/Auth/auth.context.jsx";
 import CustomButton from "../../../components/Button/Button.jsx";
@@ -103,7 +104,7 @@ if (!product)
       <Box
         bg={bgCard} borderRadius="lg" p={4} shadow="md" transition="all 0.2s ease"
         _hover={{ shadow: "lg" }}>
-       <Image src={product.imgPrimary || "/placeholder.svg"} alt={product.name} mb={4} borderRadius="md" maxH="400px" w="100%" objectFit="contain"/>
+       <ChakraImage src={product.imgPrimary || "/placeholder.svg"} alt={product.name} mb={4} borderRadius="md" maxH="400px" w="100%" objectFit="contain"/>
       
        <VStack align="start" spacing={3}>
       <Text>{product.description}</Text>
