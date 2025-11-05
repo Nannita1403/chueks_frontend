@@ -1,49 +1,85 @@
-import { Box, Text, Flex, IconButton } from "@chakra-ui/react";
-import { Image as ChakraImage } from "@chakra-ui/react";
+import { useState } from "react";
+import {   Box, Text, Flex, IconButton, Image as ChakraImage, useColorModeValue} from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CustomButton from "../../components/Button/Button.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
+import { HeartLoading } from "../../components/Loading/Loading.jsx";
 
 const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   const { favorites } = useAuth();
-  const isFavorite = favorites?.some((fav) => fav._id === product._id || fav === product._id);
+  const [likeLoading, setLikeLoading] = useState(false);
+
+  const isFavorite = favorites?.some(
+    (fav) => fav._id === product._id || fav === product._id
+  );
+
+  const handleToggleLike = async () => {
+    try {
+      setLikeLoading(true);
+      await onToggleLike(product._id);
+    } catch (error) {
+      console.error("Error al cambiar favorito:", error);
+    } finally {
+      setTimeout(() => setLikeLoading(false), 200);    }
+  };
+
+  const cardBg = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
 
   return (
     <Box
       borderWidth="1px"
+      borderColor={borderColor}
       borderRadius="lg"
       overflow="hidden"
       p={4}
-      bg="white"
-      _dark={{ bg: "gray.800" }}
-      _hover={{ shadow: "md", transform: "translateY(-2px)", transition: "all 0.2s" }}
+      bg={cardBg}
+      _hover={{
+        shadow: "lg",
+        transform: "translateY(-4px)",
+        transition: "all 0.2s ease-in-out",
+      }}
     >
-
       <ChakraImage
-        src={product.imgPrimary?.url || product.imgPrimary || "/placeholder.svg"}
-        alt={product.name}
+        src={
+          product?.imgPrimary?.url ||
+          product?.imgPrimary ||
+          "/placeholder.svg"
+        }
+        alt={product?.name || "Producto"}
         mb={4}
         borderRadius="md"
         w="100%"
         h="200px"
         objectFit="cover"
+        loading="lazy"
       />
 
-      <Text fontWeight="bold" fontSize="lg" mb={1}>
-        {product.name}
+      <Text fontWeight="bold" fontSize="lg" mb={1} noOfLines={1}>
+        {product?.name || "Producto sin nombre"}
       </Text>
+
       <Text fontSize="md" color="gray.600" mb={2}>
-        ${product.priceMin}
+        ${product?.priceMin ?? "—"}
       </Text>
 
       <Flex align="center" gap={3} mt={3}>
-        {/* Botón de favoritos */}
         <IconButton
           aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-          icon={isFavorite ? <FaHeart color="red" /> : <FaRegHeart />}
+          aria-pressed={isFavorite}
+          icon={
+            likeLoading ? (
+              <HeartLoading size={18} />
+            ) : isFavorite ? (
+              <FaHeart color="red" />
+            ) : (
+              <FaRegHeart />
+            )
+          }
           size="sm"
           variant="ghost"
-          onClick={() => onToggleLike(product._id)}
+          onClick={handleToggleLike}
+          isDisabled={likeLoading}
         />
 
         <CustomButton size="sm" colorScheme="teal" onClick={onViewDetail}>

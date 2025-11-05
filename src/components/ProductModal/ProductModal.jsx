@@ -1,41 +1,38 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Text,
-  Flex,
-  Select,
-  IconButton,
-} from "@chakra-ui/react";
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter,
+  Button, Text, Flex, Select, IconButton, useColorModeValue} from "@chakra-ui/react";
 import { Image as ChakraImage } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
+import { HeartLoading } from "../../components/Loading/Loading.jsx";
 
 function flattenColors(colors = []) {
-  const out = [];
-  colors.forEach((c) => {
+  return colors.flatMap((c) => {
     const names = Array.isArray(c?.name) ? c.name : c?.name ? [c.name] : [];
-    names.forEach((n) => out.push({ name: n, stock: Number(c?.stock) || 0 }));
+    return names.map((n) => ({
+      name: n,
+      stock: Number(c?.stock) || 0,
+    }));
   });
-  return out;
 }
 
 const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   const { user, refreshCart, toggleFavorite, refreshFavorites } = useAuth();
   const { toast } = useToast();
+
   const [modalProduct, setModalProduct] = useState(product);
   const colorItems = useMemo(() => flattenColors(product?.colors), [product]);
+
   const [selectedColor, setSelectedColor] = useState(colorItems?.[0] || null);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
+
+  const modalBg = useColorModeValue("white", "gray.800");
 
   useEffect(() => {
     if (!product) return;
@@ -49,30 +46,24 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      return toast({
-        title: "Debes iniciar sesión",
-        status: "warning",
-      });
+      return toast({ title: "Debes iniciar sesión", status: "warning" });
     }
     try {
+      setLikeLoading(true);
       const data = await toggleFavorite(modalProduct._id);
       setIsFavorite(data?.favorites?.some((f) => f._id === modalProduct._id));
       await refreshFavorites();
     } catch (e) {
       console.error("Error al togglear favorito:", e);
-      toast({
-        title: "No se pudo actualizar favoritos",
-        status: "error",
-      });
+      toast({ title: "No se pudo actualizar favoritos", status: "error" });
+    } finally {
+      setLikeLoading(false);
     }
   };
 
   const handleAddToCart = async () => {
     if (!selectedColor) {
-      return toast({
-        title: "Selecciona un color",
-        status: "warning",
-      });
+      return toast({ title: "Selecciona un color", status: "warning" });
     }
     if (!user) {
       return toast({
@@ -83,10 +74,9 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
 
     const qty = Math.min(quantity, maxQty);
     try {
+      setCartLoading(true);
       if (typeof addToCartHandler === "function") {
-        await addToCartHandler(modalProduct, qty, {
-          name: selectedColor.name,
-        });
+        await addToCartHandler(modalProduct, qty, { name: selectedColor.name });
       } else {
         await ApiService.post("/cart/add", {
           productId: modalProduct._id,
@@ -94,29 +84,30 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
           color: (selectedColor?.name || "").trim(),
         });
       }
+
       if (typeof refreshCart === "function") await refreshCart();
       window.dispatchEvent(new CustomEvent("cart:updated"));
 
       toast({
-        title: `${qty} ${modalProduct.name} agregados al carrito`,
+        title: `${qty} ${modalProduct.name} agregado${qty > 1 ? "s" : ""} al carrito`,
         status: "success",
       });
       setQuantity(1);
     } catch (e) {
       console.error(e);
-      toast({
-        title: "No se pudo agregar al carrito",
-        status: "error",
-      });
+      toast({ title: "No se pudo agregar al carrito", status: "error" });
+    } finally {
+      setCartLoading(false);
     }
   };
 
   return (
     <Modal isOpen={!!modalProduct && isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{modalProduct?.name}</ModalHeader>
+      <ModalContent bg={modalBg}>
+        <ModalHeader fontWeight="bold">{modalProduct?.name}</ModalHeader>
         <ModalCloseButton />
+
         <ModalBody>
           <ChakraImage
             src={modalProduct?.imgPrimary || "/placeholder.svg"}
@@ -126,28 +117,31 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
             objectFit="cover"
             w="100%"
             maxH="320px"
+            loading="lazy"
           />
+
           {modalProduct?.description && (
-            <Text mb={2}>{modalProduct.description}</Text>
-          )}
-          <Text>
-            <strong>Precio Unitario:</strong> ${modalProduct?.priceMin}
-          </Text>
-          {typeof modalProduct?.priceMay === "number" && (
-            <Text>
-              <strong>Precio Mayorista:</strong> ${modalProduct.priceMay}
+            <Text mb={3} color="gray.600">
+              {modalProduct.description}
             </Text>
           )}
+
+          <Text><strong>Precio Unitario:</strong> ${modalProduct?.priceMin}</Text>
+          {typeof modalProduct?.priceMay === "number" && (
+            <Text><strong>Precio Mayorista:</strong> ${modalProduct.priceMay}</Text>
+          )}
+
           {selectedColor && (
             <Text mt={1}>
               <strong>Stock color:</strong> {selectedColor.stock}
             </Text>
           )}
           {selectedColor?.stock > 0 && selectedColor.stock < 5 && (
-            <Text color="red.500">
+            <Text color="red.500" fontWeight="medium">
               ¡Solo quedan {selectedColor.stock} unidades de este color!
             </Text>
           )}
+
           <Select
             mt={3}
             value={selectedColor?.name || ""}
@@ -163,32 +157,46 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
               </option>
             ))}
           </Select>
+
           <Flex mt={3} align="center" gap={2}>
-            <Button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
-              -
-            </Button>
+            <Button onClick={() => setQuantity((q) => Math.max(1, q - 1))}>-</Button>
             <Text>{quantity}</Text>
-            <Button onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}>
-              +
-            </Button>
+            <Button onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}>+</Button>
           </Flex>
-          <Flex mt={4} gap={3} wrap="wrap">
+
+          <Flex mt={5} gap={3} wrap="wrap">
             <Button
               colorScheme="teal"
               onClick={handleAddToCart}
-              isDisabled={selectedColor?.stock === 0}
+              isDisabled={selectedColor?.stock === 0 || cartLoading}
+              isLoading={cartLoading}
+              loadingText="Agregando..."
             >
               Agregar al carrito
             </Button>
+
             <IconButton
-              aria-label="Favorito"
-              icon={isFavorite ? <FaHeart color="red" /> : <FaRegHeart />}
+              aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+              aria-pressed={isFavorite}
+              icon={
+                likeLoading ? (
+                  <HeartLoading size={18} />
+                ) : isFavorite ? (
+                  <FaHeart color="red" />
+                ) : (
+                  <FaRegHeart />
+                )
+              }
               onClick={handleToggleFavorite}
+              isDisabled={likeLoading}
             />
           </Flex>
         </ModalBody>
+
         <ModalFooter>
-          <Button onClick={onClose}>Cerrar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cerrar
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

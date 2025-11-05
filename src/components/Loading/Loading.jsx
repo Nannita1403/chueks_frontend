@@ -81,21 +81,17 @@ export default function Loading() {
       bg="white"
     >
 
-        {/* Imagen circular arriba */}
-      <TypewriterTextEffectWithImage items={items} speed={200} textSize={textSize} />
+    <TypewriterTextEffectWithImage items={items} speed={200} textSize={textSize} />
 
-      {/* Texto fijo debajo */}
-      <Text
+    <Text
         position="absolute"
-        bottom="4"
+        bottom="6"
         fontSize="lg"
         color="gray.600"
         fontWeight="medium"
       >
         Cargando... por favor espera
       </Text>
-
-      //Texto fijo debajo
     </VStack>
   );
 }
@@ -110,35 +106,30 @@ export const TypewriterTextEffectWithImage = ({
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+     if (!items.length) return;
     let placeholderIndex = 0;
     let textIndex = 0;
     let isBackward = false;
 
  const textInterval = setInterval(() => {
-      const currentText = `  ${items[placeholderIndex].name}  `;
-      if (textIndex === currentText.length) {
-        isBackward = true;
-      } else if (textIndex === 0) {
-        isBackward = false;
-      }
+      const currentText = ` ${items[placeholderIndex].name} `;
+      if (textIndex === currentText.length) isBackward = true;
+      else if (textIndex === 0) isBackward = false;
 
-      if (isBackward) {
-        textIndex--;
-        if (textIndex === 0) {
-          placeholderIndex++;
-          if (placeholderIndex === items.length) placeholderIndex = 0;
-          setIndex(placeholderIndex);
-        }
-      } else {
-        textIndex++;
+      textIndex += isBackward ? -1 : 1;
+
+      if (textIndex === 0 && isBackward) {
+        placeholderIndex = (placeholderIndex + 1) % items.length;
+        setIndex(placeholderIndex);
       }
 
       setActiveText(currentText.slice(0, textIndex).trim());
     }, speed);
 
-    const cursorInterval = setInterval(() => {
-      setShowCursor((show) => !show);
-    }, speed);
+    const cursorInterval = setInterval(
+      () => setShowCursor((prev) => !prev),
+      speed
+    );
 
     return () => {
       clearInterval(textInterval);
@@ -150,24 +141,25 @@ export const TypewriterTextEffectWithImage = ({
 
   return (
     <VStack spacing={6}>
-      {/* Imagen circular */}
-      {activeImage && (
+       {activeImage && (
         <Box
           boxSize={{ base: "120px", md: "180px" }}
           borderRadius="full"
           overflow="hidden"
           border="4px solid white"
           boxShadow="0px 8px 25px rgba(0,0,0,0.2)"
-          transition="all 0.4s ease-in-out"
+          transition="transform 0.3s ease, box-shadow 0.3s ease"
           transform="translateY(0px)"
-          _hover={{ transform: "translateY(-6px)", boxShadow: "0px 12px 30px rgba(0,0,0,0.3)" }}
+          _hover={{
+            transform: "translateY(-6px)",
+            boxShadow: "0 12px 30px rgba(0,0,0,0.3)",
+          }}
         >
           <ChakraImage src={activeImage} alt={activeText} objectFit="cover" w="100%" h="100%" />
         </Box>
       )}
 
-      {/* Texto con efecto */}
-      <Text fontSize={textSize} fontWeight="bold">
+       <Text fontSize={textSize} fontWeight="bold">
         {activeText}
         <Text
           as="span"
@@ -197,6 +189,8 @@ export const HeartLoading = ({ size = 20, color = "red" }) => {
       color={color}
       filter="drop-shadow(0 0 3px rgba(255,0,0,0.4))"
       lineHeight="1"
+      role="img"
+      aria-label="Corazón cargando"
     >
       ❤️
     </Box>

@@ -116,7 +116,10 @@ export default function Favorites() {
                       product={product}
                       isFavorite
                       onViewDetail={() => setSelectedProduct(product)}
-                      onToggleLike={() => toggleFavorite(product._id)}
+                      onToggleLike={async () => {
+                        await toggleFavorite(product._id);
+                        setSelectedProduct(null); 
+                      }}
                       showAddToCart
                     >
                       <HStack mt={2} spacing={2}>
