@@ -81,7 +81,7 @@ export default function Loading() {
       bg="white"
     >
 
-    <TypewriterTextEffectWithImage items={items} speed={200} textSize={textSize} />
+    <TypewriterTextEffectWithImage items={items} speed={70} textSize={textSize} />
 
     <Text
         position="absolute"
@@ -112,20 +112,20 @@ export const TypewriterTextEffectWithImage = ({
     let isBackward = false;
 
  const textInterval = setInterval(() => {
-      const currentText = ` ${items[placeholderIndex].name} `;
-      if (textIndex === currentText.length) isBackward = true;
-      else if (textIndex === 0) isBackward = false;
+  const currentText = ` ${items[placeholderIndex].name} `;
+  if (!isBackward && textIndex === currentText.length) {
+    setTimeout(() => {
+      isBackward = true;
+    }, 400); 
+  } else if (isBackward && textIndex === 0) {
+    isBackward = false;
+    placeholderIndex = (placeholderIndex + 1) % items.length;
+    setIndex(placeholderIndex);
+  }
 
-      textIndex += isBackward ? -1 : 1;
-
-      if (textIndex === 0 && isBackward) {
-        placeholderIndex = (placeholderIndex + 1) % items.length;
-        setIndex(placeholderIndex);
-      }
-
-      setActiveText(currentText.slice(0, textIndex).trim());
-    }, speed);
-
+  textIndex += isBackward ? -1 : 1;
+  setActiveText(currentText.slice(0, textIndex).trim());
+}, speed);
     const cursorInterval = setInterval(
       () => setShowCursor((prev) => !prev),
       speed

@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect, useCallback, useState
 import authService from "../../reducers/users/users.actions.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 import { useNavigate } from "react-router-dom";
+import Loading from "../../components/Loading/Loading.jsx";
 
 export const AuthContext = createContext();
 
@@ -202,7 +203,7 @@ export const AuthProvider = ({ children }) => {
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
   const cartCount = state.cartItems.reduce((acc, it) => acc + (Number(it?.quantity) || 0), 0);
 
-  if (authLoading) return <div>Loading...</div>;
+if (authLoading) return <Loading/>;
 
   return (
     <AuthContext.Provider
