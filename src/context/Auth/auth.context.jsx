@@ -176,15 +176,23 @@ export const AuthProvider = ({ children }) => {
 
   // Toggle favorites
   const toggleFavorite = useCallback(async (productId) => {
-    try {
-      const data = await ApiService.put(`/users/favorites/${productId}/toggle`);
-      dispatch({ type: "SET_FAVORITES", payload: data.favorites || [] });
-      return data;
-    } catch (err) {
-      console.error("Error toggling favorite:", err);
-      return null;
-    }
-  }, []);
+  try {
+    const res = await ApiService.put(`/users/favorites/${productId}/toggle`);
+    const updatedFavorites = res?.favorites || res?.data?.favorites || [];
+    dispatch({ type: "SET_FAVORITES", payload: updatedFavorites });
+    dispatch({
+      type: "SET_USER",
+      payload: state.user
+        ? { ...state.user, favorites: updatedFavorites }
+        : { favorites: updatedFavorites },
+    });
+
+    return { favorites: updatedFavorites };
+  } catch (err) {
+    console.error("Error toggling favorite:", err);
+    return null;
+  }
+}, [state.user]);
 
   const clearError = () => dispatch({ type: "CLEAR_ERROR" });
   const cartCount = state.cartItems.reduce((acc, it) => acc + (Number(it?.quantity) || 0), 0);
