@@ -8,23 +8,21 @@ import { HeartLoading } from "../../components/Loading/Loading.jsx";
 const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
   const { favorites } = useAuth();
   const [likeLoading, setLikeLoading] = useState(false);
-  const [localFavorite, setLocalFavorite] = useState(false); 
+  const [localFavorite, setLocalFavorite] = useState(() =>
+      favorites?.some((f) => f._id === product._id || f === product._id)
+    );
 
   useEffect(() => {
-    const fav = favorites?.some(
-      (f) => f._id === product._id || f === product._id
-    );
-    setLocalFavorite(fav);
+    const isFav = favorites?.some((f) => f._id === product._id || f === product._id);
+    setLocalFavorite(isFav);
   }, [favorites, product._id]);
 
   const handleToggleLike = async () => {
     try {
       setLikeLoading(true);
-      const newValue = !localFavorite;
-      setLocalFavorite(newValue); 
+      setLocalFavorite((prev) => !prev);
       await onToggleLike(product._id);
-
-    } catch (error) {
+      } catch (error) {
       console.error("Error al cambiar favorito:", error);
       setLocalFavorite((prev) => !prev); 
     } finally {

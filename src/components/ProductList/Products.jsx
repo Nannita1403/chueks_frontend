@@ -37,7 +37,10 @@ const Products = () => {
     if (!user)
       return toast({ title: "Debes iniciar sesión", status: "warning" });
     try {
-      await toggleFavorite(product._id);
+      const res = await toggleFavorite(product._id); 
+      if (res?.favorites) {
+      user.favorites = res.favorites;
+    }
       setProducts((prev) =>
         prev.map((p) =>
           p._id === product._id ? { ...p, isFavorite: !p.isFavorite } : p
@@ -77,7 +80,7 @@ const Products = () => {
     <SimpleGrid columns={[1, 2, 3]} spacing={6} p={4}>
       {products.map((product) => {
         const isFavorite = user?.favorites?.some(
-          (fav) => fav._id === product._id
+          (fav) => fav === product._id || fav._id === product._id
         );
         return (
           <ProductComponent

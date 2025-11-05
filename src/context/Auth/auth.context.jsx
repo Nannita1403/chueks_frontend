@@ -179,6 +179,7 @@ export const AuthProvider = ({ children }) => {
   try {
     const res = await ApiService.put(`/users/favorites/${productId}/toggle`);
     const updatedFavorites = res?.favorites || res?.data?.favorites || [];
+
     dispatch({ type: "SET_FAVORITES", payload: updatedFavorites });
     dispatch({
       type: "SET_USER",
@@ -187,7 +188,11 @@ export const AuthProvider = ({ children }) => {
         : { favorites: updatedFavorites },
     });
 
-    return { favorites: updatedFavorites };
+    const isFavorite = updatedFavorites.some((f) =>
+      typeof f === "string" ? f === productId : f._id === productId
+    );
+
+    return { favorites: updatedFavorites, isFavorite };
   } catch (err) {
     console.error("Error toggling favorite:", err);
     return null;

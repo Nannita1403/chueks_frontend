@@ -14,7 +14,6 @@ export const toggleFavorite = useCallback(async (productId) => {
         : { favorites: updatedFavorites },
     });
 
-    // 🟢 Nuevo: devolvemos si el producto quedó en favoritos
     const isFavorite = updatedFavorites.some((f) =>
       typeof f === "string" ? f === productId : f._id === productId
     );
