@@ -107,7 +107,7 @@ export default function Home() {
               product={product}
               onViewDetail={() => openDetail(product)}
               onToggleLike={() => toggleFavorite(product._id)}
-              isFavorite={favorites.some((f) => f._id === product._id)}
+              isFavorite={favorites?.some((f) => f._id === product._id)}
             />
             )}
           />

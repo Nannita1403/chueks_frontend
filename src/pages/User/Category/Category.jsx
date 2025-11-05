@@ -227,12 +227,12 @@ export default function CategoryPage() {
           </Box>
         ) : (
           <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-            {products.map((p) => (
+            {products.map((product) => (
               <ProductComponent
-                key={p._id}
-                product={p}
-                onViewDetail={() => setSelected(p)}
-                onToggleLike={() => handleToggleFavorite(p._id)}
+                key={product._id}
+                product={product}
+                onViewDetail={() => setSelected(product)}
+                onToggleLike={() => handleToggleFavorite(product._id)}
               />
             ))}
           </SimpleGrid>

@@ -5,17 +5,13 @@ import CustomButton from "../../components/Button/Button.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import { HeartLoading } from "../../components/Loading/Loading.jsx";
 
-const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
-  const { favorites } = useAuth();
+const ProductComponent = ({ product, onToggleLike, onViewDetail, isFavorite }) => {
   const [likeLoading, setLikeLoading] = useState(false);
-  const [localFavorite, setLocalFavorite] = useState(() =>
-      favorites?.some((f) => f._id === product._id || f === product._id)
-    );
+  const [localFavorite, setLocalFavorite] = useState(isFavorite);
 
   useEffect(() => {
-    const isFav = favorites?.some((f) => f._id === product._id || f === product._id);
-    setLocalFavorite(isFav);
-  }, [favorites, product._id]);
+    setLocalFavorite(isFavorite);
+  }, [isFavorite]);
 
   const handleToggleLike = async () => {
     try {
@@ -73,7 +69,7 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
           icon={
             likeLoading ? (
               <HeartLoading size={18} />
-            ) : localFavorite ? ( // 👈 usa localFavorite
+            ) : localFavorite ? ( 
               <FaHeart color="red" />
             ) : (
               <FaRegHeart />

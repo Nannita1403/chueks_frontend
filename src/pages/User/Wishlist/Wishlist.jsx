@@ -103,7 +103,11 @@ export default function Favorites() {
               </Box>
             ) : (
               <VStack spacing={4} align="stretch">
-                {favorites.map((product) => (
+                {favorites.map((product) => {
+                  const isFavorite =
+                    favorites?.some((f) => f._id === product._id || f === product._id) ?? false;
+
+                  return (
                   <Box key={product._id}>
                     <ProductModal
                       isOpen={!!selectedProduct && selectedProduct._id === product._id}
@@ -114,7 +118,7 @@ export default function Favorites() {
 
                     <ProductComponent
                       product={product}
-                      isFavorite
+                      isFavorite={isFavorite}  
                       onViewDetail={() => setSelectedProduct(product)}
                       onToggleLike={async () => {
                         await toggleFavorite(product._id);
@@ -138,7 +142,8 @@ export default function Favorites() {
                       </HStack>
                     </ProductComponent>
                   </Box>
-                ))}
+                  );
+                })}
               </VStack>
             )}
           </Box>
