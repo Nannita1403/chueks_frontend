@@ -14,10 +14,10 @@ import BackButton from "../../../components/Nav/BackButton.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx"
 
 
-const normalize = (p) => ({
-  ...p,
-  imgPrimary: p?.imgPrimary?.url || p?.imgPrimary || (Array.isArray(p?.images) ? p.images[0] : p?.image) || "/placeholder.svg",
-  priceMin: p?.priceMin ?? p?.price ?? 0,
+const normalize = (product) => ({
+  ...product,
+  imgPrimary: product?.imgPrimary?.url || product?.imgPrimary || (Array.isArray(product?.images) ? product.images[0] : product?.image) || "/placeholder.svg",
+  priceMin: product?.priceMin ?? product?.price ?? 0,
 });
 
 const removeAccents = (s = "") => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -31,7 +31,7 @@ const slugToEnum = {
   accesorios: "Accesorios",
   neceseres: "Neceser",
 };
-const normalizeList = (resp) => (Array.isArray(resp) ? resp : resp?.products || resp?.data || []);
+const normalizeList = (respuesta) => (Array.isArray(respuesta) ? respuesta : respuesta?.products || respuesta?.data || []);
 const categoryMatches = (product, target) => {
   const cats = Array.isArray(product.category) ? product.category : product.category ? [product.category] : [];
   return cats.some((c) => removeAccents(String(c)).toLowerCase() === target);
@@ -99,19 +99,19 @@ export default function CategoryPage() {
 
         if (filters.colors.length) {
           const setColors = new Set(filters.colors);
-          normalized = normalized.filter((p) =>
-            Array.isArray(p.colors) &&
-            p.colors.some((c) => {
-              const arr = Array.isArray(c?.name) ? c.name : c?.name ? [c.name] : [];
+          normalized = normalized.filter((product) =>
+            Array.isArray(product.colors) &&
+            product.colors.some((color) => {
+              const arr = Array.isArray(color?.name) ? color.name : color?.name ? [color.name] : [];
               return arr.some((n) => setColors.has(n));
             })
           );
         }
         if (filters.styles.length) {
           const setStyles = new Set(filters.styles);
-          normalized = normalized.filter((p) => {
-            const st = Array.isArray(p.style) ? p.style : p.style ? [p.style] : [];
-            return st.some((s) => setStyles.has(s));
+          normalized = normalized.filter((product) => {
+            const styles = Array.isArray(product.style) ? product.style : product.style ? [product.style] : [];
+            return styles.some((s) => setStyles.has(s));
           });
         }
         if (sortBy === "price_asc") normalized.sort((a, b) => (a.priceMin || 0) - (b.priceMin || 0));
@@ -133,7 +133,7 @@ export default function CategoryPage() {
     try {
       await toggleFavorite(productId);
       setProducts((prev) =>
-        prev.map((p) => (p._id === productId ? { ...p, isFavorite: !p.isFavorite } : p))
+        prev.map((product) => (product._id === productId ? { ...product, isFavorite: !product.isFavorite } : product))
       );
     } catch {
       toast({ title: "Error al actualizar favoritos", status: "error" });

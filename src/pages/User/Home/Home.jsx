@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Container, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Container, useColorModeValue } from "@chakra-ui/react";
 import ApiService from "../../../reducers/api/Api.jsx";
 import ProductComponent from "../../../components/ProductComponent/ProductComponent.jsx";
 import ProductModal from "../../../components/ProductModal/ProductModal.jsx";
@@ -33,14 +33,14 @@ export default function Home() {
     []
   );
 
-  const normalize = (p) => ({
-    ...p,
+  const normalize = (product) => ({
+    ...product,
     imgPrimary:
-      p?.imgPrimary?.url ||
-      p?.imgPrimary ||
-      (Array.isArray(p?.images) ? p.images[0] : p?.image) ||
+      product?.imgPrimary?.url ||
+      product?.imgPrimary ||
+      (Array.isArray(product?.images) ? product.images[0] : product?.image) ||
       "/placeholder.svg",
-    priceMin: p?.priceMin ?? p?.price ?? 0,
+    priceMin: product?.priceMin ?? product?.price ?? 0,
   });
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function Home() {
       try {
         const resp = await ApiService.get("/products");
         const list = Array.isArray(resp) ? resp : resp?.products || resp?.data || [];
-        setProducts(list.map((p) => normalize(p)));
+        setProducts(list.map((products) => normalize(products)));
       } catch (error) {
         console.error("❌ Error cargando productos en Home:", error);
         toast({ title: "Error cargando productos", status: "error" });
@@ -61,7 +61,7 @@ export default function Home() {
   const featuredCodes = ["RI002", "BOL002", "BOL008A", "MO004", "NEC002", "TAR002"];
   const featuredProducts = useMemo(() => {
     const arr = Array.isArray(products) ? products : [];
-    const featured = arr.filter((p) => featuredCodes.includes(p.code));
+    const featured = arr.filter((product) => featuredCodes.includes(product.code));
     return featured.length ? featured : arr.slice(0, 9);
   }, [products]);
 

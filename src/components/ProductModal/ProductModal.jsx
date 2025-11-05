@@ -8,12 +8,12 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  Image,
   Text,
   Flex,
   Select,
   IconButton,
 } from "@chakra-ui/react";
+import { Image as ChakraImage } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
@@ -118,7 +118,7 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
         <ModalHeader>{modalProduct?.name}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Image
+          <ChakraImage
             src={modalProduct?.imgPrimary || "/placeholder.svg"}
             alt={modalProduct?.name}
             mb={4}

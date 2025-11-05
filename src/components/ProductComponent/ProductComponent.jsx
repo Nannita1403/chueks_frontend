@@ -1,4 +1,5 @@
-import { Box, Image, Text, Flex, IconButton } from "@chakra-ui/react";
+import { Box, Text, Flex, IconButton } from "@chakra-ui/react";
+import { Image as ChakraImage } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CustomButton from "../../components/Button/Button.jsx";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
@@ -18,7 +19,7 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail }) => {
       _hover={{ shadow: "md", transform: "translateY(-2px)", transition: "all 0.2s" }}
     >
 
-      <Image
+      <ChakraImage
         src={product.imgPrimary?.url || product.imgPrimary || "/placeholder.svg"}
         alt={product.name}
         mb={4}
