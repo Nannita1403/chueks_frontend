@@ -57,17 +57,15 @@ const handleToggleLike = async () => {
 
   try {
     setLikeLoading(true);
-
-    const updated = await toggleFavorite(product._id);
-
+    const res = await toggleFavorite(product._id);
     setProduct((prev) => ({
       ...prev,
-      isFavorite: updated?.isFavorite ?? !prev.isFavorite,
-      likes: updated?.likes ?? (prev.isFavorite ? prev.likes - 1 : prev.likes + 1),
+      isFavorite: res?.isFavorite ?? !prev.isFavorite,
+      likes: res?.likes ?? (prev.isFavorite ? prev.likes - 1 : prev.likes + 1),
     }));
 
     toast({
-      title: updated?.isFavorite
+      title: res?.isFavorite
         ? "Agregado a favoritos"
         : "Quitado de favoritos",
       status: "success",

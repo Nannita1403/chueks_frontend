@@ -45,25 +45,23 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   const maxQty = Math.max(1, Number(selectedColor?.stock) || 1);
 
   const handleToggleFavorite = async () => {
-    if (!user) {
-      return toast({ title: "Debes iniciar sesión", status: "warning" });
-    }
+  if (!user) {
+    return toast({ title: "Debes iniciar sesión", status: "warning" });
+  }
 
-    try {
+  try {
     setLikeLoading(true);
-    setIsFavorite((prev) => !prev);
-
-    await toggleFavorite(modalProduct._id);
-    await refreshFavorites(); 
-
-    } catch (e) {
-      console.error("Error al togglear favorito:", e);
-      setIsFavorite((prev) => !prev); 
-      toast({ title: "No se pudo actualizar favoritos", status: "error" });
-    } finally {
-      setLikeLoading(false);
+    const res = await toggleFavorite(modalProduct._id);
+    if (res) {
+      setIsFavorite(res.isFavorite);
     }
-  };
+  } catch (e) {
+    console.error("Error al togglear favorito:", e);
+    toast({ title: "No se pudo actualizar favoritos", status: "error" });
+  } finally {
+    setLikeLoading(false);
+  }
+};
 
   const handleAddToCart = async () => {
     if (!selectedColor) {
