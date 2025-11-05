@@ -15,8 +15,8 @@ import {
 } from "@chakra-ui/react";
 import { FiSearch, FiHeart, FiShoppingBag, FiUser, FiMenu } from "react-icons/fi";
 import { useAuth } from "../../context/Auth/auth.context.jsx";
-import SearchOverlay from "../../components/SearchOverlay.jsx";
 import { useProducts } from "../../context/Products/products.context.jsx";
+import SearchOverlay from "../SearchOverlay/SearchOverlay.jsx";
 
 export default function AppHeader({ logoSrc = "/logoRedondo.png", onOpenMenu }) {
   const bgColor = useColorModeValue("white", "gray.800");
