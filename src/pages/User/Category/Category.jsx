@@ -12,6 +12,7 @@ import { useToast } from "../../../Hooks/useToast.jsx";
 import AppHeader from "../../../components/Header/AppHeader.jsx";
 import BackButton from "../../../components/Nav/BackButton.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx"
+import CategorySEO from "../../../components/SEO/CategorySEO.jsx";
 
 
 const normalize = (product) => ({
@@ -169,6 +170,8 @@ export default function CategoryPage() {
   );
 
   return (
+    <>
+    <CategorySEO category={enumCategory || "Productos"} products={products} />
     <Box minH="100vh">
       <AppHeader />
       <Box bg={bannerBg} color="white" py={3}>
@@ -255,5 +258,6 @@ export default function CategoryPage() {
         addToCartHandler={addToCartHandler}
       />
     </Box>
+    </>
   );
 }

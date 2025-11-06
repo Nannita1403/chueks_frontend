@@ -8,6 +8,8 @@ import { useAuth } from "../../context/Auth/auth.context.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
 import { HeartLoading } from "../../components/Loading/Loading.jsx";
+import ProductModalSEO from "../SEO/ProductModalSEO.jsx";
+
 
 function flattenColors(colors = []) {
   return colors.flatMap((c) => {
@@ -104,6 +106,8 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
   };
 
   return (
+    <>
+    <ProductModalSEO product={product} />
     <Modal isOpen={!!modalProduct && isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent bg={modalBg}>
@@ -202,6 +206,7 @@ const ProductModal = ({ isOpen, onClose, product, addToCartHandler }) => {
         </ModalFooter>
       </ModalContent>
     </Modal>
+    </>
   );
 };
 

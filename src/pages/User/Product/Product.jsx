@@ -9,6 +9,7 @@ import CustomButton from "../../../components/Button/Button.jsx";
 import { ProductCardSkeleton } from "../../../components/Loading-Skeleton/loading-skeleton.jsx";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import { HeartLoading } from "../../../components/Loading/Loading.jsx";
+import ProductSEO from "../../../components/SEO/ProductSEO.jsx";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -93,6 +94,8 @@ if (!product)
   );
 
   return (
+    <>
+    <ProductSEO product={product} />
     <Box p={6}>
       <Flex justify="space-between" align="center" mb={6}>
         <Heading size="lg">{product.name}</Heading>
@@ -146,6 +149,7 @@ if (!product)
        </VStack>
       </Box>
     </Box>
+    </>
   );
 };               
 
