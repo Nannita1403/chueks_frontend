@@ -31,8 +31,8 @@ export default function PhoneManager({ initialValue = [], onChange }) {
 
     try {
       const res = await editUserField("telephone", "add", newTelephone);
-      setTelephones(res.data.user.telephones);
-      onChange?.(res.data.user.telephones);
+      setTelephones(res.user.telephones);
+      onChange?.(res.user.telephones);
       toast({ title: "Teléfono agregado", status: "success" });
       setNewTelephone({ number: "", label: "personal" });
     } catch (err) {
@@ -47,8 +47,8 @@ export default function PhoneManager({ initialValue = [], onChange }) {
   const handleRemove = async (id) => {
     try {
       const res = await editUserField("telephone", "delete", {}, id);
-      setTelephones(res.data.user.telephones);
-      onChange?.(res.data.user.telephones);
+      setTelephones(res.user.telephones);
+      onChange?.(res.user.telephones);
       toast({ title: "Teléfono eliminado", status: "info" });
     } catch (err) {
       toast({
@@ -68,7 +68,7 @@ export default function PhoneManager({ initialValue = [], onChange }) {
     const telToUpdate = updated.find((t) => t._id === id);
     try {
       const res = await editUserField("telephone", "update", telToUpdate, id);
-      setTelephones(res.data.user.telephones);
+      setTelephones(res.user.telephones);
       toast({ title: "Teléfono actualizado", status: "success" });
     } catch (err) {
       toast({

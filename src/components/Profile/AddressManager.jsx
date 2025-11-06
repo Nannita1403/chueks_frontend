@@ -19,8 +19,8 @@ export default function AddressManager({ initialValue = [], onChange }) {
 
     try {
       const res = await editUserField("address", "add", newAddress);
-      setAddresses(res.data.user.addresses);
-      onChange?.(res.data.user.addresses);
+      setAddresses(res.user.addresses);
+      onChange?.(res.user.addresses);
       toast({ title: "Dirección agregada", status: "success" });
       setNewAddress({ street: "", city: "", zip: "", country: "ES" });
     } catch (err) {
@@ -31,8 +31,8 @@ export default function AddressManager({ initialValue = [], onChange }) {
   const handleRemove = async (id) => {
     try {
       const res = await editUserField("address", "delete", {}, id);
-      setAddresses(res.data.user.addresses);
-      onChange?.(res.data.user.addresses);
+      setAddresses(res.user.addresses);
+      onChange?.(res.user.addresses);
       toast({ title: "Dirección eliminada", status: "info" });
     } catch (err) {
       toast({ title: "Error al eliminar", description: err.message, status: "error" });
@@ -46,7 +46,7 @@ export default function AddressManager({ initialValue = [], onChange }) {
     const addrToUpdate = updated.find((a) => a._id === id);
     try {
       const res = await editUserField("address", "update", addrToUpdate, id);
-      setAddresses(res.data.user.addresses);
+      setAddresses(res.user.addresses);
     } catch (err) {
       toast({ title: "Error al actualizar", description: err.message, status: "error" });
     }
