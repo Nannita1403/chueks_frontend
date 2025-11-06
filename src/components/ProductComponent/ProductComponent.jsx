@@ -64,7 +64,7 @@ const ProductComponent = ({ product, onToggleLike, onViewDetail, isFavorite }) =
 
       <Flex align="center" gap={3} mt={3}>
         <IconButton
-          aria-label={localFavorite ? "Quitar de favoritos" : "Agregar a favoritos"} // 👈 usa localFavorite
+          aria-label={localFavorite ? "Quitar de favoritos" : "Agregar a favoritos"} 
           aria-pressed={localFavorite}
           icon={
             likeLoading ? (
