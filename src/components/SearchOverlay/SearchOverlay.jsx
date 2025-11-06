@@ -6,7 +6,6 @@ import {
   VStack,
   Text,
   Image,
-  IconButton,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -17,11 +16,11 @@ import {
 } from "@chakra-ui/react";
 import { FiSearch } from "react-icons/fi";
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import ProductModal from "../ProductModal/ProductModal"; 
 
 export default function SearchOverlay({ isOpen, onClose, allProducts = [] }) {
   const [search, setSearch] = useState("");
-  const navigate = useNavigate();
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return [];
@@ -34,78 +33,97 @@ export default function SearchOverlay({ isOpen, onClose, allProducts = [] }) {
   }, [search, allProducts]);
 
   const handleSelect = (product) => {
-  onClose();
-  setTimeout(() => {
-    navigate(`/products/${product._id}`);
+    onClose(); 
+    setTimeout(() => {
+    setSelectedProduct(product);
   }, 200);
-};
+  };
+
+  const handleCloseProductModal = () => {
+    setSelectedProduct(null);
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
-      <ModalOverlay backdropFilter="blur(6px)" />
-      <ModalContent borderRadius="2xl" overflow="hidden" p={4}>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack spacing={4} align="stretch">
-            <InputGroup>
-              <InputLeftElement>
-                <FiSearch color="gray" />
-              </InputLeftElement>
-              <Input
-                autoFocus
-                placeholder="Buscar productos..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </InputGroup>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay backdropFilter="blur(6px)" />
+        <ModalContent borderRadius="2xl" overflow="hidden" p={4}>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4} align="stretch">
+              <InputGroup>
+                <InputLeftElement>
+                  <FiSearch color="gray" />
+                </InputLeftElement>
+                <Input
+                  autoFocus
+                  placeholder="Buscar productos..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </InputGroup>
 
-            {!allProducts.length && (
-              <HStack justify="center" py={6}>
-                <Spinner />
-                <Text>Cargando productos...</Text>
-              </HStack>
-            )}
+              {!allProducts.length && (
+                <HStack justify="center" py={6}>
+                  <Spinner />
+                  <Text>Cargando productos...</Text>
+                </HStack>
+              )}
 
-            {search && filtered.length === 0 && (
-              <Text textAlign="center" color="gray.500" py={6}>
-                No se encontraron productos.
-              </Text>
-            )}
+              {search && filtered.length === 0 && (
+                <Text textAlign="center" color="gray.500" py={6}>
+                  No se encontraron productos.
+                </Text>
+              )}
 
-            <VStack align="stretch" spacing={3} maxH="60vh" overflowY="auto">
-              {filtered.map((p) => (
-                <Box
-                  key={p._id}
-                  display="flex"
-                  alignItems="center"
-                  gap={3}
-                  p={2}
-                  borderRadius="lg"
-                  _hover={{ bg: "gray.100", cursor: "pointer" }}
-                  onClick={() => handleSelect(p)}
-                >
-                  <Image
-                    src={p?.imgPrimary?.url || p?.imgPrimary || p?.images?.[0] || "/placeholder.svg"}
-                    alt={p.name || "Producto"}
-                    boxSize="50px"
-                    objectFit="cover"
-                    borderRadius="md"
+              <VStack align="stretch" spacing={3} maxH="60vh" overflowY="auto">
+                {filtered.map((p) => (
+                  <Box
+                    key={p._id}
+                    display="flex"
+                    alignItems="center"
+                    gap={3}
+                    p={2}
+                    borderRadius="lg"
+                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    onClick={() => handleSelect(p)}
+                  >
+                    <Image
+                      src={
+                        p?.imgPrimary?.url ||
+                        p?.imgPrimary ||
+                        p?.images?.[0] ||
+                        "/placeholder.svg"
+                      }
+                      alt={p.name || "Producto"}
+                      boxSize="50px"
+                      objectFit="cover"
+                      borderRadius="md"
                     />
-                  <Box flex="1">
-                    <Text fontWeight="medium">{p.name}</Text>
-                    <Text fontSize="sm" color="gray.500" noOfLines={1}>
-                      {p.description}
+                    <Box flex="1">
+                      <Text fontWeight="medium">{p.name}</Text>
+                      <Text fontSize="sm" color="gray.500" noOfLines={1}>
+                        {p.description}
+                      </Text>
+                    </Box>
+                    <Text fontWeight="bold" color="pink.500">
+                      ${p.price}
                     </Text>
                   </Box>
-                  <Text fontWeight="bold" color="pink.500">
-                    ${p.price}
-                  </Text>
-                </Box>
-              ))}
+                ))}
+              </VStack>
             </VStack>
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {selectedProduct && (
+        <ProductModal
+          isOpen={!!selectedProduct}
+          onClose={handleCloseProductModal}
+          product={selectedProduct}
+        />
+      )}
+    </>
   );
 }

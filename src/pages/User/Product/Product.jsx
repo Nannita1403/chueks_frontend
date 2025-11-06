@@ -138,9 +138,9 @@ if (!product)
           </Text>                    
         ))
         ) : (
-                      <Text fontSize="sm" color="gray.500">
-                        No hay colores registrados
-                      </Text>
+         <Text fontSize="sm" color="gray.500">
+         No hay colores registrados
+         </Text>
         )}
       </Box>
        </VStack>
