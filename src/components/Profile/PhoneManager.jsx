@@ -1,81 +1,146 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Input, VStack, Text, FormControl, FormLabel, Select, HStack, Divider } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Input,
+  VStack,
+  Text,
+  FormControl,
+  FormLabel,
+  Select,
+  HStack,
+  Divider,
+  useToast
+} from "@chakra-ui/react";
+import { editUserField } from "../../services/userService.js";
 
-export default function PhoneManager({ initialValue = [], onChange, onUpdate, onDelete }) {
+export default function PhoneManager({ initialValue = [], onChange }) {
   const [telephones, setTelephones] = useState([]);
   const [newTelephone, setNewTelephone] = useState({ number: "", label: "personal" });
+  const toast = useToast();
 
   useEffect(() => setTelephones(initialValue), [initialValue]);
 
   const isValid = (t) => t.number?.trim();
 
-  const handleAdd = () => {
-    if (!isValid(newTelephone)) return;
-    if (telephones.some(p => p.number === newTelephone.number)) return;
+  const handleAdd = async () => {
+    if (!isValid(newTelephone)) {
+      toast({ title: "Número inválido", status: "warning" });
+      return;
+    }
 
-    const newEntry = { ...newTelephone, _tempId: Date.now() };
-    const updated = [...telephones, newEntry];
-    setTelephones(updated);
-    onChange?.(updated);
-    setNewTelephone({ number: "", label: "personal" });
+    try {
+      const res = await editUserField("telephone", "add", newTelephone);
+      setTelephones(res.data.user.telephones);
+      onChange?.(res.data.user.telephones);
+      toast({ title: "Teléfono agregado", status: "success" });
+      setNewTelephone({ number: "", label: "personal" });
+    } catch (err) {
+      toast({
+        title: "Error al agregar teléfono",
+        description: err.message,
+        status: "error"
+      });
+    }
   };
 
   const handleRemove = async (id) => {
-    if (typeof id === "string" && onDelete) await onDelete(id);
-    setTelephones(telephones.filter(p => p._id !== id && p._tempId !== id));
-    onChange?.(telephones.filter(p => p._id !== id && p._tempId !== id));
+    try {
+      const res = await editUserField("telephone", "delete", {}, id);
+      setTelephones(res.data.user.telephones);
+      onChange?.(res.data.user.telephones);
+      toast({ title: "Teléfono eliminado", status: "info" });
+    } catch (err) {
+      toast({
+        title: "Error al eliminar teléfono",
+        description: err.message,
+        status: "error"
+      });
+    }
   };
 
   const handleUpdate = async (id, field, value) => {
-    const updated = telephones.map(p => (p._id === id || p._tempId === id ? { ...p, [field]: value } : p));
+    const updated = telephones.map((t) =>
+      t._id === id ? { ...t, [field]: value } : t
+    );
     setTelephones(updated);
-    onChange?.(updated);
 
-    const updatedTelephone = updated.find(p => p._id === id || p._tempId === id);
-    if (updatedTelephone._id && onUpdate) {
-      const { _id, ...rest } = updatedTelephone;
-      await onUpdate(_id, rest);
+    const telToUpdate = updated.find((t) => t._id === id);
+    try {
+      const res = await editUserField("telephone", "update", telToUpdate, id);
+      setTelephones(res.data.user.telephones);
+      toast({ title: "Teléfono actualizado", status: "success" });
+    } catch (err) {
+      toast({
+        title: "Error al actualizar teléfono",
+        description: err.message,
+        status: "error"
+      });
     }
   };
 
   return (
     <VStack align="stretch" spacing={4}>
-      {telephones.map(p => {
-        const id = p._id || p._tempId;
-        return (
-          <Box key={id} p={3} borderWidth="1px" borderRadius="md">
-            <VStack spacing={2} align="stretch">
-              <HStack justify="space-between">
-                <Text fontWeight="bold">Teléfono</Text>
-                <Button size="xs" colorScheme="red" onClick={() => handleRemove(id)}>Eliminar</Button>
-              </HStack>
-              <Input size="sm" value={p.number} onChange={e => handleUpdate(id, "number", e.target.value)} />
-              <Select size="sm" value={p.label} onChange={e => handleUpdate(id, "label", e.target.value)}>
-                <option value="personal">Personal</option>
-                <option value="work">Trabajo</option>
-              </Select>
-            </VStack>
-          </Box>
-        );
-      })}
+      {telephones.map((p) => (
+        <Box key={p._id || p._tempId} p={3} borderWidth="1px" borderRadius="md">
+          <VStack spacing={2} align="stretch">
+            <HStack justify="space-between">
+              <Text fontWeight="bold">Teléfono</Text>
+              <Button
+                size="xs"
+                colorScheme="red"
+                onClick={() => handleRemove(p._id)}
+              >
+                Eliminar
+              </Button>
+            </HStack>
+            <Input
+              size="sm"
+              value={p.number}
+              onChange={(e) => handleUpdate(p._id, "number", e.target.value)}
+              placeholder="Número"
+            />
+            <Select
+              size="sm"
+              value={p.label}
+              onChange={(e) => handleUpdate(p._id, "label", e.target.value)}
+            >
+              <option value="personal">Personal</option>
+              <option value="work">Trabajo</option>
+            </Select>
+          </VStack>
+        </Box>
+      ))}
 
       <Divider />
       <Text fontWeight="bold">Agregar nuevo teléfono</Text>
 
       <FormControl>
         <FormLabel>Número</FormLabel>
-        <Input value={newTelephone.number} onChange={e => setNewTelephone({ ...newTelephone, number: e.target.value })} />
+        <Input
+          value={newTelephone.number}
+          onChange={(e) =>
+            setNewTelephone({ ...newTelephone, number: e.target.value })
+          }
+        />
       </FormControl>
 
       <FormControl>
         <FormLabel>Etiqueta</FormLabel>
-        <Select value={newTelephone.label} onChange={e => setNewTelephone({ ...newTelephone, label: e.target.value })}>
+        <Select
+          value={newTelephone.label}
+          onChange={(e) =>
+            setNewTelephone({ ...newTelephone, label: e.target.value })
+          }
+        >
           <option value="personal">Personal</option>
           <option value="work">Trabajo</option>
         </Select>
       </FormControl>
 
-      <Button onClick={handleAdd} colorScheme="blue">Agregar teléfono</Button>
+      <Button onClick={handleAdd} colorScheme="blue">
+        Agregar teléfono
+      </Button>
     </VStack>
   );
 }
