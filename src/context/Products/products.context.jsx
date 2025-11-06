@@ -1,12 +1,12 @@
-import { useContext } from "react"
-import { ProductsContext } from "../../providers/ProductsProviders.jsx"
+import { useContext } from "react";
+import { ProductsContext } from "../../providers/ProductsProvider.jsx";
 
 export const useProducts = () => {
-  const context = useContext(ProductsContext)
+  const context = useContext(ProductsContext);
   if (!context) {
-    throw new Error("useProducts must be used within a ProductsProvider")
+    throw new Error("useProducts must be used within a ProductsProvider");
   }
-  return context
-}
+  return context;
+};
 
-export { ProductsContext }
+export { ProductsContext };

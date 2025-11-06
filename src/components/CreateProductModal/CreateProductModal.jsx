@@ -19,8 +19,10 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
-import ProductsActions from "../../reducers/products/products.actions.jsx";
 import { useToast } from "../../Hooks/useToast.jsx";
+import { useProducts } from "../../context/Products/products.context.jsx";
+
+
 
 const CreateProductModal = ({
   isOpen,
@@ -30,6 +32,7 @@ const CreateProductModal = ({
   productOptions,
 }) => {
   const { toast } = useToast();
+  const { createProduct } = useProducts();
 
   const handleChange = (e) =>
     setNewProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -57,33 +60,32 @@ const CreateProductModal = ({
 
   const handleCreate = async () => {
     try {
-      await ProductsActions.createProduct(newProduct);
+    const created = await createProduct(newProduct);
+    toast({
+      title: "Producto creado",
+      description: `${created?.name || "El producto"} se agregó correctamente.`,
+      status: "success",
+    });
+    setNewProduct({
+      code: "",
+      name: "",
+      style: [],
+      description: "",
+      priceMin: 0,
+      priceMay: 0,
+      likes: [],
+      elements: [],
+      category: [],
+      material: [],
+      colors: [],
+      height: 0,
+      width: 0,
+      depth: 0,
+      imgPrimary: "",
+      imgSecondary: "",
+    });
+    onClose();
 
-      toast({
-        title: "Producto creado",
-        description: "Se agregó correctamente a la base de datos.",
-        status: "success",
-      });
-      onClose();
-
-      setNewProduct({
-        code: "",
-        name: "",
-        style: [],
-        description: "",
-        priceMin: 0,
-        priceMay: 0,
-        likes: [],
-        elements: [],
-        category: [],
-        material: [],
-        colors: [],
-        height: 0,
-        width: 0,
-        depth: 0,
-        imgPrimary: "",
-        imgSecondary: "",
-      });
     } catch (error) {
       console.error("❌ Error al crear producto:", error);
       toast({

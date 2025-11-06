@@ -123,7 +123,12 @@ const AdminProducts = () => {
             <Heading size={{ base: "lg", md: "xl" }} >
               Gestión de Productos
             </Heading>
-            <Button leftIcon={<FiPlus />} colorScheme="pink" w={{ base: "full", sm: "auto" }}>
+            <Button 
+            leftIcon={<FiPlus />} 
+            colorScheme="pink" 
+            w={{ base: "full", sm: "auto" }}
+            onClick={() => setIsCreateOpen(true)} 
+            >
               Nuevo Producto
             </Button>
           </Flex>

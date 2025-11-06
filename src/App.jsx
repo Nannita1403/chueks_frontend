@@ -17,9 +17,12 @@ import ProfileDashboard from "./pages/User/Profile/ProfileDashboard.jsx";
 import Wishlist from "./pages/User/Wishlist/Wishlist.jsx";
 import OrderConfirm from "./pages/User/Order/OrderConfirm.jsx";
 import AdminOrders from "./pages/Admin/Orders/AdminOrders.jsx";
+import DefaultSEO from "./components/SEO/DefaultSEO.jsx";
 
 const App = () => {
   return (
+    <>
+      <DefaultSEO/>
     <Box minH="100vh">
       <Routes>
         {/* Auth Routes */}
@@ -117,6 +120,7 @@ const App = () => {
 
       </Routes>
     </Box>
+    </>
   );
 };
 

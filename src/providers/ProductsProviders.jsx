@@ -1,9 +1,9 @@
-import productsActions from "../../src/reducers/products/products.actions.jsx";
+import { createContext, useReducer, useCallback } from "react";
+import productsActions from "../reducers/products/products.actions.jsx";
 import {
   INITIAL_PRODUCTS_STATE,
   productsReducer,
 } from "../reducers/products/products.reducer";
-import { createContext, useReducer, useCallback } from "react";
 
 export const ProductsContext = createContext();
 
@@ -18,7 +18,6 @@ const ProductsProvider = ({ children }) => {
       console.log("✅ Productos cargados (provider):", products);
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
-      console.error("❌ Error al cargar productos:", err);
     }
   }, []);
 
@@ -56,7 +55,7 @@ const ProductsProvider = ({ children }) => {
     dispatch({ type: "LOADING" });
     try {
       await productsActions.deleteProduct(id);
-      dispatch({ type: "DELETE_PRODUCT", payload: id }); 
+      dispatch({ type: "DELETE_PRODUCT", payload: id });
     } catch (err) {
       dispatch({ type: "ERROR", payload: err.message });
     }
