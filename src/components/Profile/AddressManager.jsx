@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box, Button, Input, VStack, Text, FormControl, FormLabel, Select, HStack, Divider, useToast } from "@chakra-ui/react";
-import { editUserField } from "../../services/userService.js";
+import { editUserField } from "../Profile/userService.jsx";
 
 export default function AddressManager({ initialValue = [], onChange }) {
   const [addresses, setAddresses] = useState([]);

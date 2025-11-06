@@ -12,7 +12,7 @@ import {
   Divider,
   useToast
 } from "@chakra-ui/react";
-import { editUserField } from "../../services/userService.js";
+import { editUserField } from "../Profile/userService.jsx";
 
 export default function PhoneManager({ initialValue = [], onChange }) {
   const [telephones, setTelephones] = useState([]);
