@@ -51,8 +51,12 @@ const CreateProductModal = ({
   };
 
   const colorList = useMemo(() => {
-    const fromBackend = productOptions.colorOptions || Object.keys(COLOR_HEX_MAP);
-    return Array.isArray(fromBackend) ? fromBackend : Object.keys(COLOR_HEX_MAP);
+  const fromBackend =
+    Array.isArray(productOptions.colorOptions) && productOptions.colorOptions.length > 0
+      ? productOptions.colorOptions
+      : Object.keys(COLOR_HEX_MAP);
+      console.log("🎨 Opciones de producto recibidas:", productOptions);
+    return fromBackend;
   }, [productOptions]);
 
   const handleChange = (e) =>
