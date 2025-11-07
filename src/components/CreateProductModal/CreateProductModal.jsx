@@ -19,6 +19,7 @@ import {
   IconButton,
   Badge,
   Text,
+  Box,
 } from "@chakra-ui/react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { useToast } from "../../Hooks/useToast.jsx";
@@ -93,6 +94,7 @@ const CreateProductModal = ({
   const handleCreate = async () => {
     try {
       await createProduct(newProduct);
+      setTimeout(() => getProducts(), 500);
       await getProducts(); // 
       toast({
         title: "Producto creado",
