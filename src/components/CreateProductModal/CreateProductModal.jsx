@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -17,12 +17,12 @@ import {
   Select,
   HStack,
   IconButton,
+  Badge,
+  Text,
 } from "@chakra-ui/react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { useToast } from "../../Hooks/useToast.jsx";
 import { useProducts } from "../../context/Products/products.context.jsx";
-
-
 
 const CreateProductModal = ({
   isOpen,
@@ -32,19 +32,37 @@ const CreateProductModal = ({
   productOptions,
 }) => {
   const { toast } = useToast();
-  const { createProduct } = useProducts();
+  const { createProduct, getProducts } = useProducts();
+
+  const [selectedColor, setSelectedColor] = useState("");
+  const [colorStock, setColorStock] = useState(0);
 
   const handleChange = (e) =>
     setNewProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleArrayChange = (field, value) =>
-    setNewProduct((prev) => ({ ...prev, [field]: value }));
+  const handleNumberChange = (name, value) =>
+    setNewProduct((prev) => ({ ...prev, [name]: Number(value) || 0 }));
 
-  const handleAddColor = () =>
+  const handleSelectChange = (field, value) =>
+    setNewProduct((prev) => ({ ...prev, [field]: [value] }));
+
+  const handleAddColor = () => {
+    if (!selectedColor || colorStock <= 0) {
+      toast({
+        title: "Faltan datos",
+        description: "Selecciona un color y un stock válido.",
+        status: "warning",
+        duration: 2000,
+      });
+      return;
+    }
     setNewProduct((prev) => ({
       ...prev,
-      colors: [...(prev.colors || []), { name: [], stock: 0 }],
+      colors: [...(prev.colors || []), { name: selectedColor, stock: colorStock }],
     }));
+    setSelectedColor("");
+    setColorStock(0);
+  };
 
   const handleRemoveColor = (idx) => {
     const updated = [...(newProduct.colors || [])];
@@ -52,40 +70,36 @@ const CreateProductModal = ({
     setNewProduct((prev) => ({ ...prev, colors: updated }));
   };
 
-  const handleColorChange = (idx, value) => {
-    const updated = [...(newProduct.colors || [])];
-    updated[idx].name = value;
-    setNewProduct((prev) => ({ ...prev, colors: updated }));
-  };
-
   const handleCreate = async () => {
     try {
-    const created = await createProduct(newProduct);
-    toast({
-      title: "Producto creado",
-      description: `${created?.name || "El producto"} se agregó correctamente.`,
-      status: "success",
-    });
-    setNewProduct({
-      code: "",
-      name: "",
-      style: [],
-      description: "",
-      priceMin: 0,
-      priceMay: 0,
-      likes: [],
-      elements: [],
-      category: [],
-      material: [],
-      colors: [],
-      height: 0,
-      width: 0,
-      depth: 0,
-      imgPrimary: "",
-      imgSecondary: "",
-    });
-    onClose();
+      await createProduct(newProduct);
+      await getProducts(); // 
+      toast({
+        title: "Producto creado",
+        description: `${newProduct.name || "Nuevo producto"} agregado correctamente.`,
+        status: "success",
+      });
 
+      setNewProduct({
+        code: "",
+        name: "",
+        style: [],
+        description: "",
+        priceMin: 0,
+        priceMay: 0,
+        likes: [],
+        elements: [],
+        category: [],
+        material: [],
+        colors: [],
+        height: 0,
+        width: 0,
+        depth: 0,
+        imgPrimary: "",
+        imgSecondary: "",
+      });
+
+      onClose();
     } catch (error) {
       console.error("❌ Error al crear producto:", error);
       toast({
@@ -97,7 +111,7 @@ const CreateProductModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside" isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Crear Producto</ModalHeader>
@@ -106,20 +120,12 @@ const CreateProductModal = ({
           <VStack spacing={4} align="stretch">
             <FormControl>
               <FormLabel>Código</FormLabel>
-              <Input
-                name="code"
-                value={newProduct.code}
-                onChange={handleChange}
-              />
+              <Input name="code" value={newProduct.code} onChange={handleChange} />
             </FormControl>
 
             <FormControl>
               <FormLabel>Nombre</FormLabel>
-              <Input
-                name="name"
-                value={newProduct.name}
-                onChange={handleChange}
-              />
+              <Input name="name" value={newProduct.name} onChange={handleChange} />
             </FormControl>
 
             <FormControl>
@@ -135,43 +141,33 @@ const CreateProductModal = ({
               <FormControl>
                 <FormLabel>Precio Mínimo</FormLabel>
                 <NumberInput
+                  min={0}
                   value={newProduct.priceMin}
-                  onChange={(v) =>
-                    handleChange({
-                      target: { name: "priceMin", value: Number(v) },
-                    })
-                  }
+                  onChange={(v) => handleNumberChange("priceMin", v)}
                 >
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
 
               <FormControl>
-                <FormLabel>Precio Máximo</FormLabel>
+                <FormLabel>Precio Mayorista</FormLabel>
                 <NumberInput
+                  min={0}
                   value={newProduct.priceMay}
-                  onChange={(v) =>
-                    handleChange({
-                      target: { name: "priceMay", value: Number(v) },
-                    })
-                  }
+                  onChange={(v) => handleNumberChange("priceMay", v)}
                 >
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
             </HStack>
 
+            {/* Desplegables */}
             <FormControl>
               <FormLabel>Estilo</FormLabel>
               <Select
-                multiple
-                value={newProduct.style}
-                onChange={(e) =>
-                  handleArrayChange(
-                    "style",
-                    Array.from(e.target.selectedOptions, (o) => o.value)
-                  )
-                }
+                placeholder="Seleccionar estilo"
+                value={newProduct.style[0] || ""}
+                onChange={(e) => handleSelectChange("style", e.target.value)}
               >
                 {(productOptions.styleOptions || []).map((s) => (
                   <option key={s} value={s}>
@@ -184,14 +180,9 @@ const CreateProductModal = ({
             <FormControl>
               <FormLabel>Categoría</FormLabel>
               <Select
-                multiple
-                value={newProduct.category}
-                onChange={(e) =>
-                  handleArrayChange(
-                    "category",
-                    Array.from(e.target.selectedOptions, (o) => o.value)
-                  )
-                }
+                placeholder="Seleccionar categoría"
+                value={newProduct.category[0] || ""}
+                onChange={(e) => handleSelectChange("category", e.target.value)}
               >
                 {(productOptions.categoryOptions || []).map((c) => (
                   <option key={c} value={c}>
@@ -204,14 +195,9 @@ const CreateProductModal = ({
             <FormControl>
               <FormLabel>Material</FormLabel>
               <Select
-                multiple
-                value={newProduct.material}
-                onChange={(e) =>
-                  handleArrayChange(
-                    "material",
-                    Array.from(e.target.selectedOptions, (o) => o.value)
-                  )
-                }
+                placeholder="Seleccionar material"
+                value={newProduct.material[0] || ""}
+                onChange={(e) => handleSelectChange("material", e.target.value)}
               >
                 {(productOptions.materialOptions || []).map((m) => (
                   <option key={m} value={m}>
@@ -221,99 +207,81 @@ const CreateProductModal = ({
               </Select>
             </FormControl>
 
+            {/* 🎨 Colores */}
             <FormControl>
-              <FormLabel>Colores</FormLabel>
-              <VStack spacing={2} align="stretch">
+              <FormLabel>Agregar Color</FormLabel>
+              <HStack>
+                <Select
+                  placeholder="Seleccionar color"
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                >
+                  {(productOptions.colorOptions || []).map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </Select>
+                <NumberInput
+                  min={1}
+                  value={colorStock}
+                  onChange={(v) => setColorStock(Number(v) || 0)}
+                  w="100px"
+                >
+                  <NumberInputField placeholder="Stock" />
+                </NumberInput>
+                <IconButton
+                  icon={<FiPlus />}
+                  colorScheme="pink"
+                  aria-label="Agregar color"
+                  onClick={handleAddColor}
+                />
+              </HStack>
+
+              <VStack align="stretch" mt={3}>
                 {(newProduct.colors || []).map((c, idx) => (
-                  <HStack key={idx}>
-                    <Select
-                      multiple
-                      value={c.name}
-                      onChange={(e) =>
-                        handleColorChange(
-                          idx,
-                          Array.from(e.target.selectedOptions, (o) => o.value)
-                        )
-                      }
-                    >
-                      {(productOptions.colorOptions || []).map((color) => (
-                        <option key={color} value={color}>
-                          {color}
-                        </option>
-                      ))}
-                    </Select>
-
-                    <NumberInput
-                      value={c.stock || 0}
-                      onChange={(v) => {
-                        const updated = [...(newProduct.colors || [])];
-                        updated[idx].stock = Number(v);
-                        setNewProduct((prev) => ({ ...prev, colors: updated }));
-                      }}
-                    >
-                      <NumberInputField />
-                    </NumberInput>
-
+                  <HStack key={idx} justify="space-between">
+                    <Badge colorScheme="purple" px={3} py={1} borderRadius="md">
+                      {c.name}: {c.stock}
+                    </Badge>
                     <IconButton
                       icon={<FiTrash2 />}
+                      size="sm"
+                      aria-label="Eliminar color"
                       onClick={() => handleRemoveColor(idx)}
                     />
                   </HStack>
                 ))}
-
-                <Button leftIcon={<FiPlus />} onClick={handleAddColor}>
-                  Agregar Color
-                </Button>
               </VStack>
             </FormControl>
 
+            {/* Dimensiones */}
             <HStack>
-              <FormControl>
-                <FormLabel>Alto</FormLabel>
-                <NumberInput
-                  value={newProduct.height}
-                  onChange={(v) =>
-                    handleChange({
-                      target: { name: "height", value: Number(v) },
-                    })
-                  }
-                >
-                  <NumberInputField />
-                </NumberInput>
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Ancho</FormLabel>
-                <NumberInput
-                  value={newProduct.width}
-                  onChange={(v) =>
-                    handleChange({
-                      target: { name: "width", value: Number(v) },
-                    })
-                  }
-                >
-                  <NumberInputField />
-                </NumberInput>
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Profundidad</FormLabel>
-                <NumberInput
-                  value={newProduct.depth}
-                  onChange={(v) =>
-                    handleChange({
-                      target: { name: "depth", value: Number(v) },
-                    })
-                  }
-                >
-                  <NumberInputField />
-                </NumberInput>
-              </FormControl>
+              {["height", "width", "depth"].map((dim) => (
+                <FormControl key={dim}>
+                  <FormLabel>
+                    {dim === "height"
+                      ? "Alto"
+                      : dim === "width"
+                      ? "Ancho"
+                      : "Profundidad"}
+                  </FormLabel>
+                  <NumberInput
+                    min={0}
+                    value={newProduct[dim]}
+                    onChange={(v) => handleNumberChange(dim, v)}
+                  >
+                    <NumberInputField />
+                  </NumberInput>
+                </FormControl>
+              ))}
             </HStack>
 
+            {/* Imágenes */}
             <FormControl>
-              <FormLabel>Imagen Principal (URL)</FormLabel>
+              <FormLabel>Imagen Principal (URL o archivo)</FormLabel>
               <Input
+                type="text"
                 name="imgPrimary"
                 value={newProduct.imgPrimary}
                 onChange={handleChange}
@@ -321,8 +289,9 @@ const CreateProductModal = ({
             </FormControl>
 
             <FormControl>
-              <FormLabel>Imagen Secundaria (URL)</FormLabel>
+              <FormLabel>Imagen Secundaria (URL o archivo)</FormLabel>
               <Input
+                type="text"
                 name="imgSecondary"
                 value={newProduct.imgSecondary}
                 onChange={handleChange}
