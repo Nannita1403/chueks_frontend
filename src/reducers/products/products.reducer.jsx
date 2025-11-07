@@ -38,6 +38,8 @@ export const productsReducer = (state, action) => {
         loading: false,
         products: [...state.products, action.payload],
         productId: action.payload._id || action.payload.id,
+        loading: false,
+        error: null,
       };
 
     case "UPDATE_PRODUCT":

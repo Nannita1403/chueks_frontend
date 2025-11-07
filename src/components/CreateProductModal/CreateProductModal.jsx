@@ -55,7 +55,6 @@ const CreateProductModal = ({
     Array.isArray(productOptions.colorOptions) && productOptions.colorOptions.length > 0
       ? productOptions.colorOptions
       : Object.keys(COLOR_HEX_MAP);
-      console.log("🎨 Opciones de producto recibidas:", productOptions);
     return fromBackend;
   }, [productOptions]);
 
@@ -177,7 +176,7 @@ const CreateProductModal = ({
               <Select
                 placeholder="Seleccionar estilo"
                 value={newProduct.style?.[0] || ""}
-                onChange={(e) => handleSelectSingle("style", e.target.value)}
+                onChange={(e) => handleSelectChange("style", e.target.value)}
               >
                 {(productOptions.styleOptions || []).map((s) => (
                   <option key={s} value={s}>{s}</option>
@@ -190,7 +189,7 @@ const CreateProductModal = ({
               <Select
                 placeholder="Seleccionar categoría"
                 value={newProduct.category?.[0] || ""}
-                onChange={(e) => handleSelectSingle("category", e.target.value)}
+                onChange={(e) => handleSelectChange("category", e.target.value)}
               >
                 {(productOptions.categoryOptions || []).map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -203,7 +202,7 @@ const CreateProductModal = ({
               <Select
                 placeholder="Seleccionar material"
                 value={newProduct.material?.[0] || ""}
-                onChange={(e) => handleSelectSingle("material", e.target.value)}
+                onChange={(e) => handleSelectChange("material", e.target.value)}
               >
                 {(productOptions.materialOptions || []).map((m) => (
                   <option key={m} value={m}>{m}</option>
