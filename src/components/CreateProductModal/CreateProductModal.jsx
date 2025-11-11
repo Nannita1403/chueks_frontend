@@ -52,6 +52,56 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
     } else setPreviews(prev => ({ ...prev, imgSecondary: "" }));
   }, [newProduct.imgSecondary]);
 
+  const handleCreate = async () => {
+  if (!newProduct.code?.trim()) return toast({ title: "Código obligatorio", status: "warning" });
+  if (!newProduct.name?.trim()) return toast({ title: "Nombre obligatorio", status: "warning" });
+
+  try {
+    setUploading(true);
+    const formData = new FormData();
+
+    // Campos obligatorios
+    formData.append("code", newProduct.code.trim());
+    formData.append("name", newProduct.name.trim());
+
+    // Campos opcionales
+    formData.append("description", newProduct.description || "");
+    formData.append("priceMin", newProduct.priceMin || 0);
+    formData.append("priceMay", newProduct.priceMay || 0);
+    formData.append("height", newProduct.height || 0);
+    formData.append("width", newProduct.width || 0);
+    formData.append("depth", newProduct.depth || 0);
+
+    // Arrays como JSON
+    ["style", "category", "material", "colors", "elements"].forEach(key => {
+      formData.append(key, JSON.stringify(newProduct[key] || []));
+    });
+
+    // Archivos
+    if (newProduct.imgPrimary instanceof File) formData.append("imgPrimary", newProduct.imgPrimary);
+    if (newProduct.imgSecondary instanceof File) formData.append("imgSecondary", newProduct.imgSecondary);
+
+    await ApiService.postFormData("/products", formData);
+
+    toast({ title: "Producto creado", description: `${newProduct.name} agregado correctamente.`, status: "success" });
+
+    // Reset
+    setNewProduct({
+      code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
+      likes: [], elements: [], category: [], material: [], colors: [],
+      height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: ""
+    });
+    await getProducts();
+    onClose();
+
+  } catch (error) {
+    console.error("Error creando producto:", error);
+    toast({ title: "Error al crear producto", description: "Revisa los datos e inténtalo de nuevo.", status: "error" });
+  } finally {
+    setUploading(false);
+  }
+};
+
   const handleChange = (e) => setNewProduct(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleNumberChange = (name, value) => setNewProduct(prev => ({ ...prev, [name]: Number(value) || 0 }));
   const handleSelectChange = (field, value) => setNewProduct(prev => ({ ...prev, [field]: [value] }));
@@ -87,49 +137,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
     setNewProduct(prev => ({ ...prev, [field]: file }));
   };
 
-  const handleCreate = async () => {
-    // Validaciones mínimas
-    if (!newProduct.code?.trim()) return toast({ title: "Código obligatorio", status: "warning" });
-    if (!newProduct.name?.trim()) return toast({ title: "Nombre obligatorio", status: "warning" });
 
-    try {
-      setUploading(true);
-      const formData = new FormData();
-
-      // Campos simples
-      ["code", "name", "description", "priceMin", "priceMay", "height", "width", "depth"].forEach(key => {
-        if (newProduct[key] !== undefined && newProduct[key] !== null) formData.append(key, newProduct[key]);
-      });
-
-      // Arrays como JSON
-      ["style", "category", "material", "colors", "elements"].forEach(key => {
-        formData.append(key, JSON.stringify(newProduct[key] || []));
-      });
-
-      // Archivos
-      if (newProduct.imgPrimary instanceof File) formData.append("imgPrimary", newProduct.imgPrimary);
-      if (newProduct.imgSecondary instanceof File) formData.append("imgSecondary", newProduct.imgSecondary);
-
-      await ApiService.postFormData("/products", formData);
-
-      toast({ title: "Producto creado", description: `${newProduct.name} agregado correctamente.`, status: "success" });
-
-      // Reset
-      setNewProduct({
-        code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
-        likes: [], elements: [], category: [], material: [], colors: [],
-        height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: ""
-      });
-      setPreviews({ imgPrimary: "", imgSecondary: "" });
-      await getProducts();
-      onClose();
-    } catch (error) {
-      console.error("Error creando producto:", error);
-      toast({ title: "Error al crear producto", description: "Revisa los datos e inténtalo de nuevo.", status: "error" });
-    } finally {
-      setUploading(false);
-    }
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered scrollBehavior="inside">
