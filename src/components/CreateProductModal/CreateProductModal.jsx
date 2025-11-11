@@ -92,8 +92,11 @@ const CreateProductModal = ({
   };
 
   const handleCreate = async () => {
+    console.log("📦 Producto a crear:", newProduct);
+
     try {
       await createProduct(newProduct);
+      console.log("✅ Producto creado correctamente");
       setTimeout(() => getProducts(), 500);
       await getProducts(); // 
       toast({
@@ -131,6 +134,34 @@ const CreateProductModal = ({
       });
     }
   };
+
+  const handleFileChange = async (file, field) => {
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    return toast({ title: "Solo se permiten imágenes", status: "warning" });
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return toast({ title: "La imagen es demasiado grande (máx 5MB)", status: "warning" });
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const uploaded = await ApiService.postFormData("/upload", formData); 
+
+    setNewProduct(prev => ({
+      ...prev,
+      [field]: uploaded.url || prev[field]
+    }));
+
+    toast({ title: "Imagen subida correctamente", status: "success" });
+  } catch (error) {
+    console.error(error);
+    toast({ title: "Error subiendo la imagen", status: "error" });
+  }
+};
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered scrollBehavior="inside">
@@ -252,11 +283,13 @@ const CreateProductModal = ({
             <FormControl>
               <FormLabel>Imagen Principal (URL)</FormLabel>
               <Input name="imgPrimary" value={newProduct.imgPrimary} onChange={handleChange} />
+              <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e.target.files[0], "imgPrimary")} />
             </FormControl>
 
             <FormControl>
               <FormLabel>Imagen Secundaria (URL)</FormLabel>
               <Input name="imgSecondary" value={newProduct.imgSecondary} onChange={handleChange} />
+              <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e.target.files[0], "imgSecondary")} />
             </FormControl>
 
           </VStack>

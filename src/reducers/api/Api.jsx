@@ -42,10 +42,14 @@ class ApiService {
   async request(endpoint, options = {}, isFormData = false) {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
-      method: options.method || "GET",
-      headers: this.getHeaders(isFormData),
-      body: options.body ?? undefined,
-    };
+  method: options.method || "GET",
+  headers: this.getHeaders(isFormData),
+  body: isFormData
+    ? options.body
+    : options.body
+    ? JSON.stringify(options.body)
+    : undefined,
+};
 
     console.log("📡 Petición:", {
       url,
@@ -93,23 +97,23 @@ class ApiService {
   }
 
   post(endpoint, data) {
-    return this.request(endpoint, {
-      method: "POST",
-      body: JSON.stringify(data),
+  return this.request(endpoint, {
+    method: "POST",
+    body: data,
     });
   }
 
-  put(endpoint, data) {
-    return this.request(endpoint, {
-      method: "PUT",
-      body: JSON.stringify(data),
+ put(endpoint, data) {
+  return this.request(endpoint, {
+    method: "PUT",
+    body: data,
     });
   }
 
   patch(endpoint, data) {
     return this.request(endpoint, {
       method: "PATCH",
-      body: JSON.stringify(data),
+      body: data, 
     });
   }
 
