@@ -2,29 +2,27 @@ import { useState, useEffect } from "react";
 import { Box, Flex, VStack, Heading, Button, IconButton, useColorModeValue, Container, Select, 
   SimpleGrid, Card, Badge, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
-import axios from "axios";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
-import CreateProductModal from "../../../components/CreateProductModal/CreateProductModal.jsx";
-import EditProductModal from "../../../components/EditProductModal/EditProductModal.jsx";
-
+import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProductModal.jsx";
+import axios from "axios";
+import AddElementsModal from "../../../components/AddElementsModal/AddElementsModal.jsx";
 
 const AdminProducts = () => {
   const { products, getProducts, deleteProduct, updateProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(true);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [isAddElementsOpen, setIsAddElementsOpen] = useState(false);
+  const [productOptions, setProductOptions] = useState({
+    styleOptions: [], categoryOptions: [], materialOptions: [], colorOptions: []
+  });
 
   const [newProduct, setNewProduct] = useState({
     code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
-    likes: [], elements: [], category: [], material: [], colors: [],
-    height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
+    category: [], material: [], colors: [], height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
     status: "activo"
-  });
-
-  const [productOptions, setProductOptions] = useState({
-    styleOptions: [], categoryOptions: [], materialOptions: [], colorOptions: []
   });
 
   const [filterCategory, setFilterCategory] = useState("");
@@ -109,6 +107,7 @@ const AdminProducts = () => {
       toast({ title: "Error al cambiar estado", status: "error", duration: 3000 });
     }
   };
+
   if (isLoading) return <Loading />;
 
   let filteredProducts = products || [];
@@ -119,15 +118,17 @@ const AdminProducts = () => {
     <Box minH="100vh" bg="gray.50" py={{ base: 6, md: 8 }} px={{ base: 4, md: 0 }}>
       <Container maxW={{ base: "100%", md: "7xl" }} px={{ base: 0, md: 4 }}>
         <VStack spacing={6}>
-          <Flex   justify="space-between" align="center" w="full" direction={{ base: "column", sm: "row" }} gap={3} >
-            <Heading size={{ base: "lg", md: "xl" }} >
-              Gestión de Productos
-            </Heading>
-            <Button 
-            leftIcon={<FiPlus />} 
-            colorScheme="pink" 
-            w={{ base: "full", sm: "auto" }}
-            onClick={() => setIsCreateOpen(true)} 
+          <Flex justify="space-between" align="center" w="full" direction={{ base: "column", sm: "row" }} gap={3} >
+            <Heading size={{ base: "lg", md: "xl" }}>Gestión de Productos</Heading>
+            <Button leftIcon={<FiPlus />} colorScheme="pink" w={{ base: "full", sm: "auto" }}
+              onClick={() => {
+                setNewProduct({
+                  code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
+                  category: [], material: [], colors: [], height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
+                  status: "activo"
+                });
+                setIsCreateOpen(true);
+              }}
             >
               Nuevo Producto
             </Button>
@@ -148,46 +149,29 @@ const AdminProducts = () => {
                   <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
                   <Box p={{ base: 3, md: 4 }}>
                     <Heading size="md" mb={2}>{p.name}</Heading>
-                    <Box fontSize="sm" color="gray.600" mb={1}>
-                      <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}
-                    </Box>
-                    <Box fontSize="sm" color="gray.600" mb={1}>
-                      <b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}
-                    </Box>
+                    <Box fontSize="sm" color="gray.600" mb={1}><b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}</Box>
+                    <Box fontSize="sm" color="gray.600" mb={1}><b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}</Box>
                     <Box fontSize="sm" color="gray.600" mb={1}>
                       <b>Stock:</b>
                       <Flex wrap="wrap" gap={2} mt={1}>
                         {p.colors && p.colors.length > 0 ? (
                           p.colors.map((c, idx) => (
-                            <Badge
-                              key={idx}
-                              colorScheme="purple"
-                              borderRadius="md"
-                              px={2}
-                              py={1}
-                            >
+                            <Badge key={idx} colorScheme="purple" borderRadius="md" px={2} py={1}>
                               {c.name}: {c.stock}
                             </Badge>
                           ))
-                        ) : (
-                          <Badge colorScheme="red">Sin stock</Badge>
-                        )}
+                        ) : (<Badge colorScheme="red">Sin stock</Badge>)}
                       </Flex>
                     </Box>
                     <Box fontSize="sm" color="gray.600" mb={3}>
                       <b>Estado:</b>{" "}
-                      <Select
-                        size="sm"
-                        value={p.status || "activo"}
-                        onChange={(e) => handleChangeStatus(p._id, e.target.value)}
-                        w="auto"
-                        display="inline-block"
-                      >
+                      <Select size="sm" value={p.status || "activo"} onChange={(e) => handleChangeStatus(p._id, e.target.value)} w="auto" display="inline-block">
                         <option value="activo">Activo</option>
                         <option value="inactivo">Inactivo</option>
                       </Select>
                     </Box>
                     <Flex justify="flex-end" gap={2} wrap="wrap">
+                      <IconButton icon={<FiPlus />} aria-label="Agregar elementos" size="sm" colorScheme="blue" onClick={() => { setCurrentProduct(p); setIsAddElementsOpen(true); }} />
                       <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
                       <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
                       <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red"
@@ -198,28 +182,37 @@ const AdminProducts = () => {
                 </Card>
               ))
             ) : (
-              <Box textAlign="center" py={10} color="gray.500">
-                No hay productos
-              </Box>
+              <Box textAlign="center" py={10} color="gray.500">No hay productos</Box>
             )}
           </SimpleGrid>
         </VStack>
       </Container>
-      <CreateProductModal
+
+      {/* Modal Unificado */}
+      <CreateOrEditProductModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        newProduct={newProduct}
-        setNewProduct={setNewProduct}
+        product={newProduct}
+        setProduct={setNewProduct}
         productOptions={productOptions}
+        isEdit={false}
       />
-      <EditProductModal
+      <CreateOrEditProductModal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        currentProduct={currentProduct}
-        setCurrentProduct={setCurrentProduct}
+        product={currentProduct}
+        setProduct={setCurrentProduct}
         productOptions={productOptions}
-        onSave={handleUpdate}
+        isEdit={true}
       />
+      <AddElementsModal
+        isOpen={isAddElementsOpen}
+        onClose={() => setIsAddElementsOpen(false)}
+        product={currentProduct}
+        setProduct={setCurrentProduct}
+      />
+
+      {/* Modal Confirmación Eliminar */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} isCentered>
         <ModalOverlay />
         <ModalContent>
@@ -227,13 +220,7 @@ const AdminProducts = () => {
           <ModalBody>
             {currentProduct && (
               <Card shadow="lg" borderRadius="lg" overflow="hidden">
-                <Box as="img"
-                  src={currentProduct.imgPrimary}
-                  alt={currentProduct.name}
-                  w="100%"
-                  h="200px"
-                  objectFit="cover"
-                />
+                <Box as="img" src={currentProduct.imgPrimary} alt={currentProduct.name} w="100%" h="200px" objectFit="cover" />
                 <Box p={4}>
                   <Heading size="md" mb={2}>{currentProduct.name}</Heading>
                   <Box color="gray.600">
