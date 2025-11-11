@@ -1,25 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  Button,
-  VStack,
-  FormControl,
-  FormLabel,
-  Input,
-  NumberInput,
-  NumberInputField,
-  Select,
-  HStack,
-  IconButton,
-  Text,
-  Box,
-  Image,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
+  ModalCloseButton, Button, VStack, FormControl, FormLabel, Input,
+  NumberInput, NumberInputField, Select, HStack, IconButton, Text, Box, Image
 } from "@chakra-ui/react";
 import { FiPlus, FiTrash2, FiX } from "react-icons/fi";
 import { useToast } from "../../Hooks/useToast.jsx";
@@ -44,22 +27,21 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
   const { getProducts } = useProducts();
   const [uploading, setUploading] = useState(false);
   const [selectedColor, setSelectedColor] = useState("");
-  const [colorStock, setColorStock] = useState(0);
+  const [colorStock, setColorStock] = useState(1);
   const [previews, setPreviews] = useState({ imgPrimary: "", imgSecondary: "" });
 
   const colorList = useMemo(() => {
-    return Array.isArray(productOptions.colorOptions) && productOptions.colorOptions.length > 0
+    return Array.isArray(productOptions.colorOptions) && productOptions.colorOptions.length
       ? productOptions.colorOptions
       : Object.keys(COLOR_HEX_MAP);
   }, [productOptions]);
 
-  // Generar previews cuando se selecciona un archivo
   useEffect(() => {
     if (newProduct.imgPrimary instanceof File) {
       const url = URL.createObjectURL(newProduct.imgPrimary);
       setPreviews(prev => ({ ...prev, imgPrimary: url }));
       return () => URL.revokeObjectURL(url);
-    }
+    } else setPreviews(prev => ({ ...prev, imgPrimary: "" }));
   }, [newProduct.imgPrimary]);
 
   useEffect(() => {
@@ -67,7 +49,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
       const url = URL.createObjectURL(newProduct.imgSecondary);
       setPreviews(prev => ({ ...prev, imgSecondary: url }));
       return () => URL.revokeObjectURL(url);
-    }
+    } else setPreviews(prev => ({ ...prev, imgSecondary: "" }));
   }, [newProduct.imgSecondary]);
 
   const handleChange = (e) => setNewProduct(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -96,55 +78,48 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
 
   const handleRemoveFile = (field) => {
     setNewProduct(prev => ({ ...prev, [field]: "" }));
-    setPreviews(prev => ({ ...prev, [field]: "" }));
   };
 
   const handleFileChange = (file, field) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) return toast({ title: "Solo se permiten imágenes", status: "warning" });
     if (file.size > 5 * 1024 * 1024) return toast({ title: "La imagen es demasiado grande (máx 5MB)", status: "warning" });
-
     setNewProduct(prev => ({ ...prev, [field]: file }));
   };
 
   const handleCreate = async () => {
+    // Validaciones mínimas
+    if (!newProduct.code?.trim()) return toast({ title: "Código obligatorio", status: "warning" });
+    if (!newProduct.name?.trim()) return toast({ title: "Nombre obligatorio", status: "warning" });
+
     try {
       setUploading(true);
-
       const formData = new FormData();
-      Object.entries(newProduct).forEach(([key, value]) => {
-        if (["style","category","material","colors","elements"].includes(key)) {
-          formData.append(key, JSON.stringify(value));
-        } else if (value instanceof File) {
-          formData.append(key, value);
-        } else {
-          formData.append(key, value);
-        }
+
+      // Campos simples
+      ["code", "name", "description", "priceMin", "priceMay", "height", "width", "depth"].forEach(key => {
+        if (newProduct[key] !== undefined && newProduct[key] !== null) formData.append(key, newProduct[key]);
       });
+
+      // Arrays como JSON
+      ["style", "category", "material", "colors", "elements"].forEach(key => {
+        formData.append(key, JSON.stringify(newProduct[key] || []));
+      });
+
+      // Archivos
+      if (newProduct.imgPrimary instanceof File) formData.append("imgPrimary", newProduct.imgPrimary);
+      if (newProduct.imgSecondary instanceof File) formData.append("imgSecondary", newProduct.imgSecondary);
 
       await ApiService.postFormData("/products", formData);
 
-      toast({ title: "Producto creado", description: `${newProduct.name || "Nuevo producto"} agregado correctamente.`, status: "success" });
+      toast({ title: "Producto creado", description: `${newProduct.name} agregado correctamente.`, status: "success" });
 
+      // Reset
       setNewProduct({
-        code: "",
-        name: "",
-        style: [],
-        description: "",
-        priceMin: 0,
-        priceMay: 0,
-        likes: [],
-        elements: [],
-        category: [],
-        material: [],
-        colors: [],
-        height: 0,
-        width: 0,
-        depth: 0,
-        imgPrimary: "",
-        imgSecondary: "",
+        code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
+        likes: [], elements: [], category: [], material: [], colors: [],
+        height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: ""
       });
-
       setPreviews({ imgPrimary: "", imgSecondary: "" });
       await getProducts();
       onClose();
@@ -164,7 +139,6 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
-
             {/* Código, Nombre, Descripción */}
             <FormControl>
               <FormLabel>Código</FormLabel>
@@ -221,8 +195,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
               <HStack>
                 <Select
                   placeholder={colorList.length ? "Seleccionar color" : "No hay colores disponibles"}
-                  value={selectedColor}
-                  onChange={(e) => setSelectedColor(e.target.value)}
+                  value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}
                   isDisabled={!colorList.length}
                 >
                   {colorList.map(color => <option key={color} value={color}>{color}</option>)}
@@ -246,45 +219,22 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
               </VStack>
             </FormControl>
 
-            {/* Imagen Principal */}
-            <FormControl>
-              <FormLabel>Imagen Principal</FormLabel>
-              <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e.target.files[0], "imgPrimary")} />
-              {previews.imgPrimary && (
-                <Box position="relative" w="150px" mt={2}>
-                  <Image src={previews.imgPrimary} boxSize="150px" objectFit="cover" borderRadius="md" />
-                  <IconButton
-                    icon={<FiX />}
-                    size="sm"
-                    position="absolute"
-                    top="2px"
-                    right="2px"
-                    colorScheme="red"
-                    onClick={() => handleRemoveFile("imgPrimary")}
-                  />
-                </Box>
-              )}
-            </FormControl>
-
-            {/* Imagen Secundaria */}
-            <FormControl>
-              <FormLabel>Imagen Secundaria</FormLabel>
-              <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e.target.files[0], "imgSecondary")} />
-              {previews.imgSecondary && (
-                <Box position="relative" w="150px" mt={2}>
-                  <Image src={previews.imgSecondary} boxSize="150px" objectFit="cover" borderRadius="md" />
-                  <IconButton
-                    icon={<FiX />}
-                    size="sm"
-                    position="absolute"
-                    top="2px"
-                    right="2px"
-                    colorScheme="red"
-                    onClick={() => handleRemoveFile("imgSecondary")}
-                  />
-                </Box>
-              )}
-            </FormControl>
+            {/* Imagenes */}
+            {["imgPrimary", "imgSecondary"].map(field => (
+              <FormControl key={field}>
+                <FormLabel>{field === "imgPrimary" ? "Imagen Principal" : "Imagen Secundaria"}</FormLabel>
+                <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e.target.files[0], field)} />
+                {previews[field] && (
+                  <Box position="relative" w="150px" mt={2}>
+                    <Image src={previews[field]} boxSize="150px" objectFit="cover" borderRadius="md" />
+                    <IconButton
+                      icon={<FiX />} size="sm" position="absolute" top="2px" right="2px" colorScheme="red"
+                      onClick={() => handleRemoveFile(field)}
+                    />
+                  </Box>
+                )}
+              </FormControl>
+            ))}
 
           </VStack>
         </ModalBody>
