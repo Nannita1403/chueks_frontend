@@ -36,6 +36,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
       : Object.keys(COLOR_HEX_MAP);
   }, [productOptions]);
 
+  // Generar previews de imágenes
   useEffect(() => {
     if (newProduct.imgPrimary instanceof File) {
       const url = URL.createObjectURL(newProduct.imgPrimary);
@@ -76,9 +77,7 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
     });
   };
 
-  const handleRemoveFile = (field) => {
-    setNewProduct(prev => ({ ...prev, [field]: "" }));
-  };
+  const handleRemoveFile = (field) => setNewProduct(prev => ({ ...prev, [field]: "" }));
 
   const handleFileChange = (file, field) => {
     if (!file) return;
@@ -88,7 +87,6 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
   };
 
   const handleCreate = async () => {
-    // ✅ Validaciones obligatorias
     if (!newProduct.code?.trim()) return toast({ title: "Código obligatorio", status: "warning" });
     if (!newProduct.name?.trim()) return toast({ title: "Nombre obligatorio", status: "warning" });
 
@@ -96,48 +94,34 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
       setUploading(true);
       const formData = new FormData();
 
-      // Campos obligatorios
-      formData.append("code", (newProduct.code || "").trim());
-      formData.append("name", (newProduct.name || "").trim());
+      // Campos básicos
+      ["code","name","description","priceMin","priceMay","height","width","depth","weith"].forEach(field => {
+        formData.append(field, newProduct[field] || "");
+      });
 
-      // Campos opcionales
-      formData.append("description", newProduct.description || "");
-      formData.append("priceMin", newProduct.priceMin || 0);
-      formData.append("priceMay", newProduct.priceMay || 0);
-      formData.append("height", newProduct.height || 0);
-      formData.append("width", newProduct.width || 0);
-      formData.append("depth", newProduct.depth || 0);
-
-      // Arrays como JSON
-      ["style", "category", "material", "colors", "elements"].forEach(key => {
-        formData.append(key, JSON.stringify(newProduct[key] || []));
+      // Arrays
+      ["style","category","material","colors","elements"].forEach(field => {
+        formData.append(field, JSON.stringify(newProduct[field] || []));
       });
 
       // Archivos
       if (newProduct.imgPrimary instanceof File) formData.append("imgPrimary", newProduct.imgPrimary);
       if (newProduct.imgSecondary instanceof File) formData.append("imgSecondary", newProduct.imgSecondary);
 
-      // 🔍 Debug: ver qué se envía
-      for (let pair of formData.entries()) {
-        console.log(pair[0]+ ':', pair[1]);
-      }
-
       await ApiService.postFormData("/products", formData);
-
       toast({ title: "Producto creado", description: `${newProduct.name} agregado correctamente.`, status: "success" });
 
       // Reset
       setNewProduct({
         code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
         likes: [], elements: [], category: [], material: [], colors: [],
-        height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: ""
+        height: 0, width: 0, depth: 0, weith: 0, imgPrimary: "", imgSecondary: ""
       });
       setPreviews({ imgPrimary: "", imgSecondary: "" });
       await getProducts();
       onClose();
-
     } catch (error) {
-      console.error("Error creando producto:", error);
+      console.error(error);
       toast({ title: "Error al crear producto", description: "Revisa los datos e inténtalo de nuevo.", status: "error" });
     } finally {
       setUploading(false);
@@ -152,49 +136,101 @@ const CreateProductModal = ({ isOpen, onClose, newProduct, setNewProduct, produc
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
-            <FormControl>
-              <FormLabel>Código</FormLabel>
-              <Input name="code" value={newProduct.code} onChange={handleChange} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Nombre</FormLabel>
-              <Input name="name" value={newProduct.name} onChange={handleChange} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Descripción</FormLabel>
-              <Input name="description" value={newProduct.description} onChange={handleChange} />
-            </FormControl>
+            {/* Código, Nombre, Descripción */}
+            <FormControl><FormLabel>Código</FormLabel><Input name="code" value={newProduct.code} onChange={handleChange} /></FormControl>
+            <FormControl><FormLabel>Nombre</FormLabel><Input name="name" value={newProduct.name} onChange={handleChange} /></FormControl>
+            <FormControl><FormLabel>Descripción</FormLabel><Input name="description" value={newProduct.description} onChange={handleChange} /></FormControl>
 
+            {/* Precios */}
             <HStack>
-              <FormControl>
-                <FormLabel>Precio Mínimo</FormLabel>
-                <NumberInput min={0} value={newProduct.priceMin} onChange={(v) => handleNumberChange("priceMin", v)}>
-                  <NumberInputField />
-                </NumberInput>
+              <FormControl><FormLabel>Precio Mínimo</FormLabel>
+                <NumberInput min={0} value={newProduct.priceMin} onChange={(v)=>handleNumberChange("priceMin",v)}><NumberInputField/></NumberInput>
               </FormControl>
-              <FormControl>
-                <FormLabel>Precio Mayorista</FormLabel>
-                <NumberInput min={0} value={newProduct.priceMay} onChange={(v) => handleNumberChange("priceMay", v)}>
-                  <NumberInputField />
-                </NumberInput>
+              <FormControl><FormLabel>Precio Mayorista</FormLabel>
+                <NumberInput min={0} value={newProduct.priceMay} onChange={(v)=>handleNumberChange("priceMay",v)}><NumberInputField/></NumberInput>
               </FormControl>
             </HStack>
 
-            {/* Selects y colores */}
-            {/* ... tu código de Selects y Colores igual ... */}
+            {/* Dimensiones */}
+            <HStack>
+              <FormControl><FormLabel>Alto (cm)</FormLabel>
+                <NumberInput min={0} value={newProduct.height} onChange={(v)=>handleNumberChange("height",v)}><NumberInputField/></NumberInput>
+              </FormControl>
+              <FormControl><FormLabel>Ancho (cm)</FormLabel>
+                <NumberInput min={0} value={newProduct.width} onChange={(v)=>handleNumberChange("width",v)}><NumberInputField/></NumberInput>
+              </FormControl>
+            </HStack>
+            <HStack>
+              <FormControl><FormLabel>Profundidad (cm)</FormLabel>
+                <NumberInput min={0} value={newProduct.depth} onChange={(v)=>handleNumberChange("depth",v)}><NumberInputField/></NumberInput>
+              </FormControl>
+              <FormControl><FormLabel>Peso (kg)</FormLabel>
+                <NumberInput min={0} value={newProduct.weith} onChange={(v)=>handleNumberChange("weith",v)}><NumberInputField/></NumberInput>
+              </FormControl>
+            </HStack>
+
+            {/* Selects */}
+            <FormControl>
+              <FormLabel>Estilo</FormLabel>
+              <Select placeholder="Seleccionar estilo" value={newProduct.style?.[0]||""} onChange={(e)=>handleSelectChange("style",e.target.value)}>
+                {(productOptions.styleOptions||[]).map(s=><option key={s} value={s}>{s}</option>)}
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Categoría</FormLabel>
+              <Select placeholder="Seleccionar categoría" value={newProduct.category?.[0]||""} onChange={(e)=>handleSelectChange("category",e.target.value)}>
+                {(productOptions.categoryOptions||[]).map(c=><option key={c} value={c}>{c}</option>)}
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Material</FormLabel>
+              <Select placeholder="Seleccionar material" value={newProduct.material?.[0]||""} onChange={(e)=>handleSelectChange("material",e.target.value)}>
+                {(productOptions.materialOptions||[]).map(m=><option key={m} value={m}>{m}</option>)}
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Elemento asociado</FormLabel>
+              <Select placeholder="Seleccionar elemento" value={newProduct.elements?.[0]||""} onChange={(e)=>handleSelectChange("elements",e.target.value)}>
+                {(productOptions.elementOptions||[]).map(el=><option key={el} value={el}>{el}</option>)}
+              </Select>
+            </FormControl>
+
+            {/* Colores */}
+            <FormControl>
+              <FormLabel>Agregar color</FormLabel>
+              <HStack>
+                <Select placeholder={colorList.length?"Seleccionar color":"No hay colores"} value={selectedColor} onChange={e=>setSelectedColor(e.target.value)} isDisabled={!colorList.length}>
+                  {colorList.map(c => <option key={c} value={c}>{c}</option>)}
+                </Select>
+                <NumberInput min={1} value={colorStock} onChange={v=>setColorStock(Number(v)||0)} w="110px"><NumberInputField/></NumberInput>
+                <IconButton icon={<FiPlus/>} aria-label="Agregar color" colorScheme="pink" onClick={handleAddColor}/>
+              </HStack>
+              <VStack align="stretch" mt={2}>
+                {(newProduct.colors||[]).map((c,i)=>(
+                  <HStack key={i} justify="space-between">
+                    <HStack>
+                      <Box w="20px" h="20px" bg={COLOR_HEX_MAP[c.name?.toLowerCase()]||"#ccc"} border="1px solid #999" borderRadius="sm"/>
+                      <Text>{c.name} — Stock: {c.stock}</Text>
+                    </HStack>
+                    <IconButton icon={<FiTrash2/>} size="sm" onClick={()=>handleRemoveColor(i)}/>
+                  </HStack>
+                ))}
+                {(!newProduct.colors||!newProduct.colors.length) && <Text color="gray.500" fontSize="sm">No hay colores agregados</Text>}
+              </VStack>
+            </FormControl>
 
             {/* Imágenes */}
-            {["imgPrimary", "imgSecondary"].map(field => (
+            {["imgPrimary","imgSecondary"].map(field=>(
               <FormControl key={field}>
-                <FormLabel>{field === "imgPrimary" ? "Imagen Principal" : "Imagen Secundaria"}</FormLabel>
-                <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e.target.files[0], field)} />
+                <FormLabel>{field==="imgPrimary"?"Imagen Principal":"Imagen Secundaria"}</FormLabel>
+                <Input type="file" accept="image/*" onChange={e=>handleFileChange(e.target.files[0],field)}/>
                 {previews[field] && (
                   <Box position="relative" w="150px" mt={2}>
-                    <Image src={previews[field]} boxSize="150px" objectFit="cover" borderRadius="md" />
-                    <IconButton
-                      icon={<FiX />} size="sm" position="absolute" top="2px" right="2px" colorScheme="red"
-                      onClick={() => handleRemoveFile(field)}
-                    />
+                    <Image src={previews[field]} boxSize="150px" objectFit="cover" borderRadius="md"/>
+                    <IconButton icon={<FiX/>} size="sm" position="absolute" top="2px" right="2px" colorScheme="red" onClick={()=>handleRemoveFile(field)}/>
                   </Box>
                 )}
               </FormControl>
