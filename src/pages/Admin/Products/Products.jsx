@@ -5,10 +5,9 @@ import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
-import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProductModal.jsx";
 import axios from "axios";
 import AddElementsModal from "../../../components/AddElementsModal/AddElementsModal.jsx";
-
+import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProdcutModal.jsx"
 const AdminProducts = () => {
   const { products, getProducts, deleteProduct, updateProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(true);
