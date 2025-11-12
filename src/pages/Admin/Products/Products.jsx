@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Flex, VStack, Heading, Button, IconButton, useColorModeValue, Container, Select, 
+import { Box, Text, Flex, VStack, Heading, Button, IconButton, useColorModeValue, Container, Select, 
   SimpleGrid, Card, Badge, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useToast } from "../../../Hooks/useToast.jsx";
@@ -53,16 +53,27 @@ const AdminProducts = () => {
   }, []);
 
   useEffect(() => {
+      if (!isAddElementsOpen) getProducts();
+    }, [isAddElementsOpen]);
+
+  useEffect(() => {
     const loadOptions = async () => {
       try {
-        const { data } = await axios.get("https://chueks-backend.vercel.app/api/v1/meta/products/options");
-        setProductOptions(data);
+        const { data } = await axios.get("https://chueks-backend.vercel.app/api/v1/products");
+
+        setProductOptions({
+          styleOptions: [...new Set(data.flatMap(p => p.style || []))],
+          categoryOptions: [...new Set(data.flatMap(p => p.category || []))],
+          materialOptions: [...new Set(data.flatMap(p => p.material || []))],
+          colorOptions: [...new Set(data.flatMap(p => p.colors?.map(c => c.name) || []))]
+        });
       } catch (err) {
         console.error("Error cargando opciones de productos:", err);
       }
     };
     loadOptions();
   }, []);
+
 
   const handleOpenEdit = (product) => {
     setCurrentProduct(product);
@@ -170,6 +181,24 @@ const AdminProducts = () => {
                         <option value="inactivo">Inactivo</option>
                       </Select>
                     </Box>
+                    {p.elements && p.elements.length > 0 && (
+                      <Box mt={2} fontSize="sm" color="gray.700">
+                        <b>Elementos:</b>
+                        <VStack align="start" spacing={1} mt={1}>
+                          {p.elements.map((el, i) => (
+                            <Box key={i} bg="gray.50" p={2} borderRadius="md" w="full">
+                              <Text fontWeight="bold">{el.element?.name || el.element}</Text>
+                              {el.element?.type && <Text fontSize="xs">Tipo: {el.element.type}</Text>}
+                              {el.element?.color && <Text fontSize="xs">Color: {el.element.color}</Text>}
+                              {el.element?.material && <Text fontSize="xs">Material: {el.element.material}</Text>}
+                              {el.element?.style && <Text fontSize="xs">Estilo: {el.element.style}</Text>}
+                              {el.element?.extInt && <Text fontSize="xs">Interno/Externo: {el.element.extInt}</Text>}
+                              <Text fontSize="xs">Cantidad: {el.quantity}</Text>
+                            </Box>
+                          ))}
+                        </VStack>
+                      </Box>
+                    )}
                     <Flex justify="flex-end" gap={2} wrap="wrap">
                       <IconButton icon={<FiPlus />} aria-label="Agregar elementos" size="sm" colorScheme="blue" onClick={() => { setCurrentProduct(p); setIsAddElementsOpen(true); }} />
                       <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
@@ -211,6 +240,7 @@ const AdminProducts = () => {
         product={currentProduct}
         setProduct={setCurrentProduct}
       />
+      
 
       {/* Modal Confirmación Eliminar */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} isCentered>

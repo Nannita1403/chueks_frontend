@@ -24,19 +24,26 @@ const AddElementsModal = ({ isOpen, onClose, product, setProduct }) => {
     typeOptions: [], colorOptions: [], materialOptions: [], styleOptions: [], extIntOptions: []
   });
 
-  // Traer opciones de elementos
+  // Traer elementos y generar opciones dinámicas
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const { data } = await axios.get("/api/elements/options");
-        setElementOptions(data);
+        const { data } = await axios.get("https://chueks-backend.vercel.app/api/v1/elements");
+        
+        setElementOptions({
+          typeOptions: [...new Set(data.flatMap(e => e.type ? [e.type] : []))],
+          colorOptions: [...new Set(data.flatMap(e => e.color ? [e.color] : []))],
+          materialOptions: [...new Set(data.flatMap(e => e.material ? [e.material] : []))],
+          styleOptions: [...new Set(data.flatMap(e => e.style ? [e.style] : []))],
+          extIntOptions: [...new Set(data.flatMap(e => e.extInt ? [e.extInt] : []))]
+        });
       } catch (err) {
         console.error(err);
         toast({ title: "Error cargando opciones", status: "error" });
       }
     };
     loadOptions();
-  }, []);
+  }, [toast]);
 
   const handleChange = (field, value) => setElement(prev => ({ ...prev, [field]: value }));
 
@@ -47,17 +54,26 @@ const AddElementsModal = ({ isOpen, onClose, product, setProduct }) => {
     }
 
     try {
-      // Crear el elemento en el backend
-      const { data: newElement } = await axios.post("/api/elements", element);
+      // Crear elemento en backend
+      const { data: newElement } = await axios.post(
+        "https://chueks-backend.vercel.app/api/v1/elements",
+        element
+      );
 
-      // Agregar al producto
-      setProduct(prev => ({
-        ...prev,
-        elements: [...(prev.elements || []), { quantity: element.quantity || "1", element: newElement._id }]
-      }));
+      // Agregarlo al producto actual
+      const updatedProduct = {
+        ...product,
+        elements: [...(product.elements || []), { quantity: element.quantity || "1", element: newElement }]
+      };
+
+      // Guardar producto actualizado en backend
+      await axios.put(`https://chueks-backend.vercel.app/api/v1/products/${product._id}`, updatedProduct);
+
+      // Actualizar estado en el front
+      setProduct(updatedProduct);
 
       setElement({ name: "", type: "", color: "", material: "", style: "", extInt: "", quantity: "1" });
-      toast({ title: "Elemento agregado", status: "success" });
+      toast({ title: "Elemento agregado al producto", status: "success" });
     } catch (err) {
       console.error(err);
       toast({ title: "Error al agregar elemento", status: "error" });
@@ -131,7 +147,7 @@ const AddElementsModal = ({ isOpen, onClose, product, setProduct }) => {
                     {el.element.style && <Text fontSize="sm">Estilo: {el.element.style}</Text>}
                     {el.element.extInt && <Text fontSize="sm">Interno/Externo: {el.element.extInt}</Text>}
                     <Text fontSize="sm">Cantidad: {el.quantity}</Text>
-                </Box>
+                  </Box>
                   <IconButton icon={<FiTrash2 />} size="sm" onClick={() => handleRemoveElement(i)} />
                 </HStack>
               ))}
