@@ -34,21 +34,31 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
       : Object.keys(COLOR_HEX_MAP);
   }, [productOptions]);
 
-  useEffect(() => {
-    if (product.imgPrimary instanceof File) {
-      const url = URL.createObjectURL(product.imgPrimary);
-      setPreviews(prev => ({ ...prev, imgPrimary: url }));
-      return () => URL.revokeObjectURL(url);
-    } else setPreviews(prev => ({ ...prev, imgPrimary: product.imgPrimary || "" }));
-  }, [product.imgPrimary]);
+    useEffect(() => {
+    if (!product) return;
 
-  useEffect(() => {
+    let primaryUrl, secondaryUrl;
+
+    if (product.imgPrimary instanceof File) {
+      primaryUrl = URL.createObjectURL(product.imgPrimary);
+      setPreviews(prev => ({ ...prev, imgPrimary: primaryUrl }));
+    } else {
+      setPreviews(prev => ({ ...prev, imgPrimary: product.imgPrimary || "" }));
+    }
+
     if (product.imgSecondary instanceof File) {
-      const url = URL.createObjectURL(product.imgSecondary);
-      setPreviews(prev => ({ ...prev, imgSecondary: url }));
-      return () => URL.revokeObjectURL(url);
-    } else setPreviews(prev => ({ ...prev, imgSecondary: product.imgSecondary || "" }));
-  }, [product.imgSecondary]);
+      secondaryUrl = URL.createObjectURL(product.imgSecondary);
+      setPreviews(prev => ({ ...prev, imgSecondary: secondaryUrl }));
+    } else {
+      setPreviews(prev => ({ ...prev, imgSecondary: product.imgSecondary || "" }));
+    }
+
+    return () => {
+      if (primaryUrl) URL.revokeObjectURL(primaryUrl);
+      if (secondaryUrl) URL.revokeObjectURL(secondaryUrl);
+    };
+  }, [product]);
+
 
   const handleChange = (e) => setProduct(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleNumberChange = (name, value) => setProduct(prev => ({ ...prev, [name]: Number(value) || 0 }));
