@@ -7,7 +7,7 @@ import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
 import axios from "axios";
 import AddElementsModal from "../../../components/AddElementsModal/AddElementsModal.jsx";
-import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProdcutModal.jsx"
+import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProductModal.jsx";
 const AdminProducts = () => {
   const { products, getProducts, deleteProduct, updateProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(true);
@@ -249,7 +249,7 @@ const AdminProducts = () => {
           <ModalBody>
             {currentProduct && (
               <Card shadow="lg" borderRadius="lg" overflow="hidden">
-                <Box as="img" src={currentProduct.imgPrimary} alt={currentProduct.name} w="100%" h="200px" objectFit="cover" />
+                <Box as="img" src={currentProduct.imgPrimary || ""} alt={currentProduct.name || ""} w="100%" h="200px" objectFit="cover" />
                 <Box p={4}>
                   <Heading size="md" mb={2}>{currentProduct.name}</Heading>
                   <Box color="gray.600">
@@ -261,7 +261,11 @@ const AdminProducts = () => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} onClick={() => setIsDeleteOpen(false)}>Cancelar</Button>
+            <Button mr={3} onClick={() => {
+              setIsDeleteOpen(false);
+              setCurrentProduct(null); 
+              setDeleteId(null);
+            }}>Cancelar</Button>
             <Button colorScheme="red" onClick={handleDelete}>Eliminar</Button>
           </ModalFooter>
         </ModalContent>
