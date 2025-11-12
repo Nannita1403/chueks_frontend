@@ -9,19 +9,19 @@ import { useToast } from "../../Hooks/useToast.jsx";
 import ApiService from "../../reducers/api/Api.jsx";
 
 const COLOR_HEX_MAP = {
-  "lila": "#C8A2C8", "verde": "#008000", "animal print": "#A0522D", "suela": "#8B4513",
-  "nude": "#E3B7A0", "blanca": "#FFFFFF", "beige": "#F5F5DC", "gris": "#808080",
-  "negro tramado": "#2F2F2F", "rose gold": "#B76E79", "negro": "#000000",
-  "glitter dorada": "#FFD700", "dorada": "#FFD700", "borgoña": "#800020",
-  "naranja": "#FFA500", "amarillo": "#FFFF00", "habano": "#A0522D", "cobre": "#B87333",
-  "peltre": "#769DA6", "crema": "#FFFDD0", "celeste": "#87CEEB", "plateada": "#C0C0C0",
-  "rosa": "#FFC0CB", "rojo": "#FF0000", "burdeos": "#800000", "vison": "#C4A69F",
-  "verde oliva": "#808000", "cristal": "#E0FFFF", "negro opaco": "#1C1C1C",
-  "negro croco": "#1A1A1A", "negro con crudo": "#2E2E2E", "turquesa": "#40E0D0",
+  lila: "#C8A2C8", verde: "#008000", "animal print": "#A0522D", suela: "#8B4513",
+  nude: "#E3B7A0", blanca: "#FFFFFF", beige: "#F5F5DC", gris: "#808080",
+  "negro tramado": "#2F2F2F", "rose gold": "#B76E79", negro: "#000000",
+  "glitter dorada": "#FFD700", dorada: "#FFD700", borgoña: "#800020",
+  naranja: "#FFA500", amarillo: "#FFFF00", habano: "#A0522D", cobre: "#B87333",
+  peltre: "#769DA6", crema: "#FFFDD0", celeste: "#87CEEB", plateada: "#C0C0C0",
+  rosa: "#FFC0CB", rojo: "#FF0000", burdeos: "#800000", vison: "#C4A69F",
+  "verde oliva": "#808000", cristal: "#E0FFFF", "negro opaco": "#1C1C1C",
+  "negro croco": "#1A1A1A", "negro con crudo": "#2E2E2E", turquesa: "#40E0D0",
   "gris claro": "#cccccc",
 };
 
-const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, productOptions, isEdit }) => {
+const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, productOptions = {}, isEdit }) => {
   const { toast } = useToast();
   const [selectedColor, setSelectedColor] = useState("");
   const [colorStock, setColorStock] = useState(1);
@@ -29,12 +29,13 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
   const [uploading, setUploading] = useState(false);
 
   const colorList = useMemo(() => {
-    return Array.isArray(productOptions.colorOptions) && productOptions.colorOptions.length
+    return Array.isArray(productOptions?.colorOptions) && productOptions.colorOptions.length
       ? productOptions.colorOptions
       : Object.keys(COLOR_HEX_MAP);
   }, [productOptions]);
 
-    useEffect(() => {
+  // Previsualización segura de imágenes
+  useEffect(() => {
     if (!product) return;
 
     let primaryUrl, secondaryUrl;
@@ -59,7 +60,6 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
     };
   }, [product]);
 
-
   const handleChange = (e) => setProduct(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleNumberChange = (name, value) => setProduct(prev => ({ ...prev, [name]: Number(value) || 0 }));
   const handleSelectChange = (field, value) => setProduct(prev => ({ ...prev, [field]: [value] }));
@@ -72,6 +72,7 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
       ...prev,
       colors: [...(prev.colors || []), { name: selectedColor, stock: Number(colorStock) }]
     }));
+
     setSelectedColor("");
     setColorStock(1);
   };
@@ -93,101 +94,133 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
 
   const handleRemoveFile = (field) => setProduct(prev => ({ ...prev, [field]: "" }));
 
-    const handleSave = async () => {
+  const handleSave = async () => {
     if (!product.code?.trim()) return toast({ title: "Código obligatorio", status: "warning" });
     if (!product.name?.trim()) return toast({ title: "Nombre obligatorio", status: "warning" });
 
     try {
-        setUploading(true);
-        const formData = new FormData();
-        ["code","name","description","priceMin","priceMay","height","width","depth"].forEach(field => {
+      setUploading(true);
+      const formData = new FormData();
+
+      ["code","name","description","priceMin","priceMay","height","width","depth"].forEach(field => {
         formData.append(field, product[field] || "");
-        });
-        ["style","category","material","colors"].forEach(field => {
+      });
+
+      ["style","category","material","colors"].forEach(field => {
         formData.append(field, JSON.stringify(product[field] || []));
-        });
+      });
 
-        // Convertir elementos a {quantity, element:_id}
-        const elementsToSend = (product.elements || []).map(el => ({
+      const elementsToSend = (product.elements || []).map(el => ({
         quantity: el.quantity,
-        element: el.element._id || el.element
-        }));
-        formData.append("elements", JSON.stringify(elementsToSend));
+        element: el.element?._id || el.element
+      }));
+      formData.append("elements", JSON.stringify(elementsToSend));
 
-        if (product.imgPrimary instanceof File) formData.append("imgPrimary", product.imgPrimary);
-        if (product.imgSecondary instanceof File) formData.append("imgSecondary", product.imgSecondary);
+      if (product.imgPrimary instanceof File) formData.append("imgPrimary", product.imgPrimary);
+      if (product.imgSecondary instanceof File) formData.append("imgSecondary", product.imgSecondary);
 
-        if (isEdit) {
+      if (isEdit) {
         await ApiService.putFormData(`/products/${product._id}`, formData);
         toast({ title: "Producto actualizado", status: "success" });
-        } else {
+      } else {
         await ApiService.postFormData("/products", formData);
         toast({ title: "Producto creado", status: "success" });
-        }
-        onClose();
-    } catch (error) {
-        console.error(error);
-        toast({ title: "Error", description: "Revisa los datos e inténtalo de nuevo.", status: "error" });
-    } finally {
-        setUploading(false);
-    }
-    };
+      }
 
+      onClose();
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error", description: "Revisa los datos e inténtalo de nuevo.", status: "error" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{isEdit ? `Editar Producto: ${product.name}` : "Crear Producto"}</ModalHeader>
+        <ModalHeader>{isEdit ? `Editar Producto: ${product.name || ""}` : "Crear Producto"}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
+            {/* Código */}
             <FormControl>
               <FormLabel>Código</FormLabel>
               <Input name="code" value={product.code || ""} onChange={handleChange} />
             </FormControl>
+
+            {/* Nombre */}
             <FormControl>
               <FormLabel>Nombre</FormLabel>
               <Input name="name" value={product.name || ""} onChange={handleChange} />
             </FormControl>
+
+            {/* Descripción */}
             <FormControl>
               <FormLabel>Descripción</FormLabel>
               <Input name="description" value={product.description || ""} onChange={handleChange} />
             </FormControl>
+
+            {/* Precio */}
             <FormControl>
               <FormLabel>Precio Mínimo</FormLabel>
               <NumberInput min={0} value={product.priceMin || 0} onChange={(v) => handleNumberChange("priceMin", v)}>
                 <NumberInputField />
               </NumberInput>
             </FormControl>
+
             <FormControl>
               <FormLabel>Precio Mayorista</FormLabel>
               <NumberInput min={0} value={product.priceMay || 0} onChange={(v) => handleNumberChange("priceMay", v)}>
                 <NumberInputField />
               </NumberInput>
             </FormControl>
+
+            {/* Selects */}
             <FormControl>
               <FormLabel>Estilo</FormLabel>
-              <Select placeholder="Seleccionar estilo" value={product.style?.[0] || ""} onChange={e => handleSelectChange("style", e.target.value)}>
+              <Select
+                placeholder="Seleccionar estilo"
+                value={product.style?.[0] || ""}
+                onChange={e => handleSelectChange("style", e.target.value)}
+              >
                 {(productOptions.styleOptions || []).map(s => <option key={s} value={s}>{s}</option>)}
               </Select>
             </FormControl>
+
             <FormControl>
               <FormLabel>Categoría</FormLabel>
-              <Select placeholder="Seleccionar categoría" value={product.category?.[0] || ""} onChange={e => handleSelectChange("category", e.target.value)}>
+              <Select
+                placeholder="Seleccionar categoría"
+                value={product.category?.[0] || ""}
+                onChange={e => handleSelectChange("category", e.target.value)}
+              >
                 {(productOptions.categoryOptions || []).map(c => <option key={c} value={c}>{c}</option>)}
               </Select>
             </FormControl>
+
             <FormControl>
               <FormLabel>Material</FormLabel>
-              <Select placeholder="Seleccionar material" value={product.material?.[0] || ""} onChange={e => handleSelectChange("material", e.target.value)}>
+              <Select
+                placeholder="Seleccionar material"
+                value={product.material?.[0] || ""}
+                onChange={e => handleSelectChange("material", e.target.value)}
+              >
                 {(productOptions.materialOptions || []).map(m => <option key={m} value={m}>{m}</option>)}
               </Select>
             </FormControl>
+
+            {/* Colores */}
             <FormControl>
               <FormLabel>Agregar color</FormLabel>
               <HStack>
-                <Select placeholder={colorList.length ? "Seleccionar color" : "No hay colores"} value={selectedColor} onChange={e => setSelectedColor(e.target.value)} isDisabled={!colorList.length}>
+                <Select
+                  placeholder={colorList.length ? "Seleccionar color" : "No hay colores"}
+                  value={selectedColor}
+                  onChange={e => setSelectedColor(e.target.value)}
+                  isDisabled={!colorList.length}
+                >
                   {colorList.map(c => <option key={c} value={c}>{c}</option>)}
                 </Select>
                 <NumberInput min={1} value={colorStock} onChange={v => setColorStock(Number(v) || 0)} w="110px">
@@ -195,22 +228,25 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
                 </NumberInput>
                 <IconButton icon={<FiPlus />} aria-label="Agregar color" colorScheme="pink" onClick={handleAddColor} />
               </HStack>
+
               <VStack align="stretch" mt={2}>
                 {(product.colors || []).map((c, i) => (
                   <HStack key={i} justify="space-between">
                     <HStack>
                       <Box w="20px" h="20px" bg={COLOR_HEX_MAP[c.name?.toLowerCase()] || "#ccc"} border="1px solid #999" borderRadius="sm"/>
-                      <Text>{c.name} — Stock: {c.stock}</Text>
+                      <Text>{c.name || ""} — Stock: {c.stock || 0}</Text>
                     </HStack>
                     <IconButton icon={<FiTrash2 />} size="sm" onClick={() => handleRemoveColor(i)} />
                   </HStack>
                 ))}
-                {(!product.colors || !product.colors.length) && <Text color="gray.500" fontSize="sm">No hay colores agregados</Text>}
+                {(!(product.colors || []).length) && <Text color="gray.500" fontSize="sm">No hay colores agregados</Text>}
               </VStack>
             </FormControl>
+
+            {/* Imágenes */}
             <FormControl>
               <FormLabel>Imagen Principal</FormLabel>
-              <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files[0], "imgPrimary")} />
+              <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files?.[0], "imgPrimary")} />
               {previews.imgPrimary && (
                 <Box position="relative" w="150px" mt={2}>
                   <Image src={previews.imgPrimary} boxSize="150px" objectFit="cover" borderRadius="md"/>
@@ -218,9 +254,10 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
                 </Box>
               )}
             </FormControl>
+
             <FormControl>
               <FormLabel>Imagen Secundaria</FormLabel>
-              <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files[0], "imgSecondary")} />
+              <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files?.[0], "imgSecondary")} />
               {previews.imgSecondary && (
                 <Box position="relative" w="150px" mt={2}>
                   <Image src={previews.imgSecondary} boxSize="150px" objectFit="cover" borderRadius="md"/>
@@ -228,6 +265,7 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product, setProduct, produc
                 </Box>
               )}
             </FormControl>
+
           </VStack>
         </ModalBody>
         <ModalFooter>
