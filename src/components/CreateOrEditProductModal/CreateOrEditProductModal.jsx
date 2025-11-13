@@ -34,7 +34,7 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
       : Object.keys(COLOR_HEX_MAP);
   }, [productOptions]);
 
-  // Previsualización segura de imágenes
+  // Previsualización de imágenes
   useEffect(() => {
     if (!product) return;
 
@@ -72,7 +72,6 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
       ...prev,
       colors: [...(prev.colors || []), { name: selectedColor, stock: Number(colorStock) }]
     }));
-
     setSelectedColor("");
     setColorStock(1);
   };
@@ -110,12 +109,6 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
         formData.append(field, JSON.stringify(product[field] || []));
       });
 
-      const elementsToSend = (product.elements || []).map(el => ({
-        quantity: el.quantity,
-        element: el.element?._id || el.element
-      }));
-      formData.append("elements", JSON.stringify(elementsToSend));
-
       if (product.imgPrimary instanceof File) formData.append("imgPrimary", product.imgPrimary);
       if (product.imgSecondary instanceof File) formData.append("imgSecondary", product.imgSecondary);
 
@@ -144,69 +137,55 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
-            {/* Código */}
+
             <FormControl>
               <FormLabel>Código</FormLabel>
               <Input name="code" value={product.code || ""} onChange={handleChange} />
             </FormControl>
 
-            {/* Nombre */}
             <FormControl>
               <FormLabel>Nombre</FormLabel>
               <Input name="name" value={product.name || ""} onChange={handleChange} />
             </FormControl>
 
-            {/* Descripción */}
             <FormControl>
               <FormLabel>Descripción</FormLabel>
               <Input name="description" value={product.description || ""} onChange={handleChange} />
             </FormControl>
 
-            {/* Precio */}
-            <FormControl>
-              <FormLabel>Precio Mínimo</FormLabel>
-              <NumberInput min={0} value={product.priceMin || 0} onChange={(v) => handleNumberChange("priceMin", v)}>
-                <NumberInputField />
-              </NumberInput>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Precio Mayorista</FormLabel>
-              <NumberInput min={0} value={product.priceMay || 0} onChange={(v) => handleNumberChange("priceMay", v)}>
-                <NumberInputField />
-              </NumberInput>
-            </FormControl>
+            <HStack>
+              <FormControl>
+                <FormLabel>Precio Mínimo</FormLabel>
+                <NumberInput min={0} value={product.priceMin || 0} onChange={(v) => handleNumberChange("priceMin", v)}>
+                  <NumberInputField />
+                </NumberInput>
+              </FormControl>
+              <FormControl>
+                <FormLabel>Precio Mayorista</FormLabel>
+                <NumberInput min={0} value={product.priceMay || 0} onChange={(v) => handleNumberChange("priceMay", v)}>
+                  <NumberInputField />
+                </NumberInput>
+              </FormControl>
+            </HStack>
 
             {/* Selects */}
             <FormControl>
               <FormLabel>Estilo</FormLabel>
-              <Select
-                placeholder="Seleccionar estilo"
-                value={product.style?.[0] || ""}
-                onChange={e => handleSelectChange("style", e.target.value)}
-              >
+              <Select placeholder="Seleccionar estilo" value={product.style?.[0] || ""} onChange={e => handleSelectChange("style", e.target.value)}>
                 {(productOptions.styleOptions || []).map(s => <option key={s} value={s}>{s}</option>)}
               </Select>
             </FormControl>
 
             <FormControl>
               <FormLabel>Categoría</FormLabel>
-              <Select
-                placeholder="Seleccionar categoría"
-                value={product.category?.[0] || ""}
-                onChange={e => handleSelectChange("category", e.target.value)}
-              >
+              <Select placeholder="Seleccionar categoría" value={product.category?.[0] || ""} onChange={e => handleSelectChange("category", e.target.value)}>
                 {(productOptions.categoryOptions || []).map(c => <option key={c} value={c}>{c}</option>)}
               </Select>
             </FormControl>
 
             <FormControl>
               <FormLabel>Material</FormLabel>
-              <Select
-                placeholder="Seleccionar material"
-                value={product.material?.[0] || ""}
-                onChange={e => handleSelectChange("material", e.target.value)}
-              >
+              <Select placeholder="Seleccionar material" value={product.material?.[0] || ""} onChange={e => handleSelectChange("material", e.target.value)}>
                 {(productOptions.materialOptions || []).map(m => <option key={m} value={m}>{m}</option>)}
               </Select>
             </FormControl>
@@ -215,12 +194,7 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
             <FormControl>
               <FormLabel>Agregar color</FormLabel>
               <HStack>
-                <Select
-                  placeholder={colorList.length ? "Seleccionar color" : "No hay colores"}
-                  value={selectedColor}
-                  onChange={e => setSelectedColor(e.target.value)}
-                  isDisabled={!colorList.length}
-                >
+                <Select placeholder={colorList.length ? "Seleccionar color" : "No hay colores"} value={selectedColor} onChange={e => setSelectedColor(e.target.value)} isDisabled={!colorList.length}>
                   {colorList.map(c => <option key={c} value={c}>{c}</option>)}
                 </Select>
                 <NumberInput min={1} value={colorStock} onChange={v => setColorStock(Number(v) || 0)} w="110px">
@@ -228,7 +202,6 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
                 </NumberInput>
                 <IconButton icon={<FiPlus />} aria-label="Agregar color" colorScheme="pink" onClick={handleAddColor} />
               </HStack>
-
               <VStack align="stretch" mt={2}>
                 {(product.colors || []).map((c, i) => (
                   <HStack key={i} justify="space-between">
@@ -244,27 +217,18 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
             </FormControl>
 
             {/* Imágenes */}
-            <FormControl>
-              <FormLabel>Imagen Principal</FormLabel>
-              <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files?.[0], "imgPrimary")} />
-              {previews.imgPrimary && (
-                <Box position="relative" w="150px" mt={2}>
-                  <Image src={previews.imgPrimary} boxSize="150px" objectFit="cover" borderRadius="md"/>
-                  <IconButton icon={<FiX />} size="sm" position="absolute" top="2px" right="2px" colorScheme="red" onClick={() => handleRemoveFile("imgPrimary")} />
-                </Box>
-              )}
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Imagen Secundaria</FormLabel>
-              <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files?.[0], "imgSecondary")} />
-              {previews.imgSecondary && (
-                <Box position="relative" w="150px" mt={2}>
-                  <Image src={previews.imgSecondary} boxSize="150px" objectFit="cover" borderRadius="md"/>
-                  <IconButton icon={<FiX />} size="sm" position="absolute" top="2px" right="2px" colorScheme="red" onClick={() => handleRemoveFile("imgSecondary")} />
-                </Box>
-              )}
-            </FormControl>
+            {["imgPrimary", "imgSecondary"].map(field => (
+              <FormControl key={field}>
+                <FormLabel>{field === "imgPrimary" ? "Imagen Principal" : "Imagen Secundaria"}</FormLabel>
+                <Input type="file" accept="image/*" onChange={e => handleFileChange(e.target.files?.[0], field)} />
+                {previews[field] && (
+                  <Box position="relative" w="150px" mt={2}>
+                    <Image src={previews[field]} boxSize="150px" objectFit="cover" borderRadius="md"/>
+                    <IconButton icon={<FiX />} size="sm" position="absolute" top="2px" right="2px" colorScheme="red" onClick={() => handleRemoveFile(field)} />
+                  </Box>
+                )}
+              </FormControl>
+            ))}
 
           </VStack>
         </ModalBody>

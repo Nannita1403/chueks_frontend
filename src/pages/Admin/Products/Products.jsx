@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import {
-  Box, Text, Flex, VStack, Heading, Button, IconButton, useColorModeValue,
+  Box, Flex, VStack, Heading, Button, IconButton, useColorModeValue,
   Container, Select, SimpleGrid, Card, Badge, Modal, ModalOverlay,
   ModalContent, ModalHeader, ModalBody, ModalFooter
 } from "@chakra-ui/react";
-import { FiEdit, FiTrash2, FiCopy, FiPlus } from "react-icons/fi";
+import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
@@ -33,19 +33,14 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // Cargar productos
+  // Cargar productos al inicio
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
       try {
         await getProducts();
-      } catch {
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar los productos",
-          status: "error",
-          duration: 3000
-        });
+      } catch (error) {
+        toast({ title: "Error", description: "No se pudieron cargar los productos", status: "error", duration: 3000 });
       } finally {
         setIsLoading(false);
       }
@@ -53,9 +48,10 @@ const AdminProducts = () => {
     load();
   }, []);
 
-  // Cargar opciones dinámicas
+  // Actualizar opciones dinámicas según products
   useEffect(() => {
-    if (!products?.length) return;
+    if (!products || !products.length) return;
+
     setProductOptions({
       styleOptions: [...new Set(products.flatMap(p => p.style || []))],
       categoryOptions: [...new Set(products.flatMap(p => p.category || []))],
@@ -88,6 +84,17 @@ const AdminProducts = () => {
     } catch (error) {
       console.error(error);
       toast({ title: "Error al eliminar", status: "error", duration: 3000 });
+    }
+  };
+
+  const handleUpdate = async (updatedProduct) => {
+    try {
+      await updateProduct(updatedProduct._id, updatedProduct);
+      toast({ title: "Producto actualizado", status: "success", duration: 3000 });
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error al actualizar", status: "error", duration: 3000 });
     }
   };
 
@@ -131,7 +138,7 @@ const AdminProducts = () => {
           {/* Filtros */}
           <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
             <Select placeholder="Filtrar por categoría" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-              {productOptions.categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
+              {(productOptions.categoryOptions || []).map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
             <Select placeholder="Filtrar por estado" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
               <option value="activo">Activo</option>
@@ -141,48 +148,45 @@ const AdminProducts = () => {
 
           {/* Productos */}
           <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6} w="full">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map(p => (
-                <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
-                  <Box as="img" src={p.imgPrimary} alt={p.name || ""} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
-                  <Box p={{ base: 3, md: 4 }}>
-                    <Heading size="md" mb={2}>{p.name}</Heading>
-                    <Box fontSize="sm" color="gray.600" mb={1}>
-                      <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}
-                    </Box>
-                    <Box fontSize="sm" color="gray.600" mb={1}>
-                      <b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}
-                    </Box>
-                    <Box fontSize="sm" color="gray.600" mb={1}>
-                      <b>Stock:</b>
-                      <Flex wrap="wrap" gap={2} mt={1}>
-                        {p.colors?.length > 0 ? (
-                          p.colors.map((c, idx) => (
+            {filteredProducts.length > 0 ? filteredProducts.map(p => (
+              <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
+                <Box as="img" src={p.imgPrimary || ""} alt={p.name || ""} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
+                <Box p={{ base: 3, md: 4 }}>
+                  <Heading size="md" mb={2}>{p.name || "Sin nombre"}</Heading>
+                  <Box fontSize="sm" color="gray.600" mb={1}>
+                    <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category || "N/A"}
+                  </Box>
+                  <Box fontSize="sm" color="gray.600" mb={1}>
+                    <b>Precio:</b> ${p.priceMin?.toLocaleString() || 0} - ${p.priceMay?.toLocaleString() || 0}
+                  </Box>
+                  <Box fontSize="sm" color="gray.600" mb={1}>
+                    <b>Stock:</b>{" "}
+                    <Flex wrap="wrap" gap={2} mt={1}>
+                      {p.colors && p.colors.length > 0
+                        ? p.colors.map((c, idx) => (
                             <Badge key={idx} colorScheme="purple" borderRadius="md" px={2} py={1}>
-                              {c.name}: {c.stock}
+                              {c.name || "Sin color"}: {c.stock ?? 0}
                             </Badge>
                           ))
-                        ) : (<Badge colorScheme="red">Sin stock</Badge>)}
-                      </Flex>
-                    </Box>
-                    <Box fontSize="sm" color="gray.600" mb={3}>
-                      <b>Estado:</b>{" "}
-                      <Select size="sm" value={p.status || "activo"} onChange={(e) => handleChangeStatus(p._id, e.target.value)} w="auto" display="inline-block">
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
-                      </Select>
-                    </Box>
-
-                    {/* Acciones */}
-                    <Flex justify="flex-end" gap={2} wrap="wrap">
-                      <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
-                      <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
-                      <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red" onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }} />
+                        : <Badge colorScheme="red">Sin stock</Badge>}
                     </Flex>
                   </Box>
-                </Card>
-              ))
-            ) : (
+                  <Box fontSize="sm" color="gray.600" mb={3}>
+                    <b>Estado:</b>{" "}
+                    <Select size="sm" value={p.status || "activo"} onChange={e => handleChangeStatus(p._id, e.target.value)} w="auto" display="inline-block">
+                      <option value="activo">Activo</option>
+                      <option value="inactivo">Inactivo</option>
+                    </Select>
+                  </Box>
+
+                  <Flex justify="flex-end" gap={2} wrap="wrap">
+                    <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
+                    <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
+                    <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red" onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }} />
+                  </Flex>
+                </Box>
+              </Card>
+            )) : (
               <Box textAlign="center" py={10} color="gray.500">No hay productos</Box>
             )}
           </SimpleGrid>
@@ -215,9 +219,9 @@ const AdminProducts = () => {
           <ModalBody>
             {currentProduct && (
               <Card shadow="lg" borderRadius="lg" overflow="hidden">
-                <Box as="img" src={currentProduct.imgPrimary || ""} alt={currentProduct.name || ""} w="100%" h="200px" objectFit="cover" />
+                <Box as="img" src={currentProduct.imgPrimary || ""} alt={currentProduct.name || ""} w="100%" h="200px" objectFit="cover"/>
                 <Box p={4}>
-                  <Heading size="md" mb={2}>{currentProduct.name}</Heading>
+                  <Heading size="md" mb={2}>{currentProduct.name || "Sin nombre"}</Heading>
                   <Box color="gray.600">
                     Este producto se eliminará permanentemente.  
                     ¿Estás seguro de continuar?
