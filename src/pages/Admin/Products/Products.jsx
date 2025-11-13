@@ -185,17 +185,22 @@ const AdminProducts = () => {
                       <Box mt={2} fontSize="sm" color="gray.700">
                         <b>Elementos:</b>
                         <VStack align="start" spacing={1} mt={1}>
-                          {p.elements.map((el, i) => (
-                            <Box key={i} bg="gray.50" p={2} borderRadius="md" w="full">
-                              <Text fontWeight="bold">{el.element?.name || el.element}</Text>
-                              {el.element?.type && <Text fontSize="xs">Tipo: {el.element.type}</Text>}
-                              {el.element?.color && <Text fontSize="xs">Color: {el.element.color}</Text>}
-                              {el.element?.material && <Text fontSize="xs">Material: {el.element.material}</Text>}
-                              {el.element?.style && <Text fontSize="xs">Estilo: {el.element.style}</Text>}
-                              {el.element?.extInt && <Text fontSize="xs">Interno/Externo: {el.element.extInt}</Text>}
-                              <Text fontSize="xs">Cantidad: {el.quantity}</Text>
-                            </Box>
-                          ))}
+                          {p.elements.map((el, i) => {
+                            const elem = el?.element;
+                            if (!elem) return null; // 🧩 Evita crash si es null
+
+                            return (
+                              <Box key={i} bg="gray.50" p={2} borderRadius="md" w="full">
+                                <Text fontWeight="bold">{elem.name || "Elemento sin nombre"}</Text>
+                                {elem.type && <Text fontSize="xs">Tipo: {elem.type}</Text>}
+                                {elem.color && <Text fontSize="xs">Color: {elem.color}</Text>}
+                                {elem.material && <Text fontSize="xs">Material: {elem.material}</Text>}
+                                {elem.style && <Text fontSize="xs">Estilo: {elem.style}</Text>}
+                                {elem.extInt && <Text fontSize="xs">Interno/Externo: {elem.extInt}</Text>}
+                                <Text fontSize="xs">Cantidad: {el.quantity ?? 0}</Text>
+                              </Box>
+                            );
+                          })}
                         </VStack>
                       </Box>
                     )}
