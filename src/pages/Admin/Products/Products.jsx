@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Box, Text, Flex, VStack, Heading, Button, IconButton, useColorModeValue, Container, Select, 
-  SimpleGrid, Card, Badge, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@chakra-ui/react";
+import {
+  Box, Text, Flex, VStack, Heading, Button, IconButton, useColorModeValue,
+  Container, Select, SimpleGrid, Card, Badge, Modal, ModalOverlay,
+  ModalContent, ModalHeader, ModalBody, ModalFooter
+} from "@chakra-ui/react";
 import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
-import axios from "axios";
 import AddElementsModal from "../../../components/AddElementsModal/AddElementsModal.jsx";
 import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProductModal.jsx";
 
@@ -21,8 +23,8 @@ const AdminProducts = () => {
 
   const [newProduct, setNewProduct] = useState({
     code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
-    category: [], material: [], colors: [], height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
-    status: "activo"
+    category: [], material: [], colors: [], height: 0, width: 0, depth: 0,
+    imgPrimary: "", imgSecondary: "", status: "activo"
   });
 
   const [filterCategory, setFilterCategory] = useState("");
@@ -33,6 +35,7 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
+  // Cargar productos al inicio
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
@@ -52,28 +55,17 @@ const AdminProducts = () => {
     load();
   }, []);
 
+  // Actualizar opciones dinámicas según products
   useEffect(() => {
-      if (!isAddElementsOpen) getProducts();
-    }, [isAddElementsOpen]);
+    if (!products || !products.length) return;
 
-  useEffect(() => {
-    const loadOptions = async () => {
-      try {
-        const { data } = await axios.get("https://chueks-backend.vercel.app/api/v1/products");
-
-        setProductOptions({
-          styleOptions: [...new Set(data.flatMap(p => p.style || []))],
-          categoryOptions: [...new Set(data.flatMap(p => p.category || []))],
-          materialOptions: [...new Set(data.flatMap(p => p.material || []))],
-          colorOptions: [...new Set(data.flatMap(p => p.colors?.map(c => c.name) || []))]
-        });
-      } catch (err) {
-        console.error("Error cargando opciones de productos:", err);
-      }
-    };
-    loadOptions();
-  }, []);
-
+    setProductOptions({
+      styleOptions: [...new Set(products.flatMap(p => p.style || []))],
+      categoryOptions: [...new Set(products.flatMap(p => p.category || []))],
+      materialOptions: [...new Set(products.flatMap(p => p.material || []))],
+      colorOptions: [...new Set(products.flatMap(p => p.colors?.map(c => c.name) || []))]
+    });
+  }, [products]);
 
   const handleOpenEdit = (product) => {
     setCurrentProduct(product);
@@ -81,7 +73,11 @@ const AdminProducts = () => {
   };
 
   const handleDuplicate = (product) => {
-    setNewProduct({ ...product, code: product.code + "_copy", name: product.name + " (Copy)" });
+    setNewProduct({
+      ...product,
+      code: product.code + "_copy",
+      name: product.name + " (Copy)"
+    });
     setIsCreateOpen(true);
   };
 
@@ -121,6 +117,7 @@ const AdminProducts = () => {
 
   if (isLoading) return <Loading />;
 
+  // Filtrado
   let filteredProducts = products || [];
   if (filterCategory) filteredProducts = filteredProducts.filter(p => p.category?.includes(filterCategory));
   if (filterStatus) filteredProducts = filteredProducts.filter(p => p.status === filterStatus);
@@ -129,14 +126,14 @@ const AdminProducts = () => {
     <Box minH="100vh" bg="gray.50" py={{ base: 6, md: 8 }} px={{ base: 4, md: 0 }}>
       <Container maxW={{ base: "100%", md: "7xl" }} px={{ base: 0, md: 4 }}>
         <VStack spacing={6}>
-          <Flex justify="space-between" align="center" w="full" direction={{ base: "column", sm: "row" }} gap={3} >
+          <Flex justify="space-between" align="center" w="full" direction={{ base: "column", sm: "row" }} gap={3}>
             <Heading size={{ base: "lg", md: "xl" }}>Gestión de Productos</Heading>
             <Button leftIcon={<FiPlus />} colorScheme="pink" w={{ base: "full", sm: "auto" }}
               onClick={() => {
                 setNewProduct({
                   code: "", name: "", style: [], description: "", priceMin: 0, priceMay: 0,
-                  category: [], material: [], colors: [], height: 0, width: 0, depth: 0, imgPrimary: "", imgSecondary: "",
-                  status: "activo"
+                  category: [], material: [], colors: [], height: 0, width: 0, depth: 0,
+                  imgPrimary: "", imgSecondary: "", status: "activo"
                 });
                 setIsCreateOpen(true);
               }}
@@ -144,6 +141,8 @@ const AdminProducts = () => {
               Nuevo Producto
             </Button>
           </Flex>
+
+          {/* Filtros */}
           <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
             <Select placeholder="Filtrar por categoría" mr={2} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
               {productOptions.categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
@@ -153,6 +152,8 @@ const AdminProducts = () => {
               <option value="inactivo">Inactivo</option>
             </Select>
           </Flex>
+
+          {/* Productos */}
           <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6} w="full">
             {filteredProducts.length > 0 ? (
               filteredProducts.map(p => (
@@ -160,8 +161,12 @@ const AdminProducts = () => {
                   <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
                   <Box p={{ base: 3, md: 4 }}>
                     <Heading size="md" mb={2}>{p.name}</Heading>
-                    <Box fontSize="sm" color="gray.600" mb={1}><b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}</Box>
-                    <Box fontSize="sm" color="gray.600" mb={1}><b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}</Box>
+                    <Box fontSize="sm" color="gray.600" mb={1}>
+                      <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category}
+                    </Box>
+                    <Box fontSize="sm" color="gray.600" mb={1}>
+                      <b>Precio:</b> ${p.priceMin?.toLocaleString()} - ${p.priceMay?.toLocaleString()}
+                    </Box>
                     <Box fontSize="sm" color="gray.600" mb={1}>
                       <b>Stock:</b>
                       <Flex wrap="wrap" gap={2} mt={1}>
@@ -181,14 +186,15 @@ const AdminProducts = () => {
                         <option value="inactivo">Inactivo</option>
                       </Select>
                     </Box>
+
+                    {/* Elementos */}
                     {p.elements && p.elements.length > 0 && (
                       <Box mt={2} fontSize="sm" color="gray.700">
                         <b>Elementos:</b>
                         <VStack align="start" spacing={1} mt={1}>
                           {p.elements.map((el, i) => {
                             const elem = el?.element;
-                            if (!elem) return null; // 🧩 Evita crash si es null
-
+                            if (!elem) return null;
                             return (
                               <Box key={i} bg="gray.50" p={2} borderRadius="md" w="full">
                                 <Text fontWeight="bold">{elem.name || "Elemento sin nombre"}</Text>
@@ -204,13 +210,12 @@ const AdminProducts = () => {
                         </VStack>
                       </Box>
                     )}
+
                     <Flex justify="flex-end" gap={2} wrap="wrap">
                       <IconButton icon={<FiPlus />} aria-label="Agregar elementos" size="sm" colorScheme="blue" onClick={() => { setCurrentProduct(p); setIsAddElementsOpen(true); }} />
                       <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
                       <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
-                      <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red"
-                        onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }}
-                      />
+                      <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red" onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }} />
                     </Flex>
                   </Box>
                 </Card>
@@ -222,6 +227,7 @@ const AdminProducts = () => {
         </VStack>
       </Container>
 
+      {/* Modales */}
       <CreateOrEditProductModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -244,7 +250,6 @@ const AdminProducts = () => {
         product={currentProduct}
         setProduct={setCurrentProduct}
       />
-      
 
       {/* Modal Confirmación Eliminar */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} isCentered>
@@ -266,11 +271,7 @@ const AdminProducts = () => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} onClick={() => {
-              setIsDeleteOpen(false);
-              setCurrentProduct(null); 
-              setDeleteId(null);
-            }}>Cancelar</Button>
+            <Button mr={3} onClick={() => { setIsDeleteOpen(false); setCurrentProduct(null); setDeleteId(null); }}>Cancelar</Button>
             <Button colorScheme="red" onClick={handleDelete}>Eliminar</Button>
           </ModalFooter>
         </ModalContent>
