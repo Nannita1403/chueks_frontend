@@ -188,13 +188,13 @@ const AdminProducts = () => {
                     </Box>
 
                     {/* Elementos */}
-                    {p.elements && p.elements.length > 0 && (
+                    {Array.isArray(p.elements) && p.elements.length > 0 && (
                       <Box mt={2} fontSize="sm" color="gray.700">
                         <b>Elementos:</b>
                         <VStack align="start" spacing={1} mt={1}>
                           {p.elements.map((el, i) => {
-                            const elem = el?.element;
-                            if (!elem) return null;
+                            if (!el || !el.element) return null; // ← Evita crash por null
+                            const elem = el.element;
                             return (
                               <Box key={i} bg="gray.50" p={2} borderRadius="md" w="full">
                                 <Text fontWeight="bold">{elem.name || "Elemento sin nombre"}</Text>
