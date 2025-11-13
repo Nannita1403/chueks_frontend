@@ -4,11 +4,10 @@ import {
   Container, Select, SimpleGrid, Card, Badge, Modal, ModalOverlay,
   ModalContent, ModalHeader, ModalBody, ModalFooter
 } from "@chakra-ui/react";
-import { FiPlus, FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiCopy, FiPlus } from "react-icons/fi";
 import { useToast } from "../../../Hooks/useToast.jsx";
 import { useProducts } from "../../../context/Products/products.context.jsx";
 import Loading from "../../../components/Loading/Loading.jsx";
-import AddElementsModal from "../../../components/AddElementsModal/AddElementsModal.jsx";
 import CreateOrEditProductModal from "../../../components/CreateOrEditProductModal/CreateOrEditProductModal.jsx";
 
 const AdminProducts = () => {
@@ -16,7 +15,6 @@ const AdminProducts = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-  const [isAddElementsOpen, setIsAddElementsOpen] = useState(false);
   const [productOptions, setProductOptions] = useState({
     styleOptions: [], categoryOptions: [], materialOptions: [], colorOptions: []
   });
@@ -35,13 +33,13 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
 
-  // Cargar productos al inicio
+  // Cargar productos
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
       try {
         await getProducts();
-      } catch (error) {
+      } catch {
         toast({
           title: "Error",
           description: "No se pudieron cargar los productos",
@@ -55,10 +53,9 @@ const AdminProducts = () => {
     load();
   }, []);
 
-  // Actualizar opciones dinámicas según products
+  // Cargar opciones dinámicas
   useEffect(() => {
-    if (!products || !products.length) return;
-
+    if (!products?.length) return;
     setProductOptions({
       styleOptions: [...new Set(products.flatMap(p => p.style || []))],
       categoryOptions: [...new Set(products.flatMap(p => p.category || []))],
@@ -91,17 +88,6 @@ const AdminProducts = () => {
     } catch (error) {
       console.error(error);
       toast({ title: "Error al eliminar", status: "error", duration: 3000 });
-    }
-  };
-
-  const handleUpdate = async (updatedProduct) => {
-    try {
-      await updateProduct(updatedProduct._id, updatedProduct);
-      toast({ title: "Producto actualizado", status: "success", duration: 3000 });
-      setIsEditOpen(false);
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Error al actualizar", status: "error", duration: 3000 });
     }
   };
 
@@ -144,7 +130,7 @@ const AdminProducts = () => {
 
           {/* Filtros */}
           <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
-            <Select placeholder="Filtrar por categoría" mr={2} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+            <Select placeholder="Filtrar por categoría" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
               {productOptions.categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
             <Select placeholder="Filtrar por estado" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
@@ -158,7 +144,7 @@ const AdminProducts = () => {
             {filteredProducts.length > 0 ? (
               filteredProducts.map(p => (
                 <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
-                  <Box as="img" src={p.imgPrimary} alt={p.name} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
+                  <Box as="img" src={p.imgPrimary} alt={p.name || ""} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
                   <Box p={{ base: 3, md: 4 }}>
                     <Heading size="md" mb={2}>{p.name}</Heading>
                     <Box fontSize="sm" color="gray.600" mb={1}>
@@ -170,7 +156,7 @@ const AdminProducts = () => {
                     <Box fontSize="sm" color="gray.600" mb={1}>
                       <b>Stock:</b>
                       <Flex wrap="wrap" gap={2} mt={1}>
-                        {p.colors && p.colors.length > 0 ? (
+                        {p.colors?.length > 0 ? (
                           p.colors.map((c, idx) => (
                             <Badge key={idx} colorScheme="purple" borderRadius="md" px={2} py={1}>
                               {c.name}: {c.stock}
@@ -187,32 +173,8 @@ const AdminProducts = () => {
                       </Select>
                     </Box>
 
-                    {/* Elementos */}
-                    {Array.isArray(p.elements) && p.elements.length > 0 && (
-                      <Box mt={2} fontSize="sm" color="gray.700">
-                        <b>Elementos:</b>
-                        <VStack align="start" spacing={1} mt={1}>
-                          {p.elements.map((el, i) => {
-                            if (!el || !el.element) return null; // ← Evita crash por null
-                            const elem = el.element;
-                            return (
-                              <Box key={i} bg="gray.50" p={2} borderRadius="md" w="full">
-                                <Text fontWeight="bold">{elem.name || "Elemento sin nombre"}</Text>
-                                {elem.type && <Text fontSize="xs">Tipo: {elem.type}</Text>}
-                                {elem.color && <Text fontSize="xs">Color: {elem.color}</Text>}
-                                {elem.material && <Text fontSize="xs">Material: {elem.material}</Text>}
-                                {elem.style && <Text fontSize="xs">Estilo: {elem.style}</Text>}
-                                {elem.extInt && <Text fontSize="xs">Interno/Externo: {elem.extInt}</Text>}
-                                <Text fontSize="xs">Cantidad: {el.quantity ?? 0}</Text>
-                              </Box>
-                            );
-                          })}
-                        </VStack>
-                      </Box>
-                    )}
-
+                    {/* Acciones */}
                     <Flex justify="flex-end" gap={2} wrap="wrap">
-                      <IconButton icon={<FiPlus />} aria-label="Agregar elementos" size="sm" colorScheme="blue" onClick={() => { setCurrentProduct(p); setIsAddElementsOpen(true); }} />
                       <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
                       <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
                       <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red" onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }} />
@@ -244,12 +206,6 @@ const AdminProducts = () => {
         productOptions={productOptions}
         isEdit={true}
       />
-      <AddElementsModal
-        isOpen={isAddElementsOpen}
-        onClose={() => setIsAddElementsOpen(false)}
-        product={currentProduct}
-        setProduct={setCurrentProduct}
-      />
 
       {/* Modal Confirmación Eliminar */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} isCentered>
@@ -259,7 +215,7 @@ const AdminProducts = () => {
           <ModalBody>
             {currentProduct && (
               <Card shadow="lg" borderRadius="lg" overflow="hidden">
-                <Box as="img" src={currentProduct?.imgPrimary || ""} alt={currentProduct?.name || ""} w="100%" h="200px" objectFit="cover" />
+                <Box as="img" src={currentProduct.imgPrimary || ""} alt={currentProduct.name || ""} w="100%" h="200px" objectFit="cover" />
                 <Box p={4}>
                   <Heading size="md" mb={2}>{currentProduct.name}</Heading>
                   <Box color="gray.600">
