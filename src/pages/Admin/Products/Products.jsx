@@ -1,3 +1,4 @@
+// AdminProducts.jsx
 import { useState, useEffect } from "react";
 import {
   Box, Flex, VStack, Heading, Button, IconButton, useColorModeValue,
@@ -50,31 +51,32 @@ const AdminProducts = () => {
 
   // Actualizar opciones dinámicas según products
   useEffect(() => {
-    if (!products || !products.length) return;
+    if (!products?.length) return;
 
     setProductOptions({
-      styleOptions: [...new Set(products.flatMap(p => p.style || []))],
-      categoryOptions: [...new Set(products.flatMap(p => p.category || []))],
-      materialOptions: [...new Set(products.flatMap(p => p.material || []))],
-      colorOptions: [...new Set(products.flatMap(p => p.colors?.map(c => c.name) || []))]
+      styleOptions: [...new Set(products.flatMap(p => p?.style || []))],
+      categoryOptions: [...new Set(products.flatMap(p => p?.category || []))],
+      materialOptions: [...new Set(products.flatMap(p => p?.material || []))],
+      colorOptions: [...new Set(products.flatMap(p => p?.colors?.map(c => c?.name) || []))]
     });
   }, [products]);
 
   const handleOpenEdit = (product) => {
-    setCurrentProduct(product);
+    setCurrentProduct(product ?? null);
     setIsEditOpen(true);
   };
 
   const handleDuplicate = (product) => {
     setNewProduct({
       ...product,
-      code: product.code + "_copy",
-      name: product.name + " (Copy)"
+      code: (product?.code ?? "") + "_copy",
+      name: (product?.name ?? "") + " (Copy)"
     });
     setIsCreateOpen(true);
   };
 
   const handleDelete = async () => {
+    if (!deleteId) return;
     try {
       await deleteProduct(deleteId);
       toast({ title: "Producto eliminado", status: "success", duration: 3000 });
@@ -88,6 +90,7 @@ const AdminProducts = () => {
   };
 
   const handleUpdate = async (updatedProduct) => {
+    if (!updatedProduct?._id) return;
     try {
       await updateProduct(updatedProduct._id, updatedProduct);
       toast({ title: "Producto actualizado", status: "success", duration: 3000 });
@@ -99,6 +102,7 @@ const AdminProducts = () => {
   };
 
   const handleChangeStatus = async (id, newStatus) => {
+    if (!id) return;
     try {
       await updateProduct(id, { status: newStatus });
       toast({ title: "Estado actualizado", status: "success", duration: 3000 });
@@ -110,10 +114,10 @@ const AdminProducts = () => {
 
   if (isLoading) return <Loading />;
 
-  // Filtrado
-  let filteredProducts = products || [];
-  if (filterCategory) filteredProducts = filteredProducts.filter(p => p.category?.includes(filterCategory));
-  if (filterStatus) filteredProducts = filteredProducts.filter(p => p.status === filterStatus);
+  // Filtrado seguro
+  let filteredProducts = products?.filter(Boolean) || [];
+  if (filterCategory) filteredProducts = filteredProducts.filter(p => p?.category?.includes(filterCategory));
+  if (filterStatus) filteredProducts = filteredProducts.filter(p => p?.status === filterStatus);
 
   return (
     <Box minH="100vh" bg="gray.50" py={{ base: 6, md: 8 }} px={{ base: 4, md: 0 }}>
@@ -138,7 +142,7 @@ const AdminProducts = () => {
           {/* Filtros */}
           <Flex w="full" mb={4} direction={{ base: "column", md: "row" }} gap={2}>
             <Select placeholder="Filtrar por categoría" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-              {(productOptions.categoryOptions || []).map(c => <option key={c} value={c}>{c}</option>)}
+              {productOptions?.categoryOptions?.map(c => <option key={c} value={c}>{c}</option>)}
             </Select>
             <Select placeholder="Filtrar por estado" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
               <option value="activo">Activo</option>
@@ -149,23 +153,23 @@ const AdminProducts = () => {
           {/* Productos */}
           <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6} w="full">
             {filteredProducts.length > 0 ? filteredProducts.map(p => (
-              <Card key={p._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
-                <Box as="img" src={p.imgPrimary || ""} alt={p.name || ""} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
+              <Card key={p?._id} shadow="md" borderRadius="lg" overflow="hidden" bg={bgColor}>
+                <Box as="img" src={p?.imgPrimary || ""} alt={p?.name || ""} w="100%" h={{ base: "150px", md: "200px" }} objectFit="cover" borderTopRadius="lg"/>
                 <Box p={{ base: 3, md: 4 }}>
-                  <Heading size="md" mb={2}>{p.name || "Sin nombre"}</Heading>
+                  <Heading size="md" mb={2}>{p?.name || "Sin nombre"}</Heading>
                   <Box fontSize="sm" color="gray.600" mb={1}>
-                    <b>Categoría:</b> {Array.isArray(p.category) ? p.category.join(", ") : p.category || "N/A"}
+                    <b>Categoría:</b> {Array.isArray(p?.category) ? p.category.join(", ") : p?.category || "N/A"}
                   </Box>
                   <Box fontSize="sm" color="gray.600" mb={1}>
-                    <b>Precio:</b> ${p.priceMin?.toLocaleString() || 0} - ${p.priceMay?.toLocaleString() || 0}
+                    <b>Precio:</b> ${p?.priceMin?.toLocaleString() ?? 0} - ${p?.priceMay?.toLocaleString() ?? 0}
                   </Box>
                   <Box fontSize="sm" color="gray.600" mb={1}>
                     <b>Stock:</b>{" "}
                     <Flex wrap="wrap" gap={2} mt={1}>
-                      {p.colors && p.colors.length > 0
-                        ? p.colors.map((c, idx) => (
+                      {Array.isArray(p?.colors) && p.colors.length > 0
+                        ? p.colors.filter(Boolean).map((c, idx) => (
                             <Badge key={idx} colorScheme="purple" borderRadius="md" px={2} py={1}>
-                              {c.name || "Sin color"}: {c.stock ?? 0}
+                              {c?.name || "Sin color"}: {c?.stock ?? 0}
                             </Badge>
                           ))
                         : <Badge colorScheme="red">Sin stock</Badge>}
@@ -173,7 +177,7 @@ const AdminProducts = () => {
                   </Box>
                   <Box fontSize="sm" color="gray.600" mb={3}>
                     <b>Estado:</b>{" "}
-                    <Select size="sm" value={p.status || "activo"} onChange={e => handleChangeStatus(p._id, e.target.value)} w="auto" display="inline-block">
+                    <Select size="sm" value={p?.status || "activo"} onChange={e => handleChangeStatus(p?._id, e.target.value)} w="auto" display="inline-block">
                       <option value="activo">Activo</option>
                       <option value="inactivo">Inactivo</option>
                     </Select>
@@ -182,7 +186,7 @@ const AdminProducts = () => {
                   <Flex justify="flex-end" gap={2} wrap="wrap">
                     <IconButton icon={<FiEdit />} aria-label="Editar" size="sm" onClick={() => handleOpenEdit(p)} />
                     <IconButton icon={<FiCopy />} aria-label="Duplicar" size="sm" onClick={() => handleDuplicate(p)} />
-                    <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red" onClick={() => { setCurrentProduct(p); setDeleteId(p._id); setIsDeleteOpen(true); }} />
+                    <IconButton icon={<FiTrash2 />} aria-label="Eliminar" colorScheme="red" onClick={() => { setCurrentProduct(p); setDeleteId(p?._id); setIsDeleteOpen(true); }} />
                   </Flex>
                 </Box>
               </Card>
@@ -219,9 +223,9 @@ const AdminProducts = () => {
           <ModalBody>
             {currentProduct && (
               <Card shadow="lg" borderRadius="lg" overflow="hidden">
-                <Box as="img" src={currentProduct.imgPrimary || ""} alt={currentProduct.name || ""} w="100%" h="200px" objectFit="cover"/>
+                <Box as="img" src={currentProduct?.imgPrimary || ""} alt={currentProduct?.name || ""} w="100%" h="200px" objectFit="cover"/>
                 <Box p={4}>
-                  <Heading size="md" mb={2}>{currentProduct.name || "Sin nombre"}</Heading>
+                  <Heading size="md" mb={2}>{currentProduct?.name || "Sin nombre"}</Heading>
                   <Box color="gray.600">
                     Este producto se eliminará permanentemente.  
                     ¿Estás seguro de continuar?

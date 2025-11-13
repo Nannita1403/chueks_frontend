@@ -1,3 +1,4 @@
+// CreateOrEditProductModal.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton,
@@ -34,10 +35,8 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
       : Object.keys(COLOR_HEX_MAP);
   }, [productOptions]);
 
-  // Previsualización de imágenes
   useEffect(() => {
     if (!product) return;
-
     let primaryUrl, secondaryUrl;
 
     if (product.imgPrimary instanceof File) {
@@ -70,7 +69,7 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
 
     setProduct(prev => ({
       ...prev,
-      colors: [...(prev.colors || []), { name: selectedColor, stock: Number(colorStock) }]
+      colors: [...(prev.colors?.filter(Boolean) || []), { name: selectedColor, stock: Number(colorStock) }]
     }));
     setSelectedColor("");
     setColorStock(1);
@@ -78,7 +77,7 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
 
   const handleRemoveColor = (idx) => {
     setProduct(prev => {
-      const updated = [...(prev.colors || [])];
+      const updated = [...(prev.colors?.filter(Boolean) || [])];
       updated.splice(idx, 1);
       return { ...prev, colors: updated };
     });
@@ -102,11 +101,11 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
       const formData = new FormData();
 
       ["code","name","description","priceMin","priceMay","height","width","depth"].forEach(field => {
-        formData.append(field, product[field] || "");
+        formData.append(field, product[field] ?? "");
       });
 
       ["style","category","material","colors"].forEach(field => {
-        formData.append(field, JSON.stringify(product[field] || []));
+        formData.append(field, JSON.stringify(product[field] ?? []));
       });
 
       if (product.imgPrimary instanceof File) formData.append("imgPrimary", product.imgPrimary);
@@ -133,60 +132,56 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{isEdit ? `Editar Producto: ${product.name || ""}` : "Crear Producto"}</ModalHeader>
+        <ModalHeader>{isEdit ? `Editar Producto: ${product?.name || ""}` : "Crear Producto"}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
-
             <FormControl>
               <FormLabel>Código</FormLabel>
-              <Input name="code" value={product.code || ""} onChange={handleChange} />
+              <Input name="code" value={product?.code || ""} onChange={handleChange} />
             </FormControl>
-
             <FormControl>
               <FormLabel>Nombre</FormLabel>
-              <Input name="name" value={product.name || ""} onChange={handleChange} />
+              <Input name="name" value={product?.name || ""} onChange={handleChange} />
             </FormControl>
-
             <FormControl>
               <FormLabel>Descripción</FormLabel>
-              <Input name="description" value={product.description || ""} onChange={handleChange} />
+              <Input name="description" value={product?.description || ""} onChange={handleChange} />
             </FormControl>
 
             <HStack>
               <FormControl>
                 <FormLabel>Precio Mínimo</FormLabel>
-                <NumberInput min={0} value={product.priceMin || 0} onChange={(v) => handleNumberChange("priceMin", v)}>
+                <NumberInput min={0} value={product?.priceMin ?? 0} onChange={(v) => handleNumberChange("priceMin", v)}>
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
               <FormControl>
                 <FormLabel>Precio Mayorista</FormLabel>
-                <NumberInput min={0} value={product.priceMay || 0} onChange={(v) => handleNumberChange("priceMay", v)}>
+                <NumberInput min={0} value={product?.priceMay ?? 0} onChange={(v) => handleNumberChange("priceMay", v)}>
                   <NumberInputField />
                 </NumberInput>
               </FormControl>
             </HStack>
 
-            {/* Selects */}
             <FormControl>
               <FormLabel>Estilo</FormLabel>
-              <Select placeholder="Seleccionar estilo" value={product.style?.[0] || ""} onChange={e => handleSelectChange("style", e.target.value)}>
-                {(productOptions.styleOptions || []).map(s => <option key={s} value={s}>{s}</option>)}
+              <Select placeholder="Seleccionar estilo" value={product?.style?.[0] || ""} onChange={e => handleSelectChange("style", e.target.value)}>
+                {productOptions?.styleOptions?.map(s => <option key={s} value={s}>{s}</option>)}
               </Select>
             </FormControl>
 
             <FormControl>
               <FormLabel>Categoría</FormLabel>
-              <Select placeholder="Seleccionar categoría" value={product.category?.[0] || ""} onChange={e => handleSelectChange("category", e.target.value)}>
-                {(productOptions.categoryOptions || []).map(c => <option key={c} value={c}>{c}</option>)}
+              <Select placeholder="Seleccionar categoría" value={product?.category?.[0] || ""} onChange={e => handleSelectChange("category", e.target.value)}>
+                {productOptions?.categoryOptions?.map(c => <option key={c} value={c}>{c}</option>)}
               </Select>
             </FormControl>
 
             <FormControl>
               <FormLabel>Material</FormLabel>
-              <Select placeholder="Seleccionar material" value={product.material?.[0] || ""} onChange={e => handleSelectChange("material", e.target.value)}>
-                {(productOptions.materialOptions || []).map(m => <option key={m} value={m}>{m}</option>)}
+              <Select placeholder="Seleccionar material" value={product?.material?.[0] || ""} onChange={e => handleSelectChange("material", e.target.value)}>
+                {productOptions?.materialOptions?.map(m => <option key={m} value={m}>{m}</option>)}
               </Select>
             </FormControl>
 
@@ -203,16 +198,16 @@ const CreateOrEditProductModal = ({ isOpen, onClose, product = {}, setProduct, p
                 <IconButton icon={<FiPlus />} aria-label="Agregar color" colorScheme="pink" onClick={handleAddColor} />
               </HStack>
               <VStack align="stretch" mt={2}>
-                {(product.colors || []).map((c, i) => (
+                {(product?.colors?.filter(Boolean) || []).map((c, i) => (
                   <HStack key={i} justify="space-between">
                     <HStack>
-                      <Box w="20px" h="20px" bg={COLOR_HEX_MAP[c.name?.toLowerCase()] || "#ccc"} border="1px solid #999" borderRadius="sm"/>
-                      <Text>{c.name || ""} — Stock: {c.stock || 0}</Text>
+                      <Box w="20px" h="20px" bg={COLOR_HEX_MAP[c?.name?.toLowerCase()] || "#ccc"} border="1px solid #999" borderRadius="sm"/>
+                      <Text>{c?.name || ""} — Stock: {c?.stock ?? 0}</Text>
                     </HStack>
                     <IconButton icon={<FiTrash2 />} size="sm" onClick={() => handleRemoveColor(i)} />
                   </HStack>
                 ))}
-                {(!(product.colors || []).length) && <Text color="gray.500" fontSize="sm">No hay colores agregados</Text>}
+                {!product?.colors?.length && <Text color="gray.500" fontSize="sm">No hay colores agregados</Text>}
               </VStack>
             </FormControl>
 
